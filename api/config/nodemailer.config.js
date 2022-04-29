@@ -1,9 +1,8 @@
+require('dotenv').config();
 const nodemailer = require("nodemailer");
-const config = require("../email.config");
 
 const sender = process.env.EMAIL_SENDER;
 const pass = process.env.EMAIL_PASS;
-
 const transport = nodemailer.createTransport({
     service: "Gmail",
     auth: {
@@ -31,8 +30,8 @@ async function sendMail(receipt, passcode) {
                 resolve(true);
             }
         });
-    };
-};
+    });
+}
 
 module.exports.sendPassCode = async (email, passcode) => {
     return await sendMail(email, passcode);

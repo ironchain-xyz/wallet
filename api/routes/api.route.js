@@ -20,7 +20,7 @@ module.exports = async app => {
     var router = require("express").Router();
 
     // generate and send one time passcode
-    router.post("/passcode", (req, res) => {
+    router.post("/passcode", async (req, res) => {
         const email = req.body.email.trim().toLowerCase();
         if (!email || !validator.isEmail(email)) {
             return res.status(400).send({
@@ -53,7 +53,7 @@ module.exports = async app => {
     });
 
     // verify passcode and login
-    router.post("/verify", (req, res) => {
+    router.post("/verify", async (req, res) => {
         const email = req.body.email.trim().toLowerCase();
         if (!email || !validator.isEmail(email)) {
             return res.status(400).send({

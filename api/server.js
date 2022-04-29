@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -19,7 +20,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieParser());
-app.use(session({
+app.use(sessions({
     secret: process.env.SESSION_SECRET,
     cookie: { maxAge: 10000 },
     saveUninitialized: true,
@@ -27,7 +28,7 @@ app.use(session({
     rolling: true,
 }));
 
-const db = require("./app/models");
+const db = require("./models");
 if (process.env.NODE_ENV == 'production') {
     db.sequelize.sync();
 } else {
@@ -54,7 +55,7 @@ app.get('/', function (req,res) {
     }
 });
 
-require("./app/routes/api.routes")(app);
+require("./routes/api.route")(app);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

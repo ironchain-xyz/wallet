@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 module.exports = {
     HOST: process.env.PG_HOST,
     USER: process.env.PG_USER,

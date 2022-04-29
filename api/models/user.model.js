@@ -11,7 +11,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         },
         emailOtpExpiredAt: {
-            type: Sequelize.Integer
+            type: Sequelize.INTEGER
         }
     });
     return User;
