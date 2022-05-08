@@ -4,15 +4,20 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             primaryKey: true,
         },
-        alias: {
-            type: Sequelize.STRING
+        username: {
+            type: Sequelize.STRING,
+            unique: true,
+        },
+        status: {
+            type: Sequelize.ENUM("verifying", "verified", "initiated"),
+            defaultValue: "verifying",
+        },
+        refreshToken: {
+            type: Sequelize.STRING,
         },
         emailOtp: {
-            type: Sequelize.STRING
+            type: Sequelize.STRING,
         },
-        emailOtpExpiredAt: {
-            type: Sequelize.INTEGER
-        }
     });
     return User;
 };

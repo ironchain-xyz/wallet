@@ -1,17 +1,17 @@
 require('dotenv').config();
+
 const nodemailer = require("nodemailer");
 
-const sender = process.env.EMAIL_SENDER;
-const pass = process.env.EMAIL_PASS;
+const sender = process.env.MAILGUN_USER;
 const transport = nodemailer.createTransport({
-    service: "Gmail",
+    service: 'Mailgun',
     auth: {
         user: sender,
-        pass: pass,
-    },
+        pass: process.env.MAILGUN_PASS,
+    }
 });
 
-async function sendMail(receipt, passcode) {
+module.exports.sendPasscode = async (receipt, passcode) => {
     return new Promise((resolve, reject)=>{
         transport.sendMail({
             from: sender,
@@ -31,8 +31,4 @@ async function sendMail(receipt, passcode) {
             }
         });
     });
-}
-
-module.exports.sendPassCode = async (email, passcode) => {
-    return await sendMail(email, passcode);
 };

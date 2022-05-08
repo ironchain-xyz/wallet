@@ -12,9 +12,13 @@ const app = express();
 app.use(express.static(path));
 
 var corsOptions = {
-    origin: "http://localhost:8081"
+    origin: [
+        "http://localhost:8080",
+        "https://localhost:8080"
+    ],
+    credentials: true,
+    exposedHeaders: ['set-cookie']
 };
-
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -23,7 +27,7 @@ app.use(cookieParser());
 app.use(sessions({
     secret: process.env.SESSION_SECRET,
     cookie: { maxAge: 10000 },
-    saveUninitialized: true,
+    saveUninitialized: false,
     resave: false,
     rolling: true,
 }));
@@ -37,25 +41,8 @@ if (process.env.NODE_ENV == 'production') {
     });
 }
 
-app.get('/login', function (req,res) {
-    session = req.session;
-    if (session.email) {
-        res.redirect('/');
-    } else {
-        res.sendFile(path + "login.html");
-    }
-});
-
-app.get('/', function (req,res) {
-    session = req.session;
-    if (session.email) {
-        res.sendFile(path + "index.html");
-    } else {
-        res.redirect('/login');
-    }
-});
-
-require("./routes/api.route")(app);
+require("./routes/auth.route")(app);
+require("./routes/user.route")(app);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
