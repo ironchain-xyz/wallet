@@ -9,39 +9,30 @@
     @finishFailed="onFinishFailed"
   >
     <a-form-item
-      label="Account Name"
-      name="userName"
-      :rules="[{ required: true, message: 'Please input your account name!' }]"
+      label="Username"
+      name="username"
+      :rules="[{ required: true, message: 'Please input your username!' }]"
     >
       <a-row type="flex" gutter="16" justify="left" align="middle">
-        <a-col :span="12">
-          <a-input v-model:value="formState.userName" placeholder="E-mail">
-            <template #prefix>
-              <UserOutlined class="site-form-item-icon" />
-            </template>
-          </a-input>
-        </a-col>
-      
-        <a-col :span="6">
-          <a-button>Send</a-button>
-        </a-col>
+        <a-input v-model="formState.username">
+          <template #prefix>
+            <UserOutlined class="site-form-item-icon" />
+          </template>
+        </a-input>
       </a-row>
     </a-form-item>
 
     <a-form-item
-      label="Access Code"
-      name="accessCode"
-      :rules="[{ required: true, message: 'Please input your access code!' }]"
+      label="Password"
+      name="password"
+      :rules="[{ required: true, message: 'Please input your password!' }]"
     >
       <a-row type="flex" gutter="16" justify="left" align="middle">
-        <a-col :span="12">
-          <a-input-password v-model:value="formState.accessCode" placeholder="Get by E-mail">
-            <template #prefix>
-              <LockOutlined class="site-form-item-icon" />
-            </template>
-          </a-input-password>
-        </a-col>
-      </a-row>
+        <a-input-password v-model="formState.password">
+          <template #prefix>
+            <LockOutlined class="site-form-item-icon" />
+          </template>
+        </a-input-password>
     </a-form-item>
 
     <a-form-item>
@@ -58,8 +49,8 @@
 import { defineComponent, reactive, computed } from 'vue';
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 interface FormState {
-  userName: string;
-  accessCode: string;
+  username: string;
+  password: string;
   remember: boolean;
 }
 export default defineComponent({
@@ -72,8 +63,8 @@ export default defineComponent({
       labelCol: { span: 8 }
     };
     const formState = reactive<FormState>({
-      userName: '',
-      accessCode: '',
+      username: '',
+      password: '',
       remember: true,
     });
     const onFinish = (values: any) => {
@@ -84,7 +75,7 @@ export default defineComponent({
       console.log('Failed:', errorInfo);
     };
     const disabled = computed(() => {
-      return !(formState.userName && formState.accessCode);
+      return !(formState.username && formState.password);
     });
     return {
       formItemLayout,
