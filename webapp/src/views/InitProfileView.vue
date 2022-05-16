@@ -4,19 +4,19 @@
         <img alt="Vue logo" src="../assets/logo.png">
     </a-row>
     <a-row type="flex" justify="center" align="middle">
-        <Login />
+        <InitProfile />
     </a-row>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import Login from '@/components/LoginComponent.vue'
+import InitProfile from '@/components/InitProfileComponent.vue'
 
 export default {
-  name: 'LoginView',
+  name: 'InitProfile',
   components: {
-    Login
+    InitProfile
   }
 }
 </script>

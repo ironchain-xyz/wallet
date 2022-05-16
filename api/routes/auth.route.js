@@ -11,12 +11,13 @@ const OTP_LEN = 6;
 const db = require("../models");
 const User = db.users;
 
+const allowToRegister = process.env.ALLOW_TO_REGISTER;
 const secret = process.env.TOKEN_SECRET;
 const ACCESS_TOKEN_LIFETIME = parseInt(process.env.ACCESS_TOKEN_LIFETIME);
 
 async function genOTP(email, mocked=true) {
     if (mocked) {
-        OTP = "12345";
+        OTP = "123456";
     } else {
         let OTP = '';
         var len = CHARS.length;
@@ -25,10 +26,7 @@ async function genOTP(email, mocked=true) {
         }
         await nodemailer.sendPasscode(email, OTP);
     }
-    return JSON.stringify({
-        expiryTime: time.epoch() + 600,
-        value: OTP
-    });
+    return {value: OTP, sentAt: time.epoch()};
 }
 
 function genRefreshToken(email) {
@@ -44,11 +42,8 @@ function parseOTP(user) {
 }
 
 function validateEmail(req, res, next) {
-    const user = req.body.user;
-    if (!user) {
-        return res.status(400).send({message: "User not set!"});
-    }
-    if (!validator.isEmail(user.email)) {
+    const email = req.body.email;
+    if (!email || !validator.isEmail(email)) {
         return res.status(400).send({message: "Invalid email!"});
     }
     next();
@@ -79,57 +74,38 @@ function validateAccessToken(req, res, next) {
 module.exports = async app => {
     var router = require("express").Router();
 
-    // register new account
-    router.post("/register", validateEmail, asyncHandler(async (req, res) => {
-        const email = req.body.user.email;
-        const user = await User.findByPk(email);
-        if (user) {
-            if (user.status != "verifying") {
-                return res.status(400).send({
-                    message: "Email already verified!"
-                });
-            }
-            const existingOTP = parseOTP(user);
-            if (existingOTP.expiryTime > time.epoch()) {
-                return res.status(400).send({
-                    message: "Passcode already sent, retry later!"
-                });
-            }
-        }
-        await User.create({email, emailOtp: await genOTP(email)});
-        res.send({ok: true});
-    }));
-
     // generate and send one time passcode
     router.post("/passcode", validateEmail, asyncHandler(async (req, res) => {
-        const email = req.body.user.email;
+        const email = req.body.email;
         const user = await User.findByPk(email);
-        if (!user || user.status == "verifying") {
-            return res.status(400).send({
-                message: "Email not verified!"
-            });
+        if (!user && allowToRegister) {
+            const OTP = await genOTP(email);
+            await User.create({email, emailOtp: JSON.stringify(OTP)});
+            return res.send({ok: true, sentAt: OTP.sentAt});
         }
 
         const existingOTP = parseOTP(user);
-        if (existingOTP.expiryTime > time.epoch()) {
-            return res.status(400).send({
-                message: "Passcode already sent, retry later!"
-            });
+        if (existingOTP.sentAt) {
+            const sentAfter = time.epoch() - existingOTP.sentAt;
+            if (sentAfter < 60) {
+                return res.send({ok: true, sentAt: existingOTP.sentAt});
+            }
         }
 
-        await user.update({emailOtp: await genOTP(email)});
-        res.send({ok: true});
+        const newOTP = await genOTP(email);
+        await user.update({emailOtp: JSON.stringify(newOTP)});
+        res.send({ok: true, sentAt: newOTP.sentAt});
     }));
 
-    // verify passcode and login
-    router.post("/login", validateEmail, asyncHandler(async (req, res) => {
-        const user = await User.findByPk(req.body.user.email);
+    // verify passcode
+    router.post("/verify", validateEmail, asyncHandler(async (req, res) => {
+        const user = await User.findByPk(req.body.email);
         if (!user) {
             return res.status(400).send({message: "email not found"});
         }
 
         const otp = parseOTP(user);
-        if (otp.value != req.body.user.passcode) {
+        if (otp.value != req.body.passcode) {
             res.status(400).send({message: "Wrong passcode"});
         } else if (otp.expiryTime < time.epoch()) {
             res.status(400).send({message: "Expired passcode"});
@@ -141,10 +117,12 @@ module.exports = async app => {
             await user.update(userUpdate);
             const accessToken = genAccessToken(refreshToken);
             res.json({
-                ok: true,
-                refreshToken,
-                accessToken,
-                user: {email: user.email, username: user.username}
+                email: user.email,
+                username: user.username,
+                jwt: {
+                    refreshToken,
+                    accessToken
+                },
             });
         }
     }));

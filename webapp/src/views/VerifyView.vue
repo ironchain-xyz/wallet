@@ -4,19 +4,19 @@
         <img alt="Vue logo" src="../assets/logo.png">
     </a-row>
     <a-row type="flex" justify="center" align="middle">
-        <Login />
+        <Verify />
     </a-row>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import Login from '@/components/LoginComponent.vue'
+import Verify from '@/components/VerifyComponent.vue'
 
 export default {
-  name: 'LoginView',
+  name: 'VerifyView',
   components: {
-    Login
+    Verify
   }
 }
 </script>

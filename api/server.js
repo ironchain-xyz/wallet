@@ -13,8 +13,8 @@ app.use(express.static(path));
 
 var corsOptions = {
     origin: [
-        "http://localhost:8080",
-        "https://localhost:8080"
+        "http://localhost:8081",
+        "https://localhost:8081"
     ],
     credentials: true,
     exposedHeaders: ['set-cookie']
@@ -42,7 +42,7 @@ if (process.env.NODE_ENV == 'production') {
 }
 
 require("./routes/auth.route")(app);
-require("./routes/user.route")(app);
+require("./routes/main.route")(app);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

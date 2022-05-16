@@ -8,12 +8,30 @@
 </template>
 
 <script>
-export default {
-  name: 'IntroComponent',
-  props: {
-    title: String
+import { defineComponent } from 'vue';
+import { useStore } from '../store';
+import router from '../router';
+
+export default defineComponent({
+  setup() {
+    const store = useStore();
+    if (!store.state.user?.email) { 
+      store.commit("setUser", undefined);
+      router.push('/login');
+      return;
+    }
+
+    if (!store.state.user?.jwt) {
+      router.push('/verify');
+      return;
+    }
+  
+    if (!store.state.profile?.username) {
+      router.push('/profile/init');
+      return;
+    }
   }
-}
+})
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

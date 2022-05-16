@@ -34,7 +34,7 @@ module.exports = async app => {
         }
     }));
 
-    router.post('/setusername', asyncHandler(async (req, res) => {
+    router.post('/profile/init', asyncHandler(async (req, res) => {
         const username = req.body.user.username;
         if (!isValidUserName(username)) {
             res.status(400).send({
@@ -61,5 +61,5 @@ module.exports = async app => {
         res.send({ok: true});
     }));
 
-    app.use('/api/user/', router);
+    app.use('/api/', router);
 };
