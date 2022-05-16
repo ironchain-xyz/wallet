@@ -16,13 +16,14 @@ export function initProfile(store: Store<State>, profile: {username: string}) {
     }
 
     const key = "initProfile";
-    message.loading({ content: 'saving...', key });
+    const hide = message.loading({ content: 'saving...', key });
     const url = store.state.API_URL + "profile/init";
     axios.post(
         url, profile, {headers: authHeader(store)}
     ).then((res: AxiosResponse<{ok: true}>) => {
         store.commit('setProfile', profile);
-        message.success({content: 'username is set successfully', key, duration: 2});
+        hide();
+        message.success({content: 'saved', key});
         router.push('/');
-    }).catch(err => messageError(key, err));
+    }).catch(err => messageError(key, err))
 }

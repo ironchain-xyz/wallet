@@ -1,7 +1,7 @@
 import { Store } from 'vuex';
 import axios, { AxiosResponse } from 'axios';
 import { message } from 'ant-design-vue';
-import { User, State } from "../store";
+import { JWT, State } from "../store";
 import router from '../router';
 import { authHeader, messageError } from './utils';
 
@@ -19,20 +19,14 @@ export function sendOTP(store: Store<State>, email: string) {
     }
 
     const key = "sendOTP";
-    message.loading({ content: 'sending passcode...', key });
+    const hide = message.loading({ content: 'sending passcode...', key });
     const url = store.state.API_URL + "auth/passcode";
     axios.post(url, {email})
     .then((res: AxiosResponse<{sentAt: number}>) => {
         store.commit("setUser", {email, otpSentAt: res.data.sentAt});
-        message.success({content: 'passcode is sent successfully', key, duration: 2});
+        hide();
         router.push('/verify');
-    }).catch(err => {
-        if (err.response && err.response.status == 400) {
-            message.error(err.response.message);
-        } else {
-            message.error("failed to send code, unknown error");
-        }
-    });
+    }).catch(err => messageError(key, err))
 }
 
 export function verifyOTP(store: Store<State>, passcode: string) {
@@ -41,23 +35,38 @@ export function verifyOTP(store: Store<State>, passcode: string) {
     }
 
     const key = "verifyOTP";
-    message.loading({ content: 'verifying passcode...', key });
+    const hide = message.loading({ content: 'logging in...', key });
     const url = store.state.API_URL + "auth/verify";
     axios.post(
         url, {email: store.state.user!.email, passcode}
-    ).then((res: AxiosResponse<User>) => {
-        store.commit('setUser', res.data);
+    ).then((res: AxiosResponse<{email: string, jwt: JWT, username: string}>) => {
+        store.commit('setUser', {email: res.data.email, jwt: res.data.jwt});
+        store.commit('setProfile', {username: res.data.username});
+        hide();
         router.push('/');
     }).catch(err => messageError(key, err))
 }
 
 export function logout(store: Store<State>) {
     const key = "logout";
-    message.loading({ content: 'logging out...', key });
+    const hide = message.loading({ content: 'logging out...', key });
     const url = store.state.API_URL + "logout";
     axios.post(
         url, {headers: authHeader(store)}
     ).then((res: AxiosResponse<{ok: true}>) => {
-        store.commit('setUser', undefined);
+        hide();
     }).catch(err => messageError(key, err))
+    .finally(() => {
+        store.commit('setUser', undefined);
+        router.push("/login");
+    });
+}
+
+export function authenticate(store: Store<State>) {
+    if (!store.state.user?.email || !store.state.user?.jwt) { 
+        store.commit("clear");
+        router.push('/login');
+        return false;
+    }
+    return true;
 }

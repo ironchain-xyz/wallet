@@ -1,5 +1,6 @@
 import { InjectionKey } from 'vue';
 import { createStore, useStore as baseUseStore, Store } from 'vuex';
+import VuexPersistence from 'vuex-persist'
 
 export type JWT = {
   refreshToken: string;
@@ -13,17 +14,21 @@ export interface User {
   jwt?: JWT
 }
 
-export interface profile {
+export interface Profile {
   username?: string;
 }
 
 export interface State {
   API_URL: string;
   user?: User;
-  profile?: profile;
+  profile?: Profile;
 }
 
 export const key: InjectionKey<Store<State>> = Symbol()
+
+const vuexLocal = new VuexPersistence<State>({
+  storage: window.localStorage,
+});
 
 export const store = createStore<State>({
   state() {
@@ -33,13 +38,18 @@ export const store = createStore<State>({
     }
   },
   mutations: {
-    setUser(state: State, user: User | undefined) {
+    clear(state: State) {
+      state.user = undefined;
+      state.profile = undefined;
+    },
+    setUser(state: State, user: User) {
       state.user = user;
     },
-    setProfile(state: State, profile: {username: string}) {
+    setProfile(state: State, profile: Profile) {
       state.profile = profile;
     }
-  }
+  },
+  plugins: [vuexLocal.plugin]
 });
 
 export function useStore () {

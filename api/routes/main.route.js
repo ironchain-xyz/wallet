@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const validator = require('validator');
 const asyncHandler = require('express-async-handler')
 const jwt = require('jsonwebtoken');
 
@@ -19,7 +20,7 @@ module.exports = async app => {
         if (accessToken) {
             try {
                 const {refreshToken} = await jwt.verify(accessToken, secret);
-                const email = jwt.verify(refreshToken, secret)
+                const {email} = jwt.verify(refreshToken, secret)
                 req.user = {email};
                 next();
             } catch (err) {
@@ -35,20 +36,17 @@ module.exports = async app => {
     }));
 
     router.post('/profile/init', asyncHandler(async (req, res) => {
-        const username = req.body.user.username;
+        const username = req.body.username;
         if (!isValidUserName(username)) {
             res.status(400).send({
                 message: "Invalid username!"
             });
-        } else if (await User.findByOne(username)) {
+        } else if (await User.findOne({where: {username}})) {
             res.status(400).send({
                 message: "Username already used!"
             });
         } else {
             const user = await User.findByPk(req.user.email);
-            const userUpdate = user.status == 'initiated'
-                ? {username}
-                : {username, status: "initiated"}
             await user.update({username});
             res.send({ok: true});
         }

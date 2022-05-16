@@ -1,5 +1,8 @@
 <template>
   <div class="hello">
+    <a-button type="primary" @click="onLogout" class="login-form-button">
+      Logout
+    </a-button>
     <h1>{{ title }}</h1>
     <h2>
       Bridge between Web2 and Web3.
@@ -10,27 +13,22 @@
 <script>
 import { defineComponent } from 'vue';
 import { useStore } from '../store';
+import { authenticate, logout } from '../services/auth';
 import router from '../router';
 
 export default defineComponent({
   setup() {
     const store = useStore();
-    if (!store.state.user?.email) { 
-      store.commit("setUser", undefined);
-      router.push('/login');
-      return;
-    }
-
-    if (!store.state.user?.jwt) {
-      router.push('/verify');
-      return;
-    }
-  
+    if (!authenticate(store)) return;
     if (!store.state.profile?.username) {
-      router.push('/profile/init');
-      return;
+      router.push('init');
     }
-  }
+    const onLogout = () => {
+      logout(store);
+    }
+    console.log(store.state.user)
+    return {onLogout};
+  },
 })
 </script>
 

@@ -25,13 +25,8 @@ export default defineComponent({
   setup() {
     const store = useStore();
     if (!store.state.user?.email || !store.state.user?.otpSentAt) {
-      store.commit("setUser", undefined);
+      store.commit("clear");
       router.push('/login');
-      return;
-    }
-
-    if (store.state.user?.jwt) {
-      router.push('/');
       return;
     }
 

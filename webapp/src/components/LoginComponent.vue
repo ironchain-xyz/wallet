@@ -1,12 +1,12 @@
 <template>
   <div>
-    <a-input v-model:value="email"  placeholder="Email">
+    <a-input v-model:value="email" style="margin-bottom: 20px;" placeholder="Email">
       <template #prefix>
         <UserOutlined class="site-form-item-icon" />
       </template>
     </a-input>
     <a-button type="primary" @click="onClick" class="login-form-button">
-      Continue to Login
+      Get Access Code
     </a-button>
   </div>
 </template>
@@ -22,7 +22,7 @@ export default defineComponent({
   components: {UserOutlined,},
   setup() {
     const store = useStore();
-    if (store.state.user?.jwt) {
+    if (store.state.user?.email && store.state.user?.jwt) {
       router.push('/');
       return;
     }

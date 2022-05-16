@@ -1,11 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import InitProfileView from '../views/HomeView.vue'
+
 
 const routes = [
   {
     path: '/',
     name: 'home',
     component: HomeView
+  },
+  {
+    path: '/init',
+    name: 'initProfile',
+    component: () => import(/* webpackChunkName: "login" */ '../views/InitProfileView.vue')
   },
   {
     path: '/login',
@@ -20,16 +27,11 @@ const routes = [
     name: 'verify',
     component: () => import(/* webpackChunkName: "login" */ '../views/VerifyView.vue')
   },
-  {
-    path: '/profile/init',
-    name: 'initProfile',
-    component: () => import(/* webpackChunkName: "login" */ '../views/InitProfileView.vue')
-  }
 ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
 })
 
 export default router

@@ -4,11 +4,12 @@ import { State } from "../store";
 
 export function messageError(key: string, err: {response: {message: string}}) {
     if (err.response) {
-        message.error({content: err.response.message, key});
+        message.error({content: err.response.message, key, duration: 5});
     } else {
         message.error({
             content: "failed to verify passcode, unknown error",
-            key
+            key,
+            duration: 5
         });
     }
 }
