@@ -7,9 +7,14 @@ export type JWT = {
   accessToken: string;
 };
 
+export type OTP = {
+  sentAt?: number;
+  existing?: boolean;
+}
+
 export interface User {
   email: string;
-  otpSentAt?: number;
+  otp: OTP;
   username?: string;
   jwt?: JWT
 }

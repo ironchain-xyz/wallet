@@ -13,6 +13,15 @@ function validatePasscode(passcode: string) : boolean {
     return /^[0-9A-Za-z]{6}$/.test(passcode);
 }
 
+function epoch(): number {
+    return Math.floor(new Date().getTime() / 1000);
+}
+
+export function warnExistingOTP(sentAt: number): string {
+    const waiting = epoch() - sentAt;
+    return `The passcode was sent ${waiting} seconds ago, you can retry in ${60 - waiting} senconds`
+}
+
 export async function sendOTP(store: Store<State>, email: string) : Promise<string> {
     if (!validateEmail(email)) {
         return "please input a valid email address";
@@ -24,8 +33,16 @@ export async function sendOTP(store: Store<State>, email: string) : Promise<stri
     let msg = "";
     try {
         const res = await axios.post(url, {email});
-        store.commit("setUser", {email, otpSentAt: res.data.sentAt});
-        router.push('/verify');
+        if (res.data.existingOTP) {
+            msg = warnExistingOTP(res.data.sentAt);
+        }
+        store.commit("setUser", {
+            email, 
+            otp: {
+                sentAt: res.data.sentAt,
+                existing: res.data.existingOTP
+            }
+        });
     } catch (err: any) {
         msg = parseErrorMsg(err);
     }
@@ -46,7 +63,6 @@ export async function verifyOTP(store: Store<State>, passcode: string) : Promise
         const res = await axios.post(url, {email: store.state.user!.email, passcode});
         store.commit('setUser', {email: res.data.email, jwt: res.data.jwt});
         store.commit('setProfile', {username: res.data.username});
-        router.push('/');
     } catch (err: any) {
         console.log(err);
         msg = parseErrorMsg(err);

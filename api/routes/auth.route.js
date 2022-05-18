@@ -88,7 +88,11 @@ module.exports = async app => {
         if (existingOTP.sentAt) {
             const sentAfter = time.epoch() - existingOTP.sentAt;
             if (sentAfter < 60) {
-                return res.send({ok: true, sentAt: existingOTP.sentAt});
+                return res.send({
+                    ok: true,
+                    sentAt: existingOTP.sentAt,
+                    existingOTP: true
+                });
             }
         }
 

@@ -9,7 +9,7 @@ const User = db.users;
 const secret = process.env.TOKEN_SECRET;
 
 function isValidUserName(username) {
-    return validator.matches(username, "/^(?!\d)(?!.*-.*-)(?!.*-$)(?!-)[a-zA-Z0-9-]{3,20}$/");
+    return validator.matches(username, "^(?!\d)(?!.*-.*-)(?!.*-$)(?!-)[a-zA-Z0-9-]{3,20}$");
 }
 
 module.exports = async app => {
@@ -38,6 +38,7 @@ module.exports = async app => {
     router.post('/profile/init', asyncHandler(async (req, res) => {
         const username = req.body.username;
         if (!isValidUserName(username)) {
+            console.log(username);
             res.status(400).send({
                 message: "Invalid username!"
             });

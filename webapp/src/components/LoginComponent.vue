@@ -31,7 +31,12 @@ export default defineComponent({
     const alert = ref<string>("");
     let email = ref<string>('');
     const onClick = () : void => {
-      sendOTP(store, email.value).then(msg => alert.value = msg);
+      sendOTP(store, email.value).then(msg => {
+        alert.value = msg
+        if (!msg) {
+          router.push('/verify');
+        }
+      });
     };
 
     return {
