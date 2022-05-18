@@ -11,9 +11,10 @@ const OTP_LEN = 6;
 const db = require("../models");
 const User = db.users;
 
-const allowToRegister = process.env.ALLOW_TO_REGISTER;
 const secret = process.env.TOKEN_SECRET;
 const ACCESS_TOKEN_LIFETIME = parseInt(process.env.ACCESS_TOKEN_LIFETIME);
+
+const USER_WHITELIST = ['dongs2011@gmail.com', 'ironchaindao@gmail.com'];
 
 async function genOTP(email, mocked=true) {
     if (mocked) {
@@ -74,14 +75,36 @@ function validateAccessToken(req, res, next) {
 module.exports = async app => {
     var router = require("express").Router();
 
+    router.post("/register", validateEmail, asyncHandler(async (req, res) => {
+        const email = req.body.email;
+        const user = await User.findByPk(email);
+        if (user) {
+            return res.status(400).send({message: 'user already registerd'});
+        }
+
+        const invitationCode = req.body.invitationCode;
+        const invitation = await User.findByPk(code);
+        if (!invitation) {
+            return res.status(400).send({message: 'invalid invitation code'});
+        } else if (invitation.usedBy) {
+            return res.status(400).send({message: 'invitation code has been used'});
+        }
+
+        await User.create({email});
+        return res.send({ok: true});
+    }));
+
     // generate and send one time passcode
     router.post("/passcode", validateEmail, asyncHandler(async (req, res) => {
         const email = req.body.email;
-        const user = await User.findByPk(email);
-        if (!user && allowToRegister) {
-            const OTP = await genOTP(email);
-            await User.create({email, emailOtp: JSON.stringify(OTP)});
-            return res.send({ok: true, sentAt: OTP.sentAt});
+        let user = await User.findByPk(email);
+        if (!user) {
+            if (USER_WHITELIST.includes(email)) {
+                await User.create({email});
+                user = await User.findByPk(email);
+            } else {
+                return res.status(400).send({message: 'user not registerd'});
+            }
         }
 
         const existingOTP = parseOTP(user);

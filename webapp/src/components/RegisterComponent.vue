@@ -1,14 +1,15 @@
 <template>
   <div>
     <a-alert v-if="!!alert" :message="alert" type="error" style="margin-bottom: 20px;"/>
-    <a href="register">Register New Account</a>
-    <a-input v-model:value="email" placeholder="Email"  style="margin-bottom: 20px;">
+    <a-input v-model:value="email" style="margin-bottom: 20px;" placeholder="Email">
       <template #prefix>
         <UserOutlined class="site-form-item-icon" />
       </template>
     </a-input>
+    <a-input v-model:value="invitationCode" style="margin-bottom: 20px;" placeholder="InvitationCode">
+    </a-input>
     <a-button type="primary" @click="onClick" class="login-form-button">
-      Continue
+      Register
     </a-button>
   </div>
 </template>
@@ -18,7 +19,7 @@ import { defineComponent, ref } from 'vue';
 import { UserOutlined } from '@ant-design/icons-vue';
 import { useStore } from '../store';
 import router from '../router';
-import { sendOTP } from '../services/auth';
+import { register } from '../services/auth';
 
 export default defineComponent({
   components: {UserOutlined,},
@@ -29,23 +30,18 @@ export default defineComponent({
       return;
     }
 
-    const email = ref<string>("");
-    if (store.state.user?.email) {
-      email.value = store.state.user?.email;
-    }
-
     const alert = ref<string>("");
+    const email = ref<string>("");
+    const invitationCode = ref<string>("");
     const onClick = () : void => {
-      sendOTP(store, email.value).then(msg => {
+      register(store, email.value, invitationCode.value).then(msg => {
         alert.value = msg
-        if (!msg) {
-          router.push('/verify');
-        }
       });
     };
 
     return {
       email,
+      invitationCode,
       alert,
       onClick,
     };

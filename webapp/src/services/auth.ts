@@ -22,6 +22,31 @@ export function warnExistingOTP(sentAt: number): string {
     return `The passcode was sent ${waiting} seconds ago, you can retry in ${60 - waiting} senconds`
 }
 
+export async function register(
+    store: Store<State>,
+    email: string,
+    invitationCode: string
+) : Promise<string> {
+    if (!validateEmail(email)) {
+        return "please input a valid email address";
+    }
+
+    const key = "register";
+    const hide = message.loading({ content: 'registering...', key });
+    const url = store.state.API_URL + "auth/register";
+    let msg = "";
+    try {
+        await axios.post(url, {email, invitationCode});
+        store.commit("setUser", {email});
+        message.success({content: 'saved', key, duration: 2});
+        setTimeout(() => router.push('/login'), 2000);
+    } catch (err: any) {
+        msg = parseErrorMsg(err);
+    }
+    hide();
+    return msg;
+}
+
 export async function sendOTP(store: Store<State>, email: string) : Promise<string> {
     if (!validateEmail(email)) {
         return "please input a valid email address";

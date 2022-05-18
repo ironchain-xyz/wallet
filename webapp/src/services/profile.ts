@@ -23,7 +23,7 @@ export async function initProfile(store: Store<State>, profile: {username: strin
         const res = await axios.post(url, profile, {headers: authHeader(store)});
         store.commit('setProfile', profile);
         message.success({content: 'saved', key, duration: 2});
-        setTimeout(() => router.push('/'));
+        setTimeout(() => router.push('/'), 2000);
     } catch(err: any) {
         msg = parseErrorMsg(err);
     }
