@@ -1,5 +1,6 @@
 <template>
   <div>
+    <a-alert  v-if="!!alert" :message="alert" type="error" style="margin-bottom: 20px;"/>
     <a-input-password v-model:value="otp" style="margin-bottom: 20px;" placeholder="Authentication Code">
       <template #prefix>
         <LockOutlined class="site-form-item-icon" />
@@ -30,13 +31,15 @@ export default defineComponent({
       return;
     }
 
+    const alert = ref<string>("");
     const otp = ref<string>('');
     const onClick = () => {
-      verifyOTP(store, otp.value);
+      verifyOTP(store, otp.value).then(msg => alert.value = msg);
     };
 
     return {
       otp,
+      alert,
       onClick,
     };
   },

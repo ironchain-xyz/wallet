@@ -1,5 +1,9 @@
 <template>
   <div>
+    <a-alert v-if="!!alert" :message="alert" type="error" style="margin-bottom: 20px;"/>
+    <p>
+      Please set your username:
+      <br/> Rule: Only alphanumeric and dash are allowed, 3-20 characters </p>
     <a-input v-model:value="username" style="margin-bottom: 20px;" placeholder="Username">
     </a-input>
     <a-button type="primary" @click="onSave" class="login-form-button">
@@ -27,14 +31,15 @@ export default defineComponent({
         return;
     }
 
+    const alert = ref<string>("");
     let username = ref<string>('');
     const onSave = () => {
-      initProfile(store, {username: username.value});
+      initProfile(store, {username: username.value}).then(msg => alert.value = msg);
     };
     const onLogout = () => {
       logout(store);
     }
-    return {username, onSave, onLogout};
+    return {username, alert, onSave, onLogout};
   },
 });
 </script>

@@ -9,7 +9,7 @@ const User = db.users;
 const secret = process.env.TOKEN_SECRET;
 
 function isValidUserName(username) {
-  return validator.matches(username, "^[a-zA-Z0-9_\.\-]*$");
+    return validator.matches(username, "/^(?!\d)(?!.*-.*-)(?!.*-$)(?!-)[a-zA-Z0-9-]{3,20}$/");
 }
 
 module.exports = async app => {

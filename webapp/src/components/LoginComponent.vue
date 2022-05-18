@@ -1,5 +1,6 @@
 <template>
   <div>
+    <a-alert v-if="!!alert" :message="alert" type="error" style="margin-bottom: 20px;"/>
     <a-input v-model:value="email" style="margin-bottom: 20px;" placeholder="Email">
       <template #prefix>
         <UserOutlined class="site-form-item-icon" />
@@ -27,13 +28,15 @@ export default defineComponent({
       return;
     }
 
+    const alert = ref<string>("");
     let email = ref<string>('');
     const onClick = () : void => {
-      sendOTP(store, email.value);
+      sendOTP(store, email.value).then(msg => alert.value = msg);
     };
 
     return {
       email,
+      alert,
       onClick,
     };
   },
