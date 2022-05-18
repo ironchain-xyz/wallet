@@ -9,6 +9,7 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: @primary-color;
+  height: 100%;
 }
 
 nav {
@@ -22,5 +23,12 @@ nav a {
 
 nav a.router-link-exact-active {
   color: @link-color;
+}
+
+.login {
+  display: flex;
+  justify-content: center;
+  margin-top: 200px;
+  height: 100%;
 }
 </style>

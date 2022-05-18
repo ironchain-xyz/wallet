@@ -5,8 +5,8 @@ const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const nodemailer = require("../config/nodemailer.config.js");
 const time = require("../lib/time.js");
+const { randomCode } = require("../lib/util.js");
 
-const CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const OTP_LEN = 6;
 const db = require("../models");
 const User = db.users;
@@ -20,12 +20,7 @@ async function genOTP(email, mocked=true) {
     if (mocked) {
         OTP = "123456";
     } else {
-        let OTP = '';
-        var len = CHARS.length;
-        for (let i = 0; i < OTP_LEN; i++ ) {
-            OTP += CHARS[Math.floor(Math.random() * len)];
-        }
-        await nodemailer.sendPasscode(email, OTP);
+        await nodemailer.sendPasscode(email, randomCode(OTP_LEN));
     }
     return {value: OTP, sentAt: time.epoch()};
 }
@@ -91,6 +86,7 @@ module.exports = async app => {
         }
 
         await User.create({email});
+        await invitation.update({usedBy: email});
         return res.send({ok: true});
     }));
 

@@ -6,7 +6,7 @@
         <UserOutlined class="site-form-item-icon" />
       </template>
     </a-input>
-    <a-input v-model:value="invitationCode" style="margin-bottom: 20px;" placeholder="InvitationCode">
+    <a-input v-model:value="invitationCode" style="margin-bottom: 20px;" placeholder="Invitation Code">
     </a-input>
     <a-button type="primary" @click="onClick" class="login-form-button">
       Register
