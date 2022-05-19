@@ -1,14 +1,14 @@
 <template>
-  <Home title="B23"/>
+  <Profile/>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import Home from '@/components/HomeComponent.vue'; // @ is an alias to /src
+import Profile from '@/components/ProfileComponent.vue'; // @ is an alias to /src
 
 @Options({
   components: {
-    Home,
+    Profile,
   },
 })
 export default class HomeView extends Vue {}

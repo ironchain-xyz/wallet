@@ -10,6 +10,8 @@
   text-align: center;
   color: @primary-color;
   height: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 nav {
@@ -29,6 +31,15 @@ nav a.router-link-exact-active {
   display: flex;
   justify-content: center;
   margin-top: 200px;
+}
+
+.content {
+  display: flex;
+  justify-content: center;
+  margin-top: 100px;
+}
+
+.home {
   height: 100%;
 }
 </style>

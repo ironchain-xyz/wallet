@@ -97,7 +97,6 @@ export async function verifyOTP(store: Store<State>, passcode: string) : Promise
         store.commit('setUser', {email: res.data.email, jwt: res.data.jwt});
         store.commit('setProfile', {username: res.data.username});
     } catch (err: any) {
-        console.log(err);
         msg = parseErrorMsg(err);
     }
     hide();

@@ -52,6 +52,9 @@ export const store = createStore<State>({
     },
     setProfile(state: State, profile: Profile) {
       state.profile = profile;
+    },
+    updateProfile(state: State, profileUpdate: Profile) {
+      Object.assign(state.profile!, profileUpdate);
     }
   },
   plugins: [vuexLocal.plugin]
