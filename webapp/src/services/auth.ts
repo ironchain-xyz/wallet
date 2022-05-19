@@ -108,9 +108,10 @@ export async function logout(store: Store<State>) {
     const key = "logout";
     const url = store.state.API_URL + "logout";
     try {
-        const res = await axios.post(url, {headers: authHeader(store)});
+        const res = await axios.post(url, {}, {headers: authHeader(store)});
     } catch (err: any) {
-        console.log("logout error: " + JSON.stringify(err));
+        console.log("logout error: ");
+        console.log(err);
     }
     store.commit('setUser', undefined);
     router.push("/login");

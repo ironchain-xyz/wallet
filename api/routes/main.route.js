@@ -89,7 +89,7 @@ module.exports = async app => {
     }));
 
     router.post('/logout', asyncHandler(async (req,res) => {
-        const user = await User.findByPk(req.body.user.email);
+        const user = await User.findByPk(req.user.email);
         await user.update({refreshToken: ""});
         res.send({ok: true});
     }));

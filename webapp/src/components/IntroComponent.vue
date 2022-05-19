@@ -13,9 +13,9 @@
         </a-menu-item>
         <a-menu-item key="settings">
           <template #icon>
-            <setting-outlined />
+            <user-outlined />
           </template>
-          Settings
+          Profile
         </a-menu-item>
         <a-menu-item key="invitation code">
           <a-button type="primary" @click="onInvitationCode" class="login-form-button">
@@ -43,14 +43,14 @@
 <script>
 import { defineComponent, h } from 'vue';
 import { Modal } from 'ant-design-vue';
-import { SettingOutlined, HomeOutlined } from '@ant-design/icons-vue';
+import { UserOutlined, HomeOutlined } from '@ant-design/icons-vue';
 import router from '../router';
 import { useStore } from '../store';
 import { authenticate, logout } from '../services/auth';
 import { getInvitationCode } from '../services/profile';
 
 export default defineComponent({
-  components: {SettingOutlined, HomeOutlined},
+  components: {UserOutlined, HomeOutlined},
   setup() {
     const store = useStore();
     if (!authenticate(store)) return;
