@@ -22,11 +22,29 @@ export async function initProfile(store: Store<State>, profile: {username: strin
     try {
         const res = await axios.post(url, profile, {headers: authHeader(store)});
         store.commit('setProfile', profile);
-        message.success({content: 'saved', key, duration: 2});
-        setTimeout(() => router.push('/'), 2000);
+        hide();
+        const hide2 = message.success({
+            content: 'saved, redirecting to home...',
+            key,
+            duration: 1
+        });
+        setTimeout(() => {
+            hide2();
+            router.push('/');
+        }, 1000);
     } catch(err: any) {
+        hide();
         msg = parseErrorMsg(err);
     }
-    hide();
     return msg;
+}
+
+export async function getInvitationCode(store: Store<State>): Promise<{codes: {}} | {message: {}}> {
+    const url = store.state.API_URL + "invitationCode";
+    try {
+        const res = await axios.post(url, {}, {headers: authHeader(store)});
+        return res.data;
+    } catch(err: any) {
+        return {message: parseErrorMsg(err)};
+    }
 }

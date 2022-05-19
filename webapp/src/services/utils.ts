@@ -6,6 +6,6 @@ export function authHeader(store: Store<State>): Record<string, string> {
     return {"x-access-token": store.state.user!.jwt!.accessToken};
 }
 
-export function parseErrorMsg(err: any) {
-    return err.response?.data?.message || err.response?.message || "unknown error";
+export function parseErrorMsg(err: any, message?: string) {
+    return err.response?.data?.message || err.response?.message || message || "unknown server error";
 }

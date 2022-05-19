@@ -32,18 +32,26 @@ export async function register(
     }
 
     const key = "register";
-    const hide = message.loading({ content: 'registering...', key });
+    const hide1 = message.loading({ content: 'registering...', key });
     const url = store.state.API_URL + "auth/register";
     let msg = "";
     try {
         await axios.post(url, {email, invitationCode});
         store.commit("setUser", {email});
-        message.success({content: 'saved', key, duration: 2});
-        setTimeout(() => router.push('/login'), 2000);
+        hide1();
+        const hide2 = message.success({
+            content: 'saved, redirecting to login page...',
+            key,
+            duration: 1
+        });
+        setTimeout(() => {
+            hide2();
+            router.push('/login');
+        }, 1000);
     } catch (err: any) {
+        hide1();
         msg = parseErrorMsg(err);
     }
-    hide();
     return msg;
 }
 

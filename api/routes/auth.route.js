@@ -10,6 +10,7 @@ const { randomCode } = require("../lib/util.js");
 const OTP_LEN = 6;
 const db = require("../models");
 const User = db.users;
+const Invitations = db.invitations;
 
 const secret = process.env.TOKEN_SECRET;
 const ACCESS_TOKEN_LIFETIME = parseInt(process.env.ACCESS_TOKEN_LIFETIME);
@@ -78,7 +79,7 @@ module.exports = async app => {
         }
 
         const invitationCode = req.body.invitationCode;
-        const invitation = await User.findByPk(code);
+        const invitation = await Invitations.findByPk(invitationCode);
         if (!invitation) {
             return res.status(400).send({message: 'invalid invitation code'});
         } else if (invitation.usedBy) {

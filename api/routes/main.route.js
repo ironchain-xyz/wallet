@@ -54,7 +54,6 @@ module.exports = async app => {
     router.post('/profile/init', asyncHandler(async (req, res) => {
         const username = req.body.username;
         if (!isValidUserName(username)) {
-            console.log(username);
             res.status(400).send({
                 message: "Invalid username!"
             });
@@ -70,17 +69,17 @@ module.exports = async app => {
     }));
 
     router.post('/invitationCode', asyncHandler(async (req,res) => {
-        const email = req.body.user.email;
+        const referredBy = req.user.email;
         const invitations = await Invitations.findAll(
-            {where: {referredBy: req.body.user.email}}
+            {where: {referredBy}}
         );
         if (invitations.length == 0) {
             const promises = [];
             for (let i = 0; i < INVITATION_CODE_PER_USER; i++) {
-                promises.push(genInvitationCode(email));
+                promises.push(genInvitationCode(referredBy));
             }
             const codes = await Promise.all(promises);
-            res.send({codes: codes.map(c => {code: c})});
+            res.send({codes: codes.map(c => ({code: c}))});
         } else {
             const codes = invitations.map(i => ({
                 code: i.code, used: !!i.usedBy

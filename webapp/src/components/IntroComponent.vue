@@ -41,11 +41,13 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue';
-import { useStore } from '../store';
-import { authenticate, logout } from '../services/auth';
+import { defineComponent, h } from 'vue';
+import { Modal } from 'ant-design-vue';
 import { SettingOutlined, HomeOutlined } from '@ant-design/icons-vue';
 import router from '../router';
+import { useStore } from '../store';
+import { authenticate, logout } from '../services/auth';
+import { getInvitationCode } from '../services/profile';
 
 export default defineComponent({
   components: {SettingOutlined, HomeOutlined},
@@ -55,11 +57,39 @@ export default defineComponent({
     if (!store.state.profile?.username) {
       router.push('init');
     }
-    const onLogout = () => {
-      logout(store);
+
+    const onLogout = () => {logout(store);}
+
+    const genCodes = (res) => {
+      if (res.message) {
+        return h('p', "Failed to get invitation code with error: " + res.message);
+      }
+      if (res.codes && res.codes.length > 0) {
+        return res.codes.map(code => h(
+          'p',
+          {
+            style: code.used
+            ? "text-decoration: line-through; font-style: italic;"
+            : "font-weight: bold;"
+          },
+          code.code
+        ));
+      }
+      return h('p', "No invitation code found");
     }
-    console.log(store.state.user)
-    return {onLogout};
+    const onInvitationCode = () => {
+      getInvitationCode(store).then((res) => {
+        Modal.info({
+          title: 'Invitation Code',
+          content: h('div', {style: "margin-top: 30px;"}, genCodes(res))
+        });
+      });
+    }
+
+    return {
+      onLogout,
+      onInvitationCode,
+    };
   },
 })
 </script>
