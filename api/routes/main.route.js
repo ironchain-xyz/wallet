@@ -51,6 +51,19 @@ module.exports = async app => {
         }
     }));
 
+    router.post('/profile/setusername', asyncHandler(async (req, res) => {
+        const username = req.body.username;
+        if (!isValidUserName(username)) {
+            res.status(400).send({
+                message: "Invalid username!"
+            });
+        } else {
+            const user = await User.findByPk(req.user.email);
+            await user.update({username});
+            res.send({ok: true});
+        }
+    }));
+
     router.post('/profile/init', asyncHandler(async (req, res) => {
         const username = req.body.username;
         if (!isValidUserName(username)) {

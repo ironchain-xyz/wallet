@@ -78,7 +78,7 @@ export default defineComponent({
         })
     };
 
-    const email = computed(() => store.state.user!.email!);
+    const email = computed(() => store.state.user!.email);
     return {
         email,
         username,

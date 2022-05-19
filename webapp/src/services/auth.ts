@@ -112,7 +112,7 @@ export async function logout(store: Store<State>) {
         console.log("logout error: ");
         console.log(err);
     }
-    store.commit('setUser', undefined);
+    store.commit('setUser', {});
     router.push("/login");
 }
 

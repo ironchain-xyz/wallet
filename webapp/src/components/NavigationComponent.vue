@@ -10,7 +10,7 @@
                 <template #icon>
                     <home-outlined />
                 </template>
-                <a href="/">Events</a>
+                <a href="/">Home</a>
             </a-menu-item>
             <a-menu-item key="profile">
                 <template #icon>
