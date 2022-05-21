@@ -1,5 +1,5 @@
 <template>
-  <router-view :key="$route.name"/>
+  <router-view :key="$route.name" />
 </template>
 
 <style lang="less">

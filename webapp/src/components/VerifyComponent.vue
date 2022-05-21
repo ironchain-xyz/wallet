@@ -1,13 +1,13 @@
 <template>
   <div>
-    <a-alert  v-if="!!alert" :message="alert" type="error" style="margin-bottom: 20px;"/>
+    <a-alert v-if="!!alert" :message="alert" type="error" style="margin-bottom: 20px;" />
     <a-input-password v-model:value="otp" placeholder="Authentication Code">
       <template #prefix>
         <LockOutlined class="site-form-item-icon" />
       </template>
     </a-input-password>
     <div>
-      <a-button type="text" @click="onResend" style="margin-bottom: 20px;" > 
+      <a-button type="text" @click="onResend" style="margin-bottom: 20px;">
         Resend the authentication code
       </a-button>
     </div>

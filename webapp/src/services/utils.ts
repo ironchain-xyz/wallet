@@ -3,7 +3,7 @@ import { message } from 'ant-design-vue';
 import { State } from "../store";
 
 export function authHeader(store: Store<State>): Record<string, string> {
-    return {"x-access-token": store.state.user!.jwt!.accessToken};
+    return { "x-access-token": store.state.user!.jwt!.accessToken };
 }
 
 export function parseErrorMsg(err: any, message?: string) {

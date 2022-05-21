@@ -11,5 +11,5 @@ import Home from '@/components/HomeComponent.vue'; // @ is an alias to /src
     Home,
   },
 })
-export default class HomeView extends Vue {}
+export default class HomeView extends Vue { }
 </script>

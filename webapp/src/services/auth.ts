@@ -5,11 +5,11 @@ import { JWT, State } from "../store";
 import router from '../router';
 import { authHeader, parseErrorMsg } from './utils';
 
-function validateEmail(email: string) : boolean {
+function validateEmail(email: string): boolean {
     return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
 }
 
-function validatePasscode(passcode: string) : boolean {
+function validatePasscode(passcode: string): boolean {
     return /^[0-9A-Za-z]{6}$/.test(passcode);
 }
 
@@ -26,7 +26,7 @@ export async function register(
     store: Store<State>,
     email: string,
     invitationCode: string
-) : Promise<string> {
+): Promise<string> {
     if (!validateEmail(email)) {
         return "please input a valid email address";
     }
@@ -36,8 +36,8 @@ export async function register(
     const url = store.state.API_URL + "auth/register";
     let msg = "";
     try {
-        await axios.post(url, {email, invitationCode});
-        store.commit("setUser", {email});
+        await axios.post(url, { email, invitationCode });
+        store.commit("setUser", { email });
         hide1();
         const hide2 = message.success({
             content: 'saved, redirecting to login page...',
@@ -55,7 +55,7 @@ export async function register(
     return msg;
 }
 
-export async function sendOTP(store: Store<State>, email: string) : Promise<string> {
+export async function sendOTP(store: Store<State>, email: string): Promise<string> {
     if (!validateEmail(email)) {
         return "please input a valid email address";
     }
@@ -65,12 +65,12 @@ export async function sendOTP(store: Store<State>, email: string) : Promise<stri
     const url = store.state.API_URL + "auth/passcode";
     let msg = "";
     try {
-        const res = await axios.post(url, {email});
+        const res = await axios.post(url, { email });
         if (res.data.existingOTP) {
             msg = warnExistingOTP(res.data.sentAt);
         }
         store.commit("setUser", {
-            email, 
+            email,
             otp: {
                 sentAt: res.data.sentAt,
                 existing: res.data.existingOTP
@@ -83,7 +83,7 @@ export async function sendOTP(store: Store<State>, email: string) : Promise<stri
     return msg;
 }
 
-export async function verifyOTP(store: Store<State>, passcode: string) : Promise<string> {
+export async function verifyOTP(store: Store<State>, passcode: string): Promise<string> {
     if (!validatePasscode(passcode)) {
         return "please input a valid passcode";
     }
@@ -93,9 +93,9 @@ export async function verifyOTP(store: Store<State>, passcode: string) : Promise
     const url = store.state.API_URL + "auth/verify";
     let msg = "";
     try {
-        const res = await axios.post(url, {email: store.state.user!.email, passcode});
-        store.commit('setUser', {email: res.data.email, jwt: res.data.jwt});
-        store.commit('setProfile', {username: res.data.username});
+        const res = await axios.post(url, { email: store.state.user!.email, passcode });
+        store.commit('setUser', { email: res.data.email, jwt: res.data.jwt });
+        store.commit('setProfile', { username: res.data.username });
     } catch (err: any) {
         msg = parseErrorMsg(err);
     }
@@ -107,7 +107,7 @@ export async function logout(store: Store<State>) {
     const key = "logout";
     const url = store.state.API_URL + "logout";
     try {
-        const res = await axios.post(url, {}, {headers: authHeader(store)});
+        const res = await axios.post(url, {}, { headers: authHeader(store) });
     } catch (err: any) {
         console.log("logout error: ");
         console.log(err);
@@ -117,7 +117,7 @@ export async function logout(store: Store<State>) {
 }
 
 export function authenticate(store: Store<State>) {
-    if (!store.state.user?.email || !store.state.user?.jwt) { 
+    if (!store.state.user?.email || !store.state.user?.jwt) {
         store.commit("clear");
         router.push('/login');
         return false;

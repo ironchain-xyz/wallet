@@ -1,5 +1,5 @@
 <template>
-  <Profile/>
+  <Profile />
 </template>
 
 <script lang="ts">
@@ -11,5 +11,5 @@ import Profile from '@/components/ProfileComponent.vue'; // @ is an alias to /sr
     Profile,
   },
 })
-export default class HomeView extends Vue {}
+export default class HomeView extends Vue { }
 </script>

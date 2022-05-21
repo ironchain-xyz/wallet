@@ -60,6 +60,6 @@ export const store = createStore<State>({
   plugins: [vuexLocal.plugin]
 });
 
-export function useStore () {
+export function useStore() {
   return baseUseStore(key)
 }

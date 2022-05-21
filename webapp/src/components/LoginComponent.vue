@@ -1,8 +1,8 @@
 <template>
   <div>
-    <a-alert v-if="!!alert" :message="alert" type="error" style="margin-bottom: 20px;"/>
+    <a-alert v-if="!!alert" :message="alert" type="error" style="margin-bottom: 20px;" />
     <a href="register">Register New Account</a>
-    <a-input v-model:value="email" placeholder="Email"  style="margin-bottom: 20px;">
+    <a-input v-model:value="email" placeholder="Email" style="margin-bottom: 20px;">
       <template #prefix>
         <UserOutlined class="site-form-item-icon" />
       </template>
@@ -21,7 +21,7 @@ import router from '../router';
 import { sendOTP } from '../services/auth';
 
 export default defineComponent({
-  components: {UserOutlined,},
+  components: { UserOutlined, },
   setup() {
     const store = useStore();
     if (store.state.user?.email && store.state.user?.jwt) {
@@ -35,7 +35,7 @@ export default defineComponent({
     }
 
     const alert = ref<string>("");
-    const onClick = () : void => {
+    const onClick = (): void => {
       sendOTP(store, email.value).then(msg => {
         alert.value = msg
         if (!msg) {

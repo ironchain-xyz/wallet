@@ -1,10 +1,10 @@
 <template>
   <div>
     <a-row type="flex" justify="center" align="middle">
-        <img alt="Vue logo" src="../assets/logo.png" style="width:200px; height:200px;">
+      <img alt="Vue logo" src="../assets/logo.png" style="width:200px; height:200px;">
     </a-row>
     <a-row type="flex" justify="center" align="middle">
-        <InitProfile />
+      <InitProfile />
     </a-row>
   </div>
 </template>

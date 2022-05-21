@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import Profile from '../views/ProfileView.vue'
-import NewEvent from '../views/NewEventView.vue'
+import NewFact from '../views/NewFactView.vue'
 
 const routes = [
   {
@@ -35,9 +35,9 @@ const routes = [
     component: () => import('../views/VerifyView.vue')
   },
   {
-    path: '/event/new',
-    name: "newEvent",
-    component: NewEvent,
+    path: '/fact/new',
+    name: "newFact",
+    component: NewFact,
   },
 ]
 

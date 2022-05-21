@@ -1,23 +1,23 @@
 <template>
     <div>
-        <a-button type="primary" size="large" href="/event/new">
-            Start to record
+        <a-button type="primary" size="large" href="/fact/new">
+            Create your fact
         </a-button>
     </div>
-    <div v-if="events.length == 0 && !fetchErrMsg" style="margin-top: 100px;">
+    <div v-if="facts.length == 0 && !fetchErrMsg" style="margin-top: 100px;">
         <h1>IronchainDAO</h1>
         <h2>
             We persist reality.
         </h2>
     </div>
-    <div v-if="events.length > 0 || !!fetchErrMsg"  style="margin-top: 50px;">
+    <div v-if="facts.length > 0 || !!fetchErrMsg" style="margin-top: 50px;">
         <a-select v-model:value="sortedBy" :options="sortedByOptions"></a-select>
-        <a-spin v-if="loading"/>
-        <div v-for="event in events" v-bind:key="event.id">
-            {{event.name}}
+        <a-spin v-if="loading" />
+        <div v-for="fact in facts" v-bind:key="fact.hash">
+            {{ fact.description }}
         </div>
         <div v-if="!!fetchErrMsg" style="margin-top: 100px;">
-            {{fetchErrMsg}}
+            {{ fetchErrMsg }}
         </div>
     </div>
 </template>
@@ -25,12 +25,15 @@
 <script lang="ts">
 import { defineComponent, ref, watch, onBeforeMount } from 'vue';
 import type { SelectProps } from 'ant-design-vue';
-import { fetchEvents, Event } from '../services/event';
 import { parseErrorMsg } from '@/services/utils';
+import { useStore } from '@/store';
+import { fetchFacts, Fact } from '@/services/fact';
 
 export default defineComponent({
-  components: {},
-  setup() {
+    components: {},
+    setup() {
+        const store = useStore();
+        const owner = store.state.user!.username!;
         const sortedByOptions = ref<SelectProps['options']>([
             {
                 value: 'latest',
@@ -43,13 +46,13 @@ export default defineComponent({
         ]);
         let sortedBy = ref<string>("latest");
         let loading = ref<boolean>(false);
-        let events = ref<Event[]>([]);
+        let facts = ref<Fact[]>([]);
         let fetchErrMsg = ref<string>("");
         watch(sortedBy, () => {
-            events.value = [];
+            facts.value = [];
             loading.value = true;
-            fetchEvents({sortedBy: sortedBy.value}).then(res => {
-                events.value = res
+            fetchFacts({ owner, sortedBy: sortedBy.value }).then(res => {
+                facts.value = res
             }).catch(err => {
                 fetchErrMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
             }).finally(() => {
@@ -57,10 +60,10 @@ export default defineComponent({
             });
         });
         onBeforeMount(() => {
-            events.value = [];
+            facts.value = [];
             loading.value = true;
-            fetchEvents({sortedBy: sortedBy.value}).then(res => {
-                events.value = res
+            fetchFacts({ owner, sortedBy: sortedBy.value }).then(res => {
+                facts.value = res
             }).catch(err => {
                 fetchErrMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
             }).finally(() => {
@@ -70,20 +73,20 @@ export default defineComponent({
         return {
             loading,
             fetchErrMsg,
-            events,
+            facts,
             sortedBy,
             sortedByOptions,
         };
-  }
+    }
 });
 </script>
 
 <style lang="less" scoped>
 h1 {
-  color: @heading-color;
+    color: @heading-color;
 }
 
 h2 {
-  color: @text-color;
+    color: @text-color;
 }
 </style>

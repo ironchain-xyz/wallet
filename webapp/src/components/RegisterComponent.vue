@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-alert v-if="!!alert" :message="alert" type="error" style="margin-bottom: 20px;"/>
+    <a-alert v-if="!!alert" :message="alert" type="error" style="margin-bottom: 20px;" />
     <a-input v-model:value="email" style="margin-bottom: 20px;" placeholder="Email">
       <template #prefix>
         <UserOutlined class="site-form-item-icon" />
@@ -22,7 +22,7 @@ import router from '../router';
 import { register } from '../services/auth';
 
 export default defineComponent({
-  components: {UserOutlined,},
+  components: { UserOutlined, },
   setup() {
     const store = useStore();
     if (store.state.user?.email && store.state.user?.jwt) {
@@ -33,7 +33,7 @@ export default defineComponent({
     const alert = ref<string>("");
     const email = ref<string>("");
     const invitationCode = ref<string>("");
-    const onClick = () : void => {
+    const onClick = (): void => {
       register(store, email.value, invitationCode.value).then(msg => {
         alert.value = msg
       });

@@ -44,9 +44,6 @@ if (process.env.NODE_ENV == 'production') {
 require("./routes/auth.route")(app);
 require("./routes/main.route")(app);
 
-var dir = path.join(__dirname, 'public');
-app.use(express.static(dir));
-
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);
