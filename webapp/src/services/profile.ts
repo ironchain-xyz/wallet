@@ -5,6 +5,7 @@ import { message } from 'ant-design-vue';
 import { User, State } from "../store";
 import router from '../router';
 import { authHeader, parseErrorMsg } from './utils';
+import { API_URL } from '../lib/constants';
 
 function validateUsername(username: string): boolean {
     return /^(?!\d)(?!.*-.*-)(?!.*-$)(?!-)[a-zA-Z0-9-]{3,20}$/.test(username);
@@ -17,7 +18,7 @@ export async function initProfile(store: Store<State>, profile: { username: stri
 
     const key = "initProfile";
     const hide = message.loading({ content: 'saving...', key });
-    const url = store.state.API_URL + "profile/init";
+    const url = API_URL + "profile/init";
     let msg = "";
     try {
         const res = await axios.post(url, profile, { headers: authHeader(store) });
@@ -44,7 +45,7 @@ export async function updateUsername(store: Store<State>, username: string): Pro
 
     const key = "setUsername";
     message.loading({ content: 'saving...', key, duration: 0 });
-    const url = store.state.API_URL + "profile/setusername";
+    const url = API_URL + "profile/setusername";
     try {
         const res = await axios.post(url, { username }, { headers: authHeader(store) });
         store.commit('updateProfile', { username });
@@ -62,7 +63,7 @@ export async function updateUsername(store: Store<State>, username: string): Pro
 export async function getInvitationCode(
     store: Store<State>
 ): Promise<{ codes?: [], message?: string }> {
-    const url = store.state.API_URL + "invitationCode";
+    const url = API_URL + "invitationCode";
     try {
         const res = await axios.post(url, {}, { headers: authHeader(store) });
         return res.data;

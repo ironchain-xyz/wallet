@@ -24,7 +24,6 @@ export interface Profile {
 }
 
 export interface State {
-  API_URL: string;
   user?: User;
   profile?: Profile;
 }
@@ -37,10 +36,7 @@ const vuexLocal = new VuexPersistence<State>({
 
 export const store = createStore<State>({
   state() {
-    return {
-      API_URL: process.env.NODE_ENV === 'development'
-        ? "http://localhost:8080/api/" : "https://ironchain.xyz/api/",
-    }
+    return {}
   },
   mutations: {
     clear(state: State) {

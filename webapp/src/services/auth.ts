@@ -4,6 +4,7 @@ import { message } from 'ant-design-vue';
 import { JWT, State } from "../store";
 import router from '../router';
 import { authHeader, parseErrorMsg } from './utils';
+import { API_URL } from '../lib/constants';
 
 function validateEmail(email: string): boolean {
     return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
@@ -33,7 +34,7 @@ export async function register(
 
     const key = "register";
     const hide1 = message.loading({ content: 'registering...', key });
-    const url = store.state.API_URL + "auth/register";
+    const url = API_URL + "auth/register";
     let msg = "";
     try {
         await axios.post(url, { email, invitationCode });
@@ -62,7 +63,7 @@ export async function sendOTP(store: Store<State>, email: string): Promise<strin
 
     const key = "sendOTP";
     const hide = message.loading({ content: 'sending passcode...', key });
-    const url = store.state.API_URL + "auth/passcode";
+    const url = API_URL + "auth/passcode";
     let msg = "";
     try {
         const res = await axios.post(url, { email });
@@ -90,7 +91,7 @@ export async function verifyOTP(store: Store<State>, passcode: string): Promise<
 
     const key = "verifyOTP";
     const hide = message.loading({ content: 'logging in...', key });
-    const url = store.state.API_URL + "auth/verify";
+    const url = API_URL + "auth/verify";
     let msg = "";
     try {
         const res = await axios.post(url, { email: store.state.user!.email, passcode });
@@ -105,7 +106,7 @@ export async function verifyOTP(store: Store<State>, passcode: string): Promise<
 
 export async function logout(store: Store<State>) {
     const key = "logout";
-    const url = store.state.API_URL + "logout";
+    const url = API_URL + "logout";
     try {
         const res = await axios.post(url, {}, { headers: authHeader(store) });
     } catch (err: any) {

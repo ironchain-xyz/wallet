@@ -3,6 +3,7 @@ import axios, { AxiosResponse } from 'axios';
 import { State } from "../store";
 import { authHeader, parseErrorMsg } from './utils';
 import { useStore } from '../store';
+import { API_URL } from '../lib/constants';
 
 export interface Evidence {
     description?: string;
@@ -53,7 +54,8 @@ export function validateFact(fact: FactBase): { alert?: {} ok: boolean } {
 }
 
 export async function saveFact(fact: FactBase): Promise<Fact> {
-    console.log(fact);
+    const url = API_URL + "facts";
+    const res = await axios.post(url, fact, { headers: authHeader() });
     return {
         ...fact,
         owner: '',
@@ -62,8 +64,7 @@ export async function saveFact(fact: FactBase): Promise<Fact> {
 }
 
 export async function fetchFacts(params: { owner: string, sortedBy: string }): Promise<Fact[]> {
-    const store = useStore();
-    const url = store.state.API_URL + "facts";
-    const res = await axios.post(url, params, { headers: authHeader(store) });
+    const url = API_URL + "facts";
+    const res = await axios.post(url, params, { headers: authHeader() });
     return res.data;
 }
