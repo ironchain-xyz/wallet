@@ -8,10 +8,8 @@
                 <a-alert v-if="!!alert" :message="alert" type="error"/>
             </div>
             <div class="field">
-                <a-avatar :size="100">
-                    <template #icon>
-                        <UserOutlined />
-                    </template>
+                <a-avatar :size="80" class="avatar">
+                    {{username.toUpperCase()}}
                 </a-avatar>
             </div>
             <div class="field">
@@ -44,7 +42,6 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref, computed, onBeforeMount } from 'vue';
-import { UserOutlined } from '@ant-design/icons-vue';
 import { useStore } from '../store';
 import { getInvitationCode, updateUsername } from '../services/profile';
 import Navigation from '@/components/NavigationComponent.vue'
@@ -55,7 +52,7 @@ interface InvitationCode {
 }
 
 export default defineComponent({
-  components: {UserOutlined, Navigation},
+  components: {Navigation},
   setup() {
     const store = useStore();
     let alert = ref<string>('');
@@ -77,7 +74,6 @@ export default defineComponent({
             username.value = store.state.profile!.username!;
         })
     };
-
     const email = computed(() => store.state.user!.email);
     return {
         email,
@@ -102,5 +98,10 @@ export default defineComponent({
 
 .field {
     margin-bottom: 50px;
+}
+
+.avatar {
+    font-weight: bold;
+    background-color: #1890ff;
 }
 </style>

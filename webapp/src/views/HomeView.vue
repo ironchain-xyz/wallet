@@ -1,5 +1,5 @@
 <template>
-  <Home title="B23"/>
+  <Home />
 </template>
 
 <script lang="ts">

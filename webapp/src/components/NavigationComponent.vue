@@ -2,10 +2,10 @@
     <a-affix :offset-top="top" >
       <div class="nav-container">
         <div class="nav-item">
-          <img alt="Vue logo" src="../assets/logo.png" style="width:30px; height:30px;">
+          <img alt="Vue logo" src="../assets/logo.png" style="width:50px; height:50px;">
         </div>
         <div style="margin-top: 10px">
-          <a-menu mode="horizontal">
+          <a-menu mode="horizontal" class="menuItem">
             <a-menu-item key="events">
                 <template #icon>
                     <home-outlined />
@@ -21,7 +21,7 @@
           </a-menu>
         </div>
         <div class="nav-item">
-          <a-button type="primary" @click="onLogout" class="login-form-button">
+          <a-button type="primary" @click="onLogout" style="font-size: 20px" size="large">
             Logout
           </a-button>
         </div>
@@ -58,10 +58,15 @@ export default defineComponent({
 <style lang="less" scoped>
 .nav-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .nav-item {
-  margin: 20px;
+    margin: 12px;
+    font-size: 20px;
+}
+
+.menuItem {
+    font-size: 20px;
 }
 </style>

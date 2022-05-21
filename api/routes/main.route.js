@@ -1,9 +1,11 @@
 require('dotenv').config();
 
+const path = require('path');
 const validator = require('validator');
 const asyncHandler = require('express-async-handler')
 const jwt = require('jsonwebtoken');
 
+const multer  = require('multer')
 const { nanoid } = require('nanoid');
 
 const db = require("../models");
@@ -12,6 +14,24 @@ const Invitations = db.invitations;
 
 const secret = process.env.TOKEN_SECRET;
 const INVITATION_CODE_PER_USER = 3;
+
+var storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, path.join(__dirname, "../public/uploads"));
+    },
+    filename: function(req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalName));
+    },
+    fileFilter: function(req, file, cb) {
+        var ext = path.extname(file.originalName);
+        if (ext !== "png" && ext !== "jpg" && ext !== "jpeg" && ext !== "gif") {
+            return cb(new Error("only images are allowed"));
+        }
+        cb(null, true);
+    },
+});
+const upload = multer({storage});
+const fileUpload = upload.fields([{name: "evidences", maxCount: 5}]);
 
 function isValidUserName(username) {
     return validator.matches(username, "^(?!\d)(?!.*-.*-)(?!.*-$)(?!-)[a-zA-Z0-9-]{3,20}$");

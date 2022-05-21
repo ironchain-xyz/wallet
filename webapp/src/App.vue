@@ -34,12 +34,11 @@ nav a.router-link-exact-active {
 }
 
 .content {
-  display: flex;
-  justify-content: center;
-  margin-top: 100px;
+  margin-top: 20px;
 }
 
 .home {
   height: 100%;
+  width: 100%;
 }
 </style>
