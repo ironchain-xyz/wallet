@@ -1,37 +1,14 @@
 require('dotenv').config();
+const router = require("express").Router();
 
-const path = require('path');
 const validator = require('validator');
 const asyncHandler = require('express-async-handler')
-const jwt = require('jsonwebtoken');
 
-const multer  = require('multer')
 const { nanoid } = require('nanoid');
-
 const db = require("../models");
 const User = db.users;
 const Invitations = db.invitations;
-
-const secret = process.env.TOKEN_SECRET;
 const INVITATION_CODE_PER_USER = 3;
-
-var storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, path.join(__dirname, "../public/uploads"));
-    },
-    filename: function(req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalName));
-    },
-    fileFilter: function(req, file, cb) {
-        var ext = path.extname(file.originalName);
-        if (ext !== "png" && ext !== "jpg" && ext !== "jpeg" && ext !== "gif") {
-            return cb(new Error("only images are allowed"));
-        }
-        cb(null, true);
-    },
-});
-const upload = multer({storage});
-const fileUpload = upload.fields([{name: "evidences", maxCount: 5}]);
 
 function isValidUserName(username) {
     return validator.matches(username, "^(?!\d)(?!.*-.*-)(?!.*-$)(?!-)[a-zA-Z0-9-]{3,20}$");
@@ -48,84 +25,60 @@ async function genInvitationCode(referredBy) {
     }
 }
 
-module.exports = async app => {
-    var router = require("express").Router();
-
-    router.use(asyncHandler(async (req, res, next) => {
-        const accessToken = req.headers["x-access-token"];
-        if (accessToken) {
-            try {
-                const {refreshToken} = await jwt.verify(accessToken, secret);
-                const {email} = jwt.verify(refreshToken, secret)
-                req.user = {email};
-                next();
-            } catch (err) {
-                res.status(401).send({
-                    message: "Invalid access Token"
-                });
-            }
-        } else {
-            res.status(403).send({
-                message: "Access token is required"
-            });
-        }
-    }));
-
-    router.post('/profile/setusername', asyncHandler(async (req, res) => {
-        const username = req.body.username;
-        if (!isValidUserName(username)) {
-            res.status(400).send({
-                message: "Invalid username!"
-            });
-        } else {
-            const user = await User.findByPk(req.user.email);
-            await user.update({username});
-            res.send({ok: true});
-        }
-    }));
-
-    router.post('/profile/init', asyncHandler(async (req, res) => {
-        const username = req.body.username;
-        if (!isValidUserName(username)) {
-            res.status(400).send({
-                message: "Invalid username!"
-            });
-        } else if (await User.findOne({where: {username}})) {
-            res.status(400).send({
-                message: "Username already used!"
-            });
-        } else {
-            const user = await User.findByPk(req.user.email);
-            await user.update({username});
-            res.send({ok: true});
-        }
-    }));
-
-    router.post('/invitationCode', asyncHandler(async (req,res) => {
-        const referredBy = req.user.email;
-        const invitations = await Invitations.findAll(
-            {where: {referredBy}}
-        );
-        if (invitations.length == 0) {
-            const promises = [];
-            for (let i = 0; i < INVITATION_CODE_PER_USER; i++) {
-                promises.push(genInvitationCode(referredBy));
-            }
-            const codes = await Promise.all(promises);
-            res.send({codes: codes.map(c => ({code: c}))});
-        } else {
-            const codes = invitations.map(i => ({
-                code: i.code, used: !!i.usedBy
-            }));
-            res.send({codes: codes});
-        }
-    }));
-
-    router.post('/logout', asyncHandler(async (req,res) => {
+router.post('/profile/setusername', asyncHandler(async (req, res) => {
+    const username = req.body.username;
+    if (!isValidUserName(username)) {
+        res.status(400).send({
+            message: "Invalid username!"
+        });
+    } else {
         const user = await User.findByPk(req.user.email);
-        await user.update({refreshToken: ""});
+        await user.update({username});
         res.send({ok: true});
-    }));
+    }
+}));
 
-    app.use('/api/', router);
-};
+router.post('/profile/init', asyncHandler(async (req, res) => {
+    const username = req.body.username;
+    if (!isValidUserName(username)) {
+        res.status(400).send({
+            message: "Invalid username!"
+        });
+    } else if (await User.findOne({where: {username}})) {
+        res.status(400).send({
+            message: "Username already used!"
+        });
+    } else {
+        const user = await User.findByPk(req.user.email);
+        await user.update({username});
+        res.send({ok: true});
+    }
+}));
+
+router.post('/invitationCode', asyncHandler(async (req,res) => {
+    const referredBy = req.user.email;
+    const invitations = await Invitations.findAll(
+        {where: {referredBy}}
+    );
+    if (invitations.length == 0) {
+        const promises = [];
+        for (let i = 0; i < INVITATION_CODE_PER_USER; i++) {
+            promises.push(genInvitationCode(referredBy));
+        }
+        const codes = await Promise.all(promises);
+        res.send({codes: codes.map(c => ({code: c}))});
+    } else {
+        const codes = invitations.map(i => ({
+            code: i.code, used: !!i.usedBy
+        }));
+        res.send({codes: codes});
+    }
+}));
+
+router.post('/logout', asyncHandler(async (req,res) => {
+    const user = await User.findByPk(req.user.email);
+    await user.update({refreshToken: ""});
+    res.send({ok: true});
+}));
+
+module.exports = router

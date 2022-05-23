@@ -5,13 +5,30 @@
                 <a-typography-title :level="2">New Fact</a-typography-title>
             </a-row>
             <a-row>
-                <a-textarea :rows="2" v-model:value="fact.description" placeholder="Describe the fact" />
-                <a-alert v-if="alert.description" :message="alert.description" show-icon type="error" />
+                <a-textarea
+                    :rows="2"
+                    @change="() => alert.description = ''"
+                    v-model:value="fact.description"
+                    placeholder="Describe the fact"
+                />
+            </a-row>
+            <a-row v-if="!!alert.description" class="alertGap">
+                <a-alert :message="alert.description" type="error" />
             </a-row>
             <a-row class="itemGap">
                 <div v-if="setTime">
-                    <a-date-picker v-model:value="fact.startTime" placeholder="Start" style="margin-right: 20px;" />
-                    <a-date-picker v-model:value="fact.endTime" placeholder="End" style="margin-right: 20px;" />
+                    <a-date-picker
+                        v-model:value="fact.startTime"
+                        placeholder="Start Date"
+                        style="margin-right: 20px;"
+                        @openChange="() => alert.time = ''"
+                    />
+                    <a-date-picker
+                        v-model:value="fact.endTime"
+                        placeholder="End Date"
+                        style="margin-right: 20px;"
+                        @openChange="() => alert.time = ''"
+                    />
                     <a-tooltip title="delete">
                         <a-button @click="toggleTime">
                             <template #icon>
@@ -29,15 +46,26 @@
                     </a-button>
                 </div>
             </a-row>
+            <a-row v-if="!!alert.time"  class="alertGap">
+                <a-alert :message="alert.time" type="error" />
+            </a-row>
+
             <a-row class="titleGap">
                 <a-typography-title :level="3">References</a-typography-title>
             </a-row>
             <a-row v-for="(reference, index) in fact.references" v-bind:key="index">
-                <a-input-group compact>
-                    <a-input v-model:value="fact.references[index].link" placeholder="Link"
-                        style="width: 100%; margin-bottom: 3px;" />
-                    <a-input v-model:value="fact.references[index].description" placeholder="Description"
-                        style="width: calc(100% - 35px); margin-right: 2px;" />
+                <a-input-group compact style="margin-top: 20px; text-align: left">
+                    <a-input
+                        v-model:value="fact.references[index].link"
+                        placeholder="Link"
+                        style="width: 100%; margin-bottom: 3px;"
+                        @change="() => alert.references[index] = ''"
+                    />
+                    <a-input
+                        v-model:value="fact.references[index].description"
+                        placeholder="Description"
+                        style="width: calc(100% - 35px);margin-right: 2px;"
+                    />
                     <a-tooltip title="delete">
                         <a-button @click="() => deleteReference(index)">
                             <template #icon>
@@ -46,15 +74,19 @@
                         </a-button>
                     </a-tooltip>
                 </a-input-group>
+                <div v-if="!!alert.references[index]" class="alertGap">
+                    <a-alert :message="alert.references[index]" type="error" />
+                </div>
             </a-row>
-            <a-row>
+            <a-row :class="fact.references.length > 0 ? 'itemGap' : ''">
                 <a-button type="dashed" @click="() => addReference()" style="margin-right: 20px">
                     <template #icon>
                         <PlusOutlined />
                     </template>
-                    Add a reference
+                    Add reference
                 </a-button>
             </a-row>
+
             <a-row class="titleGap">
                 <a-typography-title :level="3">Evidences</a-typography-title>
             </a-row>
@@ -70,26 +102,44 @@
                         </a-button>
                     </a-tooltip>
                 </a-input-group>
-                <a-upload v-model:file-list="evidence.files" list-type="picture-card" @preview="handlePreview">
-                    <div v-if="evidence.files.length < 10">
-                        <upload-outlined />
-                        <div style="margin-top: 8px">Upload</div>
-                    </div>
-                </a-upload>
+                <div>
+                    <a-upload
+                        name="evidence"
+                        v-model:file-list="evidence.files" 
+                        list-type="picture-card"
+                        @preview="handlePreview"
+                        :customRequest="uploadCustomRequest"
+                        :maxCount="10"
+                        @change="() => alert.evidences[index] = ''"
+                    >
+                        <div v-if="evidence.files.length < 10">
+                            <upload-outlined />
+                            <div style="margin-top: 8px">Upload</div>
+                        </div>
+                    </a-upload>
+                </div>
+                <div v-if="!!alert.evidences[index]" class="alertGap">
+                    <a-alert :message="alert.evidences[index]" type="error" />
+                </div>
             </a-row>
-            <a-row>
+
+            <a-row :class="fact.evidences.length > 0 ? 'itemGap' : ''">
                 <a-button type="dashed" @click="() => addEvidence()" style="margin-right: 20px">
                     <template #icon>
                         <PlusOutlined />
                     </template>
-                    Add a evidence
+                    Add evidence
                 </a-button>
             </a-row>
             <a-row class="titleGap">
                 <a-typography-title :level="3">Tags</a-typography-title>
             </a-row>
             <a-row>
-                <a-select v-model:value="fact.tags" mode="tags" style="width: 100%" placeholder="Add tags"></a-select>
+                <a-select
+                    v-model:value="fact.tags"
+                    mode="tags" style="width: 100%; text-align: left;"
+                    placeholder="Add tags"
+                ></a-select>
             </a-row>
             <a-row class="titleGap" type="flex" style="justify-content: center;">
                 <a-button type="primary" size="large" block @click="onSaveFact">
@@ -103,14 +153,18 @@
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue';
 import { DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons-vue';
-import { UploadProps } from 'ant-design-vue';
 import router from '../router';
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
-import { FactBase, validateFact, saveFact } from '../services/fact';
+import { NewFactAlert, FactBase, validateFact, saveFact, uploadEvidence } from '../services/fact';
+import type { UploadProps } from 'ant-design-vue';
 
 export default defineComponent({
-    components: { DeleteOutlined, PlusOutlined, UploadOutlined },
+    components: {
+        DeleteOutlined,
+        PlusOutlined,
+        UploadOutlined
+    },
     setup() {
         const store = useStore();
         if (!authenticate(store)) return;
@@ -118,10 +172,10 @@ export default defineComponent({
             router.push('init');
         }
 
-        let alert = reactive<{
-            description?: string;
-        }>({});
-
+        const alert = reactive<NewFactAlert>({
+            references: [],
+            evidences: [],
+        });
         const fact = reactive<FactBase>({
             description: '',
             references: [],
@@ -131,42 +185,51 @@ export default defineComponent({
         const setTime = ref<boolean>(false);
         const addReference = () => {
             fact.references.push({ link: '' });
+            alert.references.push('');
         };
         const addEvidence = () => {
             fact.evidences.push({ files: [] });
+            alert.evidences.push('');
         };
 
         const deleteReference = (index) => {
+            alert.references.splice(index, 1);
             fact.references.splice(index, 1);
         };
         const deleteEvidence = (index) => {
+            alert.evidences.splice(index, 1);
             fact.evidences.splice(index, 1);
         };
 
         const handlePreview = async (file: UploadProps['fileList'][number]) => {
-            console.log(file);
             window.open(file.url);
         };
         const onSaveFact = () => {
-            alert = {};
-            const res = validateFact(fact);
+            const res = validateFact(fact, alert);
             if (res.ok) {
-                saveFact(fact);
-            } else if (res.alert) {
-                console.log(res.alert);
-                alert = res.alert;
+                saveFact(store, fact);
             }
         };
         const toggleTime = () => {
             if (setTime.value) {
                 fact.startTime = undefined;
                 fact.endTime = undefined;
+                alert.time = undefined;
             }
             setTime.value = !setTime.value;
+        };
+
+        const uploadCustomRequest = (options: any) => {
+            uploadEvidence(store, options.file).then(res => {
+                options.onSuccess(res, options.file);
+            }).catch(err => {
+                console.log(err);
+            })
         };
         return {
             fact,
             alert,
+            uploadCustomRequest,
             setTime,
             addReference,
             addEvidence,
@@ -196,10 +259,14 @@ export default defineComponent({
 }
 
 .titleGap {
-    margin-top: 50px;
+    margin-top: 40px;
 }
 
 .itemGap {
     margin-top: 20px;
+}
+
+.alertGap {
+    margin-top: 5px;
 }
 </style>

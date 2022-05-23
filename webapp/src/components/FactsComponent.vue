@@ -51,7 +51,7 @@ export default defineComponent({
         watch(sortedBy, () => {
             facts.value = [];
             loading.value = true;
-            fetchFacts({ owner, sortedBy: sortedBy.value }).then(res => {
+            fetchFacts(store, { owner, sortedBy: sortedBy.value }).then(res => {
                 facts.value = res
             }).catch(err => {
                 fetchErrMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
@@ -62,7 +62,7 @@ export default defineComponent({
         onBeforeMount(() => {
             facts.value = [];
             loading.value = true;
-            fetchFacts({ owner, sortedBy: sortedBy.value }).then(res => {
+            fetchFacts(store, { owner, sortedBy: sortedBy.value }).then(res => {
                 facts.value = res
             }).catch(err => {
                 fetchErrMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);

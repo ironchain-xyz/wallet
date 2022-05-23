@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const router = require("express").Router();
+
 const asyncHandler = require('express-async-handler')
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
@@ -68,99 +70,95 @@ function validateAccessToken(req, res, next) {
     };
 }
 
-module.exports = async app => {
-    var router = require("express").Router();
+router.post("/register", validateEmail, asyncHandler(async (req, res) => {
+    const email = req.body.email;
+    const user = await User.findByPk(email);
+    if (user) {
+        return res.status(400).send({message: 'user already registerd'});
+    }
 
-    router.post("/register", validateEmail, asyncHandler(async (req, res) => {
-        const email = req.body.email;
-        const user = await User.findByPk(email);
-        if (user) {
-            return res.status(400).send({message: 'user already registerd'});
-        }
+    const invitationCode = req.body.invitationCode;
+    const invitation = await Invitations.findByPk(invitationCode);
+    if (!invitation) {
+        return res.status(400).send({message: 'invalid invitation code'});
+    } else if (invitation.usedBy) {
+        return res.status(400).send({message: 'invitation code has been used'});
+    }
 
-        const invitationCode = req.body.invitationCode;
-        const invitation = await Invitations.findByPk(invitationCode);
-        if (!invitation) {
-            return res.status(400).send({message: 'invalid invitation code'});
-        } else if (invitation.usedBy) {
-            return res.status(400).send({message: 'invitation code has been used'});
-        }
+    await User.create({email});
+    await invitation.update({usedBy: email});
+    return res.send({ok: true});
+}));
 
-        await User.create({email});
-        await invitation.update({usedBy: email});
-        return res.send({ok: true});
-    }));
-
-    // generate and send one time passcode
-    router.post("/passcode", validateEmail, asyncHandler(async (req, res) => {
-        const email = req.body.email;
-        let user = await User.findByPk(email);
-        if (!user) {
-            if (USER_WHITELIST.includes(email)) {
-                await User.create({email});
-                user = await User.findByPk(email);
-            } else {
-                return res.status(400).send({message: 'user not registerd'});
-            }
-        }
-
-        const existingOTP = parseOTP(user);
-        if (existingOTP.sentAt) {
-            const sentAfter = time.epoch() - existingOTP.sentAt;
-            if (sentAfter < 60) {
-                return res.send({
-                    ok: true,
-                    sentAt: existingOTP.sentAt,
-                    existingOTP: true
-                });
-            }
-        }
-
-        const newOTP = await genOTP(email);
-        await user.update({emailOtp: JSON.stringify(newOTP)});
-        res.send({ok: true, sentAt: newOTP.sentAt});
-    }));
-
-    // verify passcode
-    router.post("/verify", validateEmail, asyncHandler(async (req, res) => {
-        const user = await User.findByPk(req.body.email);
-        if (!user) {
-            return res.status(400).send({message: "email not found"});
-        }
-
-        const otp = parseOTP(user);
-        if (otp.value != req.body.passcode) {
-            res.status(400).send({message: "Wrong passcode"});
-        } else if (otp.expiryTime < time.epoch()) {
-            res.status(400).send({message: "Expired passcode"});
+// generate and send one time passcode
+router.post("/passcode", validateEmail, asyncHandler(async (req, res) => {
+    const email = req.body.email;
+    let user = await User.findByPk(email);
+    if (!user) {
+        if (USER_WHITELIST.includes(email)) {
+            await User.create({email});
+            user = await User.findByPk(email);
         } else {
-            const refreshToken = genRefreshToken(user.email);
-            const userUpdate = user.status == "verified"
-                ? {refreshToken, emailOtp: ""}
-                : {refreshToken, emailOtp: "", status: "verified"};
-            await user.update(userUpdate);
-            const accessToken = genAccessToken(refreshToken);
-            res.json({
-                email: user.email,
-                username: user.username,
-                jwt: {
-                    refreshToken,
-                    accessToken
-                },
+            return res.status(400).send({message: 'user not registerd'});
+        }
+    }
+
+    const existingOTP = parseOTP(user);
+    if (existingOTP.sentAt) {
+        const sentAfter = time.epoch() - existingOTP.sentAt;
+        if (sentAfter < 60) {
+            return res.send({
+                ok: true,
+                sentAt: existingOTP.sentAt,
+                existingOTP: true
             });
         }
-    }));
+    }
 
-    router.post("/refresh", validateAccessToken, asyncHandler(async (req, res) => {
-        const user = await User.findByPk(
-            req.email,
-            {attributes: ["refreshToken"]}
-        );
-        if (!user || user.refreshToken != req.refreshToken) {
-            return res.status(400).send({message: "invalid refresh token"});
-        }
-        res.send({ok: true, accessToken: genAccessToken(req.refreshToken)});
-    }));
+    const newOTP = await genOTP(email);
+    await user.update({emailOtp: JSON.stringify(newOTP)});
+    res.send({ok: true, sentAt: newOTP.sentAt});
+}));
 
-    app.use('/api/auth/', router);
-};
+// verify passcode
+router.post("/verify", validateEmail, asyncHandler(async (req, res) => {
+    const user = await User.findByPk(req.body.email);
+    if (!user) {
+        return res.status(400).send({message: "email not found"});
+    }
+
+    const otp = parseOTP(user);
+    if (otp.value != req.body.passcode) {
+        res.status(400).send({message: "Wrong passcode"});
+    } else if (otp.expiryTime < time.epoch()) {
+        res.status(400).send({message: "Expired passcode"});
+    } else {
+        const refreshToken = genRefreshToken(user.email);
+        const userUpdate = user.status == "verified"
+            ? {refreshToken, emailOtp: ""}
+            : {refreshToken, emailOtp: "", status: "verified"};
+        await user.update(userUpdate);
+        const accessToken = genAccessToken(refreshToken);
+        res.json({
+            email: user.email,
+            username: user.username,
+            jwt: {
+                refreshToken,
+                accessToken
+            },
+        });
+    }
+}));
+
+router.post("/refresh", validateAccessToken, asyncHandler(async (req, res) => {
+    const user = await User.findByPk(
+        req.email,
+        {attributes: ["refreshToken"]}
+    );
+    if (!user || user.refreshToken != req.refreshToken) {
+        return res.status(400).send({message: "invalid refresh token"});
+    }
+    res.send({ok: true, accessToken: genAccessToken(req.refreshToken)});
+}));
+
+module.exports = router

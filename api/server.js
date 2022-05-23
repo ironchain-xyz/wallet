@@ -41,8 +41,43 @@ if (process.env.NODE_ENV == 'production') {
     });
 }
 
-require("./routes/auth.route")(app);
-require("./routes/main.route")(app);
+const jwt = require('jsonwebtoken');
+const asyncHandler = require('express-async-handler')
+const secret = process.env.TOKEN_SECRET;
+app.use(asyncHandler(async (req, res, next) => {
+    if (req.path.startsWith("/api/auth")) {
+        next();
+    }
+
+    const accessToken = req.headers["x-access-token"];
+    if (accessToken) {
+        try {
+            const {refreshToken} = await jwt.verify(accessToken, secret);
+            const {email} = jwt.verify(refreshToken, secret)
+            req.user = {email};
+            next();
+        } catch (err) {
+            res.status(401).send({
+                message: "Invalid access Token"
+            });
+        }
+    } else {
+        res.status(403).send({
+            message: "Access token is required"
+        });
+    }
+}));
+
+const auth = require('./routes/auth.route');
+app.use('/api/auth/', auth);
+
+const upload = require('./routes/upload.route');
+app.use('/api/upload/', upload);
+
+const main = require('./routes/main.route');
+app.use('/api/', main);
+
+app.use('/files', express.static(__dirname + '/files'));
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

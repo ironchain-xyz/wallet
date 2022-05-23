@@ -22,5 +22,8 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 db.users = require("./user.model.js")(sequelize, Sequelize);
 db.invitations = require("./invitation.model.js")(sequelize, Sequelize);
+db.rawFiles = require("./rawFile.model.js")(sequelize, Sequelize);
+db.files = require("./file.model.js")(sequelize, Sequelize);
+db.facts = require("./fact.model.js")(sequelize, Sequelize);
 
 module.exports = db;
