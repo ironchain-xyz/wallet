@@ -17,7 +17,12 @@ const File = db.files;
 const rename = (oldFile, newFile) => {
     return new Promise((resolve, reject) => {
         fs.rename(oldFile, newFile, (err) => {
-            if (err) { return reject(err); }
+            if (err) {
+                fs.unlink(oldFile, (err) => {
+                    console.log(`Failed to remove ${oldFile} with error ${err}`);
+                });
+                return reject(err);
+            }
             return resolve();
         });
     });
@@ -40,7 +45,7 @@ const saveFile = async (tmpFile, hash, size, info) => {
 
 router.post('/evidence', asyncHandler(async (req, res) => {
     var files = 0, finished = false, uploaded = [];
-    const bb = busboy({ headers: req.headers });
+    const bb = busboy({ headers: req.headers, limits: {files: 5}});
     bb.on('file', (name, file, info) => {
         var hash = crypto.createHash('sha256');
         var size = 0;
@@ -50,10 +55,10 @@ router.post('/evidence', asyncHandler(async (req, res) => {
         var outStream = fs.createWriteStream(tmpFile)
         outStream.on('err', function (err) {
             console.log(`file upload err ${err}`);
-            uploaded.push({
-                ok: false,
-                message: "server failed to receive file"
-            });
+            uploaded.push({message: "server failed to receive file"});
+            if (uploaded.length == files && finished) {
+                res.send({uploaded});
+            }
         });
 
         file.on('data', function (chunk) {
@@ -72,16 +77,13 @@ router.post('/evidence', asyncHandler(async (req, res) => {
                     mimeType: info.mimeType,
                 });
                 if (uploaded.length == files && finished) {
-                    res.send({ok: true, uploaded});
+                    res.send({uploaded});
                 }
             }).catch(err => {
                 console.log(`Failed to save file with error ${err}`);
-                uploaded.push({
-                    ok: false,
-                    message: "server failed to save file"
-                });
+                uploaded.push({message: "server failed to save file"});
                 if (uploaded.length == files && finished) {
-                    res.send({ok: true, uploaded});
+                    res.send({uploaded});
                 }
             });
         });

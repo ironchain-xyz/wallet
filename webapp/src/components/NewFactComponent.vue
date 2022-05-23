@@ -105,14 +105,16 @@
                 <div>
                     <a-upload
                         name="evidence"
+                        accept="image/png, image/jpeg, image/jpg, application/pdf"
                         v-model:file-list="evidence.files" 
                         list-type="picture-card"
                         @preview="handlePreview"
-                        :customRequest="uploadCustomRequest"
-                        :maxCount="10"
+                        :customRequest="uploadCustomRequest(evidence)"
+                        :maxCount="5"
+                        multiple
                         @change="() => alert.evidences[index] = ''"
                     >
-                        <div v-if="evidence.files.length < 10">
+                        <div v-if="evidence.files.length < 5"> 
                             <upload-outlined />
                             <div style="margin-top: 8px">Upload</div>
                         </div>
@@ -156,7 +158,7 @@ import { DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons-
 import router from '../router';
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
-import { NewFactAlert, FactBase, validateFact, saveFact, uploadEvidence } from '../services/fact';
+import { RawFile, NewFactAlert, FactBase, validateFact, saveFact, uploadEvidence } from '../services/fact';
 import type { UploadProps } from 'ant-design-vue';
 
 export default defineComponent({
@@ -219,12 +221,24 @@ export default defineComponent({
             setTime.value = !setTime.value;
         };
 
-        const uploadCustomRequest = (options: any) => {
-            uploadEvidence(store, options.file).then(res => {
-                options.onSuccess(res, options.file);
-            }).catch(err => {
-                console.log(err);
-            })
+        const uploadCustomRequest = (evidence) => (options: any) => {
+            for (const file of evidence.files as RawFile[]) {
+                if (options.file.uid == file.uid) {
+                    uploadEvidence(store, options.file).then(res => {
+                        const uploaded = res.uploaded[0];
+                        if (uploaded.id) {
+                            file.id = uploaded.id;
+                            options.onSuccess(uploaded, options.file);
+                        } else {
+                            options.onError(
+                                new Error(uploaded.message!), uploaded, options.file
+                            );
+                        }
+                    }).catch(err => {
+                        options.onError(err, {}, options.file);
+                    })
+                }
+            }
         };
         return {
             fact,

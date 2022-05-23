@@ -5,7 +5,9 @@ import { authHeader, parseErrorMsg } from './utils';
 import { API_URL } from '../lib/constants';
 
 export interface RawFile {
+    uid: string;
     status: "error" | "done" | "uploading" | "removed";
+    id?: number;
 }
 
 export interface Evidence {
@@ -44,6 +46,8 @@ function isRawFile(file: any): file is RawFile {
 }
 
 export function validateFact(fact: FactBase, alert: NewFactAlert): { alert?: NewFactAlert, ok: boolean } {
+    console.log(fact);
+
     let ok = true;
     if (!fact.description) {
         alert.description = "Description cannot be empty";
@@ -102,7 +106,10 @@ export async function fetchFacts(store: Store<State>, params: { owner: string, s
     return res.data;
 }
 
-export async function uploadEvidence(store: Store<State>, file: string | Blob):  Promise<{}>{
+export async function uploadEvidence(
+    store: Store<State>,
+    file: string | Blob
+):  Promise<{uploaded: [{id?: number, hash?: string, message?: string}]}>{
     const data = new FormData();
     data.append('evidences', file);
     const headers = authHeader(store);
@@ -113,6 +120,5 @@ export async function uploadEvidence(store: Store<State>, file: string | Blob): 
         }
     }
     const res = await axios.post(API_URL + "upload/evidence", data, config);
-    console.log(res.data);
     return res.data;
 }
