@@ -9,13 +9,17 @@
                     :rows="2"
                     @change="() => alert.description = ''"
                     v-model:value="fact.description"
-                    placeholder="Describe the fact"
+                    placeholder="Describe the fact, append tags with # at the end"
                 />
             </a-row>
             <a-row v-if="!!alert.description" class="alertGap">
                 <a-alert :message="alert.description" type="error" />
             </a-row>
-            <a-row class="itemGap">
+
+            <a-row class="titleGap">
+                <a-typography-title :level="3">When</a-typography-title>
+            </a-row>
+            <a-row>
                 <div v-if="setTime">
                     <a-date-picker
                         v-model:value="fact.startTime"
@@ -51,97 +55,65 @@
             </a-row>
 
             <a-row class="titleGap">
-                <a-typography-title :level="3">References</a-typography-title>
-            </a-row>
-            <a-row v-for="(reference, index) in fact.references" v-bind:key="index">
-                <a-input-group compact style="margin-top: 20px; text-align: left">
-                    <a-input
-                        v-model:value="fact.references[index].link"
-                        placeholder="Link"
-                        style="width: 100%; margin-bottom: 3px;"
-                        @change="() => alert.references[index] = ''"
-                    />
-                    <a-input
-                        v-model:value="fact.references[index].description"
-                        placeholder="Description"
-                        style="width: calc(100% - 35px);margin-right: 2px;"
-                    />
-                    <a-tooltip title="delete">
-                        <a-button @click="() => deleteReference(index)">
-                            <template #icon>
-                                <DeleteOutlined />
-                            </template>
-                        </a-button>
-                    </a-tooltip>
-                </a-input-group>
-                <div v-if="!!alert.references[index]" class="alertGap">
-                    <a-alert :message="alert.references[index]" type="error" />
-                </div>
-            </a-row>
-            <a-row :class="fact.references.length > 0 ? 'itemGap' : ''">
-                <a-button type="dashed" @click="() => addReference()" style="margin-right: 20px">
-                    <template #icon>
-                        <PlusOutlined />
-                    </template>
-                    Add reference
-                </a-button>
-            </a-row>
-
-            <a-row class="titleGap">
                 <a-typography-title :level="3">Evidences</a-typography-title>
             </a-row>
-            <a-row v-for="(evidence, index) in fact.evidences" v-bind:key="index">
-                <a-input-group compact style="margin-bottom: 5px">
-                    <a-input v-model:value="evidence.description" placeholder="Description"
-                        style="width: calc(100% - 35px); margin-right: 2px;" />
-                    <a-tooltip title="delete">
-                        <a-button @click="() => deleteEvidence(index)">
-                            <template #icon>
-                                <DeleteOutlined />
-                            </template>
-                        </a-button>
-                    </a-tooltip>
-                </a-input-group>
+            <a-row type="flex">
                 <div>
                     <a-upload
                         name="evidence"
                         accept="image/png, image/jpeg, image/jpg, application/pdf"
-                        v-model:file-list="evidence.files" 
+                        v-model:file-list="fact.evidences"
                         list-type="picture-card"
                         @preview="handlePreview"
-                        :customRequest="uploadCustomRequest(evidence)"
-                        :maxCount="5"
+                        :customRequest="uploadCustomRequest"
+                        :maxCount="10"
                         multiple
-                        @change="() => alert.evidences[index] = ''"
+                        @change="() => alert.evidences = ''"
                     >
-                        <div v-if="evidence.files.length < 5"> 
+                        <div v-if="fact.evidences.length < 5"> 
                             <upload-outlined />
-                            <div style="margin-top: 8px">Upload</div>
+                            <div style="margin-top: 8px">Upload Files</div>
                         </div>
                     </a-upload>
                 </div>
-                <div v-if="!!alert.evidences[index]" class="alertGap">
-                    <a-alert :message="alert.evidences[index]" type="error" />
+                <div v-if="!!alert.evidences" class="alertGap">
+                    <a-alert :message="alert.evidences" type="error" />
                 </div>
             </a-row>
 
-            <a-row :class="fact.evidences.length > 0 ? 'itemGap' : ''">
-                <a-button type="dashed" @click="() => addEvidence()" style="margin-right: 20px">
+            <a-row v-for="(reference, index) in fact.references" v-bind:key="index" style="margin-top: 10px;">
+                <div style="width: 100%">
+                    <a-input-search
+                        v-model:value="reference.value"
+                        @search="() => deleteReference(index)"
+                    >
+                        <template #addonBefore>
+                            <a-select v-model:value="reference.header" style="width: 120px">
+                                <a-select-option value="https://">https://</a-select-option>
+                                <a-select-option value="http://">http://</a-select-option>
+                                <a-select-option value="web3://">web3://</a-select-option>
+                                <a-select-option value="ipfs://">ipfs://</a-select-option>
+                                <a-select-option value="ipns://">ipns://</a-select-option>
+                            </a-select>
+                        </template>
+                        <template #enterButton>
+                            <DeleteOutlined />
+                        </template>
+                    </a-input-search>
+                </div>
+                
+                <div v-if="!!alert.references[index]" class="alertGap">
+                    <a-alert :message="alert.references[index]" type="error" />
+                </div>
+            </a-row>
+
+            <a-row :class="fact.references.length > 0 ? 'itemGap' : ''">
+                <a-button type="dashed" @click="() => addReference()">
                     <template #icon>
                         <PlusOutlined />
                     </template>
-                    Add evidence
+                    Add link
                 </a-button>
-            </a-row>
-            <a-row class="titleGap">
-                <a-typography-title :level="3">Tags</a-typography-title>
-            </a-row>
-            <a-row>
-                <a-select
-                    v-model:value="fact.tags"
-                    mode="tags" style="width: 100%; text-align: left;"
-                    placeholder="Add tags"
-                ></a-select>
             </a-row>
             <a-row class="titleGap" type="flex" style="justify-content: center;">
                 <a-button type="primary" size="large" block @click="onSaveFact">
@@ -158,7 +130,7 @@ import { DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons-
 import router from '../router';
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
-import { RawFile, NewFactAlert, FactBase, validateFact, saveFact, uploadEvidence } from '../services/fact';
+import { NewFactAlert, FactBase, validateFact, saveFact, uploadEvidence } from '../services/fact';
 import type { UploadProps } from 'ant-design-vue';
 
 export default defineComponent({
@@ -176,7 +148,6 @@ export default defineComponent({
 
         const alert = reactive<NewFactAlert>({
             references: [],
-            evidences: [],
         });
         const fact = reactive<FactBase>({
             description: '',
@@ -186,23 +157,13 @@ export default defineComponent({
         });
         const setTime = ref<boolean>(false);
         const addReference = () => {
-            fact.references.push({ link: '' });
+            fact.references.push({header: 'https://', url: ""});
             alert.references.push('');
         };
-        const addEvidence = () => {
-            fact.evidences.push({ files: [] });
-            alert.evidences.push('');
-        };
-
         const deleteReference = (index) => {
             alert.references.splice(index, 1);
             fact.references.splice(index, 1);
         };
-        const deleteEvidence = (index) => {
-            alert.evidences.splice(index, 1);
-            fact.evidences.splice(index, 1);
-        };
-
         const handlePreview = async (file: UploadProps['fileList'][number]) => {
             window.open(file.url);
         };
@@ -221,13 +182,14 @@ export default defineComponent({
             setTime.value = !setTime.value;
         };
 
-        const uploadCustomRequest = (evidence) => (options: any) => {
-            for (const file of evidence.files as RawFile[]) {
+        const uploadCustomRequest = (options: any) => {
+            for (const file of fact.evidences) {
                 if (options.file.uid == file.uid) {
+                    console.log(options.file);
                     uploadEvidence(store, options.file).then(res => {
                         const uploaded = res.uploaded[0];
-                        if (uploaded.id) {
-                            file.id = uploaded.id;
+                        if (uploaded.hash) {
+                            file.hash = uploaded.hash;
                             options.onSuccess(uploaded, options.file);
                         } else {
                             options.onError(
@@ -246,9 +208,7 @@ export default defineComponent({
             uploadCustomRequest,
             setTime,
             addReference,
-            addEvidence,
             deleteReference,
-            deleteEvidence,
             onSaveFact,
             handlePreview,
             toggleTime,
@@ -261,7 +221,7 @@ export default defineComponent({
 .formContainer {
     display: flex;
     justify-content: center;
-    align-items: center;
+    margin-top: 10%;
     height: 100%;
     width: 100%;
 }

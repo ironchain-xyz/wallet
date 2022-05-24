@@ -4,20 +4,15 @@ import { State } from "../store";
 import { authHeader, parseErrorMsg } from './utils';
 import { API_URL } from '../lib/constants';
 
-export interface RawFile {
+export interface File {
     uid: string;
     status: "error" | "done" | "uploading" | "removed";
-    id?: number;
-}
-
-export interface Evidence {
-    description?: string;
-    files: string[] | RawFile[];
+    hash?: string;
 }
 
 export interface Reference {
-    description?: string;
-    link: string;
+    header: "https://" | "http://" | "ipfs://" | "ipns://" | "web3://";
+    url: string;
 }
 
 export interface FactBase {
@@ -25,7 +20,7 @@ export interface FactBase {
     startTime?: string;
     endTime?: string;
     references: Reference[];
-    evidences: Evidence[];
+    evidences: File[];
     tags: string[];
 }
 
@@ -38,11 +33,7 @@ export interface NewFactAlert {
     description?: string;
     time?: string;
     references: string[];
-    evidences: string[];
-}
-
-function isRawFile(file: any): file is RawFile {
-    return 'status' in file;
+    evidences?: string;
 }
 
 export function validateFact(fact: FactBase, alert: NewFactAlert): { alert?: NewFactAlert, ok: boolean } {
@@ -61,30 +52,21 @@ export function validateFact(fact: FactBase, alert: NewFactAlert): { alert?: New
 
     for (const index in fact.references || []) {
         const reference = fact.references[index];
-        if (!reference.link) {
+        if (!reference.url || !reference.header) {
             alert.references[index] = "Reference link cannot be empty"
             ok = false;
         }
     }
 
     for (const index in fact.evidences || []) {
-        const evidence = fact.evidences[index];
-        if (evidence.files.length == 0) {
-            alert.evidences[index] = "Evidence must include at least one file"
+        const file = fact.evidences[index];
+        if (file.status == "error") {
+            alert.evidences = "Please remove invalid files"
             ok = false;
-        } else {
-            for (const file of evidence.files) {
-                if (isRawFile(file)) {
-                    if (file.status == "error") {
-                        alert.evidences[index] = "Please remove invalid files"
-                        ok = false;
-                    }
-                    if (file.status == "uploading") {
-                        alert.evidences[index] = "Please wait util all files uploaded"
-                        ok = false;
-                    }
-                }
-            }
+        }
+        if (file.status == "uploading") {
+            alert.evidences = "Please wait util all files uploaded"
+            ok = false;
         }
     }
     return { ok, alert };
