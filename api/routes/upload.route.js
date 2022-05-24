@@ -28,19 +28,16 @@ const rename = (oldFile, newFile) => {
     });
 };
 
-const saveFile = async (tmpFile, hash, size, info) => {
-    const fileObj = await RawFile.findByPk(hash);
-    if (!fileObj) {
-        await rename(tmpFile, path.join(EVIDENCE_PATH, hash));
-        await RawFile.create({hash: hash, size: size});
-    }
-    const file = await File.create({
-        raw: hash,
-        mimetype: info.mimeType,
-        encoding: info.encoding,
-        originalName: info.filename
+const saveFile = async (tmpFile, hash, size, mimetype) => {
+    const file = await File.findOne({
+        where: {hash, mimetype}
     });
-    return file;
+    if (file) {
+        return file;
+    }
+
+    await rename(tmpFile, path.join(EVIDENCE_PATH, hash));
+    return await File.create({hash, mimetype, size});
 };
 
 router.post('/evidence', asyncHandler(async (req, res) => {
@@ -70,10 +67,7 @@ router.post('/evidence', asyncHandler(async (req, res) => {
             const hexHash = hash.digest('hex');
             saveFile(tmpFile, hexHash, size, info).then((file) => {
                 uploaded.push({
-                    id: file.id,
                     hash: hexHash,
-                    size,
-                    filename: info.filename,
                     mimeType: info.mimeType,
                 });
                 if (uploaded.length == files && finished) {

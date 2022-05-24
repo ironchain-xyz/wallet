@@ -1,26 +1,15 @@
 module.exports = (sequelize, Sequelize) => {
     const File = sequelize.define("Files", {
-        id: {
-            type: Sequelize.INTEGER,
-            autoIncrement: true,
-            primaryKey: true
-        },
-        raw: {
+        hash: {
             type: Sequelize.STRING,
-            allowNull: false,
-            references: {
-                model: 'rawFiles',
-                key: 'hash',
-            },
+            primaryKey: true,
         },
         mimetype: {
             type: Sequelize.STRING,
+            primaryKey: true,
         },
-        originalName: {
-            type: Sequelize.STRING,
-        },
-        encoding: {
-            type: Sequelize.STRING,
+        size: {
+            type: Sequelize.INTEGER,
         },
     });
     return File;
