@@ -4,58 +4,57 @@ import { State } from "../store";
 import { authHeader, parseErrorMsg } from './utils';
 import { API_URL } from '../lib/constants';
 
-export interface File {
+export interface RawFile {
     uid: string;
     status: "error" | "done" | "uploading" | "removed";
     hash?: string;
 }
 
 export interface Reference {
-    header: "https://" | "http://" | "ipfs://" | "ipns://" | "web3://";
-    url: string;
-}
-
-export interface FactBase {
-    description: string;
-    startTime?: string;
-    endTime?: string;
-    references: Reference[];
-    evidences: File[];
-    tags: string[];
-}
-
-export interface Fact extends FactBase {
     hash: string;
-    owner: string;
+    description: string;
+    createdBy: string;
+    createdAt: number;
+}
+
+export interface FactPreview {
+    hash: string;
+    description: string;
+    createdBy: string;
+    createdAt: number;
+    selected?: boolean;
+    status?: "available" | "selected" | "added";
+}
+
+export interface NewFact {
+    description: string;
+    tags: string[];
+    references: FactPreview[];
+    evidences: RawFile[];
+}
+
+export interface Fact {
+    hash: string;
+    description: string;
+    tags: string[];
+    createdBy: string;
+    evidences: string[];
+    references: string[];
 }
 
 export interface NewFactAlert {
     description?: string;
     time?: string;
-    references: string[];
     evidences?: string;
 }
 
-export function validateFact(fact: FactBase, alert: NewFactAlert): { alert?: NewFactAlert, ok: boolean } {
+export function validateFact(fact: NewFact, alert: NewFactAlert): { alert?: NewFactAlert, ok: boolean } {
     console.log(fact);
 
     let ok = true;
     if (!fact.description) {
         alert.description = "Description cannot be empty";
         ok = false;
-    }
-
-    if (fact.startTime && fact.endTime && fact.endTime < fact.startTime) {
-        alert.time = "End time must after start time";
-        ok = false;
-    }
-
-    for (const index in fact.references || []) {
-        const reference = fact.references[index];
-        if (!reference.url || !reference.header) {
-            alert.references[index] = "Reference link cannot be empty"
-            ok = false;
-        }
     }
 
     for (const index in fact.evidences || []) {
@@ -72,14 +71,10 @@ export function validateFact(fact: FactBase, alert: NewFactAlert): { alert?: New
     return { ok, alert };
 }
 
-export async function saveFact(store: Store<State>, fact: FactBase): Promise<Fact> {
+export async function saveFact(store: Store<State>, fact: NewFact): Promise<{}> {
     const url = API_URL + "/fact/new";
     const res = await axios.post(url, fact, { headers: authHeader(store) });
-    return {
-        ...fact,
-        owner: '',
-        hash: '',
-    }
+    return {}
 }
 
 export async function fetchFacts(store: Store<State>, params: { owner: string, sortedBy: string }): Promise<Fact[]> {
@@ -103,4 +98,34 @@ export async function uploadEvidence(
     }
     const res = await axios.post(API_URL + "upload/evidence", data, config);
     return res.data;
+}
+
+
+function random() { // min and max included 
+    return Math.floor(Math.random() * 2)
+  }
+  
+  const content = [
+      "fact some",
+      "I believe the problem is somewhere else in your code as passing an object as a prop is as simple as you imagine I believe the problem is somewhere else in your code as passing an object as a prop is as simple as you imagine",
+  ];
+  
+  function genPreview(offset, max) : FactPreview[] {
+      const res : FactPreview[] = [];
+      for (let i = offset; i < max + offset; i++) {
+          res.push({
+              hash: i.toString(),
+              description: content[random()], 
+              createdAt: 1653434738,
+              createdBy: "shudong"
+          });
+      }
+      return res;
+}
+
+export async function getLibrary(offset: number, max: number) : Promise<FactPreview[]> {
+    if (offset < 50) {
+        return genPreview(offset, max);
+    }
+    return [];
 }

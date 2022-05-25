@@ -6,54 +6,16 @@
             </a-row>
             <a-row>
                 <a-textarea
-                    :rows="2"
+                    :rows="4"
                     @change="() => alert.description = ''"
                     v-model:value="fact.description"
                     placeholder="Describe the fact, append tags with # at the end"
+                    style="font-size: large"
                 />
             </a-row>
             <a-row v-if="!!alert.description" class="alertGap">
                 <a-alert :message="alert.description" type="error" />
             </a-row>
-
-            <a-row class="titleGap">
-                <a-typography-title :level="3">When</a-typography-title>
-            </a-row>
-            <a-row>
-                <div v-if="setTime">
-                    <a-date-picker
-                        v-model:value="fact.startTime"
-                        placeholder="Start Date"
-                        style="margin-right: 20px;"
-                        @openChange="() => alert.time = ''"
-                    />
-                    <a-date-picker
-                        v-model:value="fact.endTime"
-                        placeholder="End Date"
-                        style="margin-right: 20px;"
-                        @openChange="() => alert.time = ''"
-                    />
-                    <a-tooltip title="delete">
-                        <a-button @click="toggleTime">
-                            <template #icon>
-                                <DeleteOutlined />
-                            </template>
-                        </a-button>
-                    </a-tooltip>
-                </div>
-                <div v-if="!setTime">
-                    <a-button type="dashed" @click="toggleTime" style="margin-right: 20px">
-                        <template #icon>
-                            <PlusOutlined />
-                        </template>
-                        {{ setTime ? "Remove Time" : "Add Time" }}
-                    </a-button>
-                </div>
-            </a-row>
-            <a-row v-if="!!alert.time"  class="alertGap">
-                <a-alert :message="alert.time" type="error" />
-            </a-row>
-
             <a-row class="titleGap">
                 <a-typography-title :level="3">Evidences</a-typography-title>
             </a-row>
@@ -81,40 +43,49 @@
                 </div>
             </a-row>
 
-            <a-row v-for="(reference, index) in fact.references" v-bind:key="index" style="margin-top: 10px;">
-                <div style="width: 100%">
-                    <a-input-search
-                        v-model:value="reference.value"
-                        @search="() => deleteReference(index)"
-                    >
-                        <template #addonBefore>
-                            <a-select v-model:value="reference.header" style="width: 120px">
-                                <a-select-option value="https://">https://</a-select-option>
-                                <a-select-option value="http://">http://</a-select-option>
-                                <a-select-option value="web3://">web3://</a-select-option>
-                                <a-select-option value="ipfs://">ipfs://</a-select-option>
-                                <a-select-option value="ipns://">ipns://</a-select-option>
-                            </a-select>
-                        </template>
-                        <template #enterButton>
-                            <DeleteOutlined />
-                        </template>
-                    </a-input-search>
-                </div>
-                
-                <div v-if="!!alert.references[index]" class="alertGap">
-                    <a-alert :message="alert.references[index]" type="error" />
-                </div>
+            <a-row class="titleGap">
+                <a-typography-title :level="3">References</a-typography-title>
             </a-row>
-
-            <a-row :class="fact.references.length > 0 ? 'itemGap' : ''">
-                <a-button type="dashed" @click="() => addReference()">
-                    <template #icon>
-                        <PlusOutlined />
+            <a-row v-for="(reference, index) in fact.references" v-bind:key="index">
+                <a-card style="width: 100%; margin: 5px" :title="reference.hash">
+                    <a-card-meta :description="reference.description">
+                        <template #avatar>
+                            <a-avatar :src="reference.createdBy" />
+                        </template>
+                    </a-card-meta>
+                    <template #extra>
+                        <a-button @click="() => deleteReference(reference, index)">Delete</a-button>
                     </template>
-                    Add link
+                </a-card>
+            </a-row>
+            <a-row style="margin-top: 10px;">
+                <a-button type="primary" size="large" block @click="onShowLibrary">
+                    Select from your library
                 </a-button>
             </a-row>
+            <a-modal
+                :visible="showLibrary"
+                title="Select fact to reference"
+                @ok="onAddReference"
+                @cancel="onCancelReference"
+            >
+                <div @scroll="onScroll" style="height: calc(50vh); overflow: auto; background-color: #ececec;">
+                    <a-card
+                        :hoverable="!reference.selected"
+                        :class="reference.status || 'available'"
+                        v-for="(reference, index) in library"
+                        v-bind:key="index"
+                        @click="() => selectReference(reference)"
+                    >
+                        <a-card-meta :description="reference.shortDescription">
+                            <template #avatar>
+                                <a-avatar :src="reference.createdBy" />
+                            </template>
+                        </a-card-meta>
+                    </a-card>
+                </div>
+            </a-modal>                          
+
             <a-row class="titleGap" type="flex" style="justify-content: center;">
                 <a-button type="primary" size="large" block @click="onSaveFact">
                     Save
@@ -126,18 +97,23 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue';
-import { DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons-vue';
+import { UploadOutlined } from '@ant-design/icons-vue';
 import router from '../router';
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
-import { NewFactAlert, FactBase, validateFact, saveFact, uploadEvidence } from '../services/fact';
+import { FactPreview, NewFactAlert, NewFact, validateFact, saveFact, uploadEvidence, getLibrary } from '../services/fact';
 import type { UploadProps } from 'ant-design-vue';
+
+function shortDescription(description: string) : string {
+    if (description.length > 100) {
+        return description.substring(0, 100) + "...";
+    }
+    return description;
+}
 
 export default defineComponent({
     components: {
-        DeleteOutlined,
-        PlusOutlined,
-        UploadOutlined
+        UploadOutlined,
     },
     setup() {
         const store = useStore();
@@ -146,40 +122,76 @@ export default defineComponent({
             router.push('init');
         }
 
-        const alert = reactive<NewFactAlert>({
-            references: [],
-        });
-        const fact = reactive<FactBase>({
+        const alert = reactive<NewFactAlert>({});
+        const fact = reactive<NewFact>({
             description: '',
             references: [],
             evidences: [],
             tags: [],
         });
-        const setTime = ref<boolean>(false);
-        const addReference = () => {
-            fact.references.push({header: 'https://', url: ""});
-            alert.references.push('');
+
+        const library = reactive<FactPreview[]>([]);
+        const showLibrary = ref<boolean>(false);
+        const offset = ref<number>(0);
+        const selectReference = (reference) => {
+            if (reference.status == "selected") {
+                reference.status = "available";
+            } else {
+                reference.status = "selected";
+            }
+            
         };
-        const deleteReference = (index) => {
-            alert.references.splice(index, 1);
+        const onAddReference = () => {
+            showLibrary.value = false;
+            library.forEach(ref => {
+                if (ref.status == "selected") {
+                    fact.references.push(ref);
+                    ref.status = "added";
+                }
+            });
+        };
+        const deleteReference = (reference, index) => {
+            reference.status = "available";
             fact.references.splice(index, 1);
         };
+        const onCancelReference = () => {
+            showLibrary.value = false;
+        };
+
         const handlePreview = async (file: UploadProps['fileList'][number]) => {
             window.open(file.url);
         };
+
         const onSaveFact = () => {
             const res = validateFact(fact, alert);
             if (res.ok) {
                 saveFact(store, fact);
             }
         };
-        const toggleTime = () => {
-            if (setTime.value) {
-                fact.startTime = undefined;
-                fact.endTime = undefined;
-                alert.time = undefined;
+        const loadMoreFacts = () => {
+            getLibrary(offset.value, 20).then((facts) => {
+                offset.value += facts.length;
+                facts.forEach(fact => {
+                    const processed = {
+                        ...fact,
+                        shortDescription: shortDescription(fact.description)
+                    }
+                    library.push(processed);
+                });
+            }).catch(err => {
+                console.log(`Failed to search facts with error ${err}`);
+            });
+        };
+        const onShowLibrary = () => {
+            showLibrary.value = true;
+            if (library.length == 0) {
+                loadMoreFacts();
             }
-            setTime.value = !setTime.value;
+        };
+        const onScroll = ({ target: { scrollTop, clientHeight, scrollHeight }}) => {
+            if (scrollTop + clientHeight >= scrollHeight) {
+                loadMoreFacts()
+            }
         };
 
         const uploadCustomRequest = (options: any) => {
@@ -202,16 +214,21 @@ export default defineComponent({
                 }
             }
         };
+
         return {
             fact,
             alert,
+            library,
             uploadCustomRequest,
-            setTime,
-            addReference,
+            selectReference,
+            onAddReference,
+            onCancelReference,
             deleteReference,
             onSaveFact,
             handlePreview,
-            toggleTime,
+            onShowLibrary,
+            showLibrary,
+            onScroll,
         };
     }
 });
@@ -242,5 +259,18 @@ export default defineComponent({
 
 .alertGap {
     margin-top: 5px;
+}
+
+.selected {
+    border: 3px solid #fcba03;
+    margin: 5px;
+}
+
+.available {
+    margin: 5px;
+}
+
+.added {
+    display: none;
 }
 </style>
