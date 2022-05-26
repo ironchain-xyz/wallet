@@ -27,42 +27,42 @@ import router from '../router';
 import { sendOTP, verifyOTP, warnExistingOTP } from '../services/auth';
 
 export default defineComponent({
-  components: {
-    LockOutlined,
-  },
-  setup() {
-    const store = useStore();
-    if (!store.state.user?.email || !store.state.user?.otp) {
-      store.commit("clear");
-      router.push('/login');
-      return;
-    }
-
-    const alert = ref<string>("");
-    if (store.state.user!.otp!.existing) {
-      alert.value = warnExistingOTP(store.state.user!.otp!.sentAt!);
-    }
-
-    const otp = ref<string>('');
-    const onClick = () => {
-      verifyOTP(store, otp.value).then(msg => {
-        alert.value = msg;
-        if (!msg) {
-          router.push('/');
+    components: {
+        LockOutlined,
+    },
+    setup() {
+        const store = useStore();
+        if (!store.state.user?.email || !store.state.user?.otp) {
+            store.commit("clear");
+            router.push('/login');
+            return;
         }
-      });
-    };
 
-    const onResend = () => {
-      sendOTP(store, store.state.user!.email).then(msg => alert.value = msg);
-    };
+        const alert = ref<string>("");
+        if (store.state.user!.otp!.existing) {
+            alert.value = warnExistingOTP(store.state.user!.otp!.sentAt!);
+        }
 
-    return {
-      otp,
-      alert,
-      onClick,
-      onResend,
-    };
-  },
+        const otp = ref<string>('');
+        const onClick = () => {
+            verifyOTP(store, otp.value).then(msg => {
+                alert.value = msg;
+                if (!msg) {
+                    router.push('/');
+                }
+            });
+        };
+
+        const onResend = () => {
+            sendOTP(store, store.state.user!.email).then(msg => alert.value = msg);
+        };
+
+        return {
+            otp,
+            alert,
+            onClick,
+            onResend,
+        };
+    },
 });
 </script>

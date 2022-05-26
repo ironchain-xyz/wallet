@@ -20,14 +20,17 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useStore } from '../store';
-import { authenticate } from '../services/auth';
+import router from '../router';
 import { initProfile } from "../services/profile";
-import router from '@/router';
 
 export default defineComponent({
   setup() {
     const store = useStore();
-    if (!authenticate(store)) return;
+    if (!store.state.user?.email || !store.state.user?.jwt) {
+        store.commit("clear");
+        router.push('/login');
+        return false;
+    }
     if (store.state.profile?.username) {
       router.push('/');
       return;

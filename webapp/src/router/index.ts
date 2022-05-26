@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import Profile from '../views/ProfileView.vue'
 import NewFact from '../views/NewFactView.vue'
+import Fact from '../views/FactView.vue'
 
 const routes = [
   {
@@ -39,6 +40,11 @@ const routes = [
     name: "newFact",
     component: NewFact,
   },
+  {
+    path: '/fact/:hash',
+    name: "fact",
+    component: Fact,
+  }
 ]
 
 const router = createRouter({

@@ -4,10 +4,16 @@ import { State } from "../store";
 import { authHeader, parseErrorMsg } from './utils';
 import { API_URL } from '../lib/constants';
 
+export interface File {
+    hash: string;
+    mimetype: string;
+    size: number;
+}
+
 export interface RawFile {
+    status: "uploading" | "done" | "error" | "removed";
     uid: string;
-    status: "error" | "done" | "uploading" | "removed";
-    hash?: string;
+    response?: File;
 }
 
 export interface Reference {
@@ -22,35 +28,32 @@ export interface FactPreview {
     description: string;
     createdBy: string;
     createdAt: number;
-    selected?: boolean;
     status?: "available" | "selected" | "added";
 }
 
 export interface NewFact {
     description: string;
-    tags: string[];
-    references: FactPreview[];
     evidences: RawFile[];
+    references: FactPreview[];
 }
 
 export interface Fact {
     hash: string;
     description: string;
-    tags: string[];
     createdBy: string;
-    evidences: string[];
-    references: string[];
+    evidences: File[] | string[];
+    references: FactPreview[] | string[];
+    tags: string[];
 }
 
 export interface NewFactAlert {
     description?: string;
     time?: string;
     evidences?: string;
+    save?: string;
 }
 
 export function validateFact(fact: NewFact, alert: NewFactAlert): { alert?: NewFactAlert, ok: boolean } {
-    console.log(fact);
-
     let ok = true;
     if (!fact.description) {
         alert.description = "Description cannot be empty";
@@ -71,22 +74,53 @@ export function validateFact(fact: NewFact, alert: NewFactAlert): { alert?: NewF
     return { ok, alert };
 }
 
-export async function saveFact(store: Store<State>, fact: NewFact): Promise<{}> {
-    const url = API_URL + "/fact/new";
-    const res = await axios.post(url, fact, { headers: authHeader(store) });
-    return {}
-}
-
-export async function fetchFacts(store: Store<State>, params: { owner: string, sortedBy: string }): Promise<Fact[]> {
-    const url = API_URL + "facts";
-    const res = await axios.post(url, params, { headers: authHeader(store) });
+export async function saveFact(store: Store<State>, fact: NewFact): Promise<Fact | {error: string}> {
+    const url = API_URL + "fact/new";
+    const res = await axios.post(url, {
+        description: fact.description,
+        evidences: fact.evidences.map(e => e.response),
+        references: fact.references.map(f => ({hash: f.hash}))
+    }, { headers: authHeader(store) });
     return res.data;
 }
+
+export async function fetchOwnedFacts(store: Store<State>, params: {owner: string}) : Promise<Fact[]> {
+    const url = API_URL + "fact/owned";
+    const res = await axios.get(url, {
+        headers: authHeader(store),
+        params
+    });
+    return res.data.result;
+}
+
+export async function fetchFacts(store: Store<State>, hashes: string[]) : Promise<Fact[]> {
+    const url = API_URL + "fact";
+    const res = await axios.get(url, {
+        headers: authHeader(store),
+        params: {hashes: hashes.join(',')}
+    });
+    return res.data.result;
+}
+
+export async function fetchEvidences(
+    store: Store<State>,
+    hashes: string[]
+):  Promise<File[]>{
+    const res = await axios.get(
+        API_URL + "evidence",
+        {
+            params: {hashes: hashes.join(',')},
+            headers: authHeader(store)
+        }
+    );
+    return res.data.result;
+}
+
 
 export async function uploadEvidence(
     store: Store<State>,
     file: string | Blob
-):  Promise<{uploaded: [{id?: number, hash?: string, message?: string}]}>{
+):  Promise<File | {error: string}>{
     const data = new FormData();
     data.append('evidences', file);
     const headers = authHeader(store);
@@ -96,34 +130,37 @@ export async function uploadEvidence(
             ...headers
         }
     }
-    const res = await axios.post(API_URL + "upload/evidence", data, config);
-    return res.data;
+    const res = await axios.post(API_URL + "evidence/upload", data, config);
+    return res.data.uploaded[0];
 }
-
 
 function random() { // min and max included 
     return Math.floor(Math.random() * 2)
-  }
-  
-  const content = [
-      "fact some",
-      "I believe the problem is somewhere else in your code as passing an object as a prop is as simple as you imagine I believe the problem is somewhere else in your code as passing an object as a prop is as simple as you imagine",
-  ];
-  
-  function genPreview(offset, max) : FactPreview[] {
-      const res : FactPreview[] = [];
-      for (let i = offset; i < max + offset; i++) {
-          res.push({
-              hash: i.toString(),
-              description: content[random()], 
-              createdAt: 1653434738,
-              createdBy: "shudong"
-          });
-      }
-      return res;
 }
 
 export async function getLibrary(offset: number, max: number) : Promise<FactPreview[]> {
+    return [];
+}
+
+const content = [
+    "fact some",
+    "I believe the problem is somewhere else in your code as passing an object as a prop is as simple as you imagine I believe the problem is somewhere else in your code as passing an object as a prop is as simple as you imagine",
+];
+
+function genPreview(offset, max) : FactPreview[] {
+    const res : FactPreview[] = [];
+    for (let i = offset; i < max + offset; i++) {
+        res.push({
+            hash: i.toString(),
+            description: content[random()], 
+            createdAt: 1653434738,
+            createdBy: "shudong"
+        });
+    }
+    return res;
+}
+
+export async function getLibraryMock(offset: number, max: number) : Promise<FactPreview[]> {
     if (offset < 50) {
         return genPreview(offset, max);
     }

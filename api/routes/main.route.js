@@ -14,13 +14,21 @@ function isValidUserName(username) {
     return validator.matches(username, "^(?!\d)(?!.*-.*-)(?!.*-$)(?!-)[a-zA-Z0-9-]{3,20}$");
 }
 
-async function genInvitationCode(referredBy) {
+async function genInvitationCode(createdBy) {
     const code = await nanoid();
     const invitation = await Invitations.findByPk(code);
     if (invitation) {
-        return genInvitationCode(referredBy);
+        return genInvitationCode(createdBy);
     } else {
-        await Invitations.create({code, referredBy});
+        await Invitations.create({
+            code,
+            createdBy
+        }, {
+            include: {
+                model: User,
+                as: "beneficiary"
+            }
+        });
         return code;
     }
 }
@@ -56,14 +64,14 @@ router.post('/profile/init', asyncHandler(async (req, res) => {
 }));
 
 router.post('/invitationCode', asyncHandler(async (req,res) => {
-    const referredBy = req.user.email;
+    const createdBy = req.user.email;
     const invitations = await Invitations.findAll(
-        {where: {referredBy}}
+        {where: {createdBy}}
     );
     if (invitations.length == 0) {
         const promises = [];
         for (let i = 0; i < INVITATION_CODE_PER_USER; i++) {
-            promises.push(genInvitationCode(referredBy));
+            promises.push(genInvitationCode(createdBy));
         }
         const codes = await Promise.all(promises);
         res.send({codes: codes.map(c => ({code: c}))});

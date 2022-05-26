@@ -11,8 +11,8 @@ const TMP_PATH = path.join(__dirname, "../files/tmp");
 const EVIDENCE_PATH = path.join(__dirname, "../files/evidences");
 
 const db = require("../models");
-const RawFile = db.rawFiles;
 const File = db.files;
+const User = db.users;
 
 const rename = (oldFile, newFile) => {
     return new Promise((resolve, reject) => {
@@ -28,19 +28,43 @@ const rename = (oldFile, newFile) => {
     });
 };
 
-const saveFile = async (tmpFile, hash, size, mimetype) => {
-    const file = await File.findOne({
-        where: {hash, mimetype}
-    });
-    if (file) {
-        return file;
+const saveFile = async (tmpFile, hash, size, mimetype, createdBy) => {
+    let file = await File.findOne({where: {hash}});
+    if (!file) {
+        await rename(tmpFile, path.join(EVIDENCE_PATH, hash));
+        file = await File.create({
+            hash,
+            mimetype,
+            size,
+            createdBy
+        }, {
+            include: {
+                model: User,
+                as: "creator"
+            }
+        });
     }
-
-    await rename(tmpFile, path.join(EVIDENCE_PATH, hash));
-    return await File.create({hash, mimetype, size});
+    return file;
 };
 
-router.post('/evidence', asyncHandler(async (req, res) => {
+router.get('/', asyncHandler(async (req, res) => {
+    const files = await File.findAll({
+        where: {hash: req.query.hashes.split(",")},
+        include: [
+            { model: User, as: "creator", attributes: ['username'] },
+        ]
+    });
+    res.send({
+        result: files.map(file => ({
+            hash: file.hash,
+            mimetype: file.mimetype,
+            size: file.size,
+            creator: file.creator
+        })),
+    });
+}));
+
+router.post('/upload', asyncHandler(async (req, res) => {
     var files = 0, finished = false, uploaded = [];
     const bb = busboy({ headers: req.headers, limits: {files: 5}});
     bb.on('file', (name, file, info) => {
@@ -52,7 +76,7 @@ router.post('/evidence', asyncHandler(async (req, res) => {
         var outStream = fs.createWriteStream(tmpFile)
         outStream.on('err', function (err) {
             console.log(`file upload err ${err}`);
-            uploaded.push({message: "server failed to receive file"});
+            uploaded.push({error: "server failed to receive file"});
             if (uploaded.length == files && finished) {
                 res.send({uploaded});
             }
@@ -65,17 +89,18 @@ router.post('/evidence', asyncHandler(async (req, res) => {
 
         outStream.on('finish', () => {
             const hexHash = hash.digest('hex');
-            saveFile(tmpFile, hexHash, size, info).then((file) => {
+            saveFile(tmpFile, hexHash, size, info.mimeType, req.user.email).then((file) => {
                 uploaded.push({
                     hash: hexHash,
                     mimeType: info.mimeType,
+                    size: size
                 });
                 if (uploaded.length == files && finished) {
                     res.send({uploaded});
                 }
             }).catch(err => {
                 console.log(`Failed to save file with error ${err}`);
-                uploaded.push({message: "server failed to save file"});
+                uploaded.push({error: "server failed to save file"});
                 if (uploaded.length == files && finished) {
                     res.send({uploaded});
                 }

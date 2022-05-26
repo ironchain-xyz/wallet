@@ -36,7 +36,7 @@ const db = require("./models");
 if (process.env.NODE_ENV == 'production') {
     db.sequelize.sync();
 } else {
-    db.sequelize.sync({ force: true }).then(() => {
+    db.sequelize.sync({ force: false }).then(() => {
         console.log("Drop and re-sync db.");
     });
 }
@@ -45,8 +45,11 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler')
 const secret = process.env.TOKEN_SECRET;
 app.use(asyncHandler(async (req, res, next) => {
+    if (req.path.startsWith("/static")) {
+        return next();
+    }
     if (req.path.startsWith("/api/auth")) {
-        next();
+        return next();
     }
 
     const accessToken = req.headers["x-access-token"];
@@ -71,13 +74,16 @@ app.use(asyncHandler(async (req, res, next) => {
 const auth = require('./routes/auth.route');
 app.use('/api/auth/', auth);
 
-const upload = require('./routes/upload.route');
-app.use('/api/upload/', upload);
+const upload = require('./routes/evidence.route');
+app.use('/api/evidence/', upload);
+
+const fact = require('./routes/fact.route');
+app.use('/api/fact/', fact);
 
 const main = require('./routes/main.route');
 app.use('/api/', main);
 
-app.use('/files', express.static(__dirname + '/files'));
+app.use('/static/evidences', express.static(__dirname + '/files/evidences'));
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

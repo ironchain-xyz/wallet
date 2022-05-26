@@ -86,7 +86,14 @@ router.post("/register", validateEmail, asyncHandler(async (req, res) => {
     }
 
     await User.create({email});
-    await invitation.update({usedBy: email});
+    await invitation.update({
+        usedBy: email
+    }, {
+        include: {
+            model: User,
+            as: "usedBy"
+        }
+    });
     return res.send({ok: true});
 }));
 
@@ -121,7 +128,7 @@ router.post("/passcode", validateEmail, asyncHandler(async (req, res) => {
 }));
 
 // verify passcode
-router.post("/verify", validateEmail, asyncHandler(async (req, res) => {
+router.post("/verify", asyncHandler(async (req, res) => {
     const user = await User.findByPk(req.body.email);
     if (!user) {
         return res.status(400).send({message: "email not found"});

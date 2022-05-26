@@ -123,5 +123,9 @@ export function authenticate(store: Store<State>) {
         router.push('/login');
         return false;
     }
+    if (!store.state.profile?.username) {
+        router.push('init');
+        return false;
+    }
     return true;
 }

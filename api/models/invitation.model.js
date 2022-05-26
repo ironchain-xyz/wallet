@@ -3,23 +3,7 @@ module.exports = (sequelize, Sequelize) => {
         code: {
             type: Sequelize.STRING,
             primaryKey: true,
-        },
-        referredBy: {
-            type: Sequelize.STRING,
-            allowNull: true,
-            references: {
-                model: 'users',
-                key: 'email',
-            },
-        },
-        usedBy: {
-            type: Sequelize.STRING,
-            allowNull: true,
-            references: {
-                model: 'users',
-                key: 'email',
-            },
-        },
+        }
     });
     return Invitation;
 }

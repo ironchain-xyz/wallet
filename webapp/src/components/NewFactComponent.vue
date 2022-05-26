@@ -8,7 +8,7 @@
                 <a-textarea
                     :rows="4"
                     @change="() => alert.description = ''"
-                    v-model:value="fact.description"
+                    v-model:value="description"
                     placeholder="Describe the fact, append tags with # at the end"
                     style="font-size: large"
                 />
@@ -23,16 +23,15 @@
                 <div>
                     <a-upload
                         name="evidence"
-                        accept="image/png, image/jpeg, image/jpg, application/pdf"
-                        v-model:file-list="fact.evidences"
+                        v-model:file-list="evidences"
                         list-type="picture-card"
                         @preview="handlePreview"
                         :customRequest="uploadCustomRequest"
-                        :maxCount="10"
+                        :maxCount="5"
                         multiple
                         @change="() => alert.evidences = ''"
                     >
-                        <div v-if="fact.evidences.length < 5"> 
+                        <div v-if="evidences.length < 5"> 
                             <upload-outlined />
                             <div style="margin-top: 8px">Upload Files</div>
                         </div>
@@ -46,7 +45,7 @@
             <a-row class="titleGap">
                 <a-typography-title :level="3">References</a-typography-title>
             </a-row>
-            <a-row v-for="(reference, index) in fact.references" v-bind:key="index">
+            <a-row v-for="(reference, index) in references" v-bind:key="index">
                 <a-card style="width: 100%; margin: 5px" :title="reference.hash">
                     <a-card-meta :description="reference.description">
                         <template #avatar>
@@ -59,8 +58,8 @@
                 </a-card>
             </a-row>
             <a-row style="margin-top: 10px;">
-                <a-button type="primary" size="large" block @click="onShowLibrary">
-                    Select from your library
+                <a-button type="dashed" size="large" @click="onShowLibrary">
+                    Select from library
                 </a-button>
             </a-row>
             <a-modal
@@ -71,7 +70,7 @@
             >
                 <div @scroll="onScroll" style="height: calc(50vh); overflow: auto; background-color: #ececec;">
                     <a-card
-                        :hoverable="!reference.selected"
+                        :hoverable="reference.status !== 'selected'"
                         :class="reference.status || 'available'"
                         v-for="(reference, index) in library"
                         v-bind:key="index"
@@ -87,6 +86,9 @@
             </a-modal>                          
 
             <a-row class="titleGap" type="flex" style="justify-content: center;">
+                <div v-if="!!alert.save" class="alertGap">
+                    <a-alert :message="alert.save" type="error" />
+                </div>
                 <a-button type="primary" size="large" block @click="onSaveFact">
                     Save
                 </a-button>
@@ -101,7 +103,17 @@ import { UploadOutlined } from '@ant-design/icons-vue';
 import router from '../router';
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
-import { FactPreview, NewFactAlert, NewFact, validateFact, saveFact, uploadEvidence, getLibrary } from '../services/fact';
+import {
+    RawFile,
+    FactPreview,
+    NewFactAlert,
+    validateFact,
+    saveFact,
+    uploadEvidence,
+    fetchEvidences,
+    getLibraryMock
+} from '../services/fact';
+import { genHash, parseErrorMsg } from '../services/utils'
 import type { UploadProps } from 'ant-design-vue';
 
 function shortDescription(description: string) : string {
@@ -123,12 +135,9 @@ export default defineComponent({
         }
 
         const alert = reactive<NewFactAlert>({});
-        const fact = reactive<NewFact>({
-            description: '',
-            references: [],
-            evidences: [],
-            tags: [],
-        });
+        const description = ref<string>("");
+        const references = ref<FactPreview[]>([]);
+        const evidences = ref<RawFile[]>([]);
 
         const library = reactive<FactPreview[]>([]);
         const showLibrary = ref<boolean>(false);
@@ -139,20 +148,19 @@ export default defineComponent({
             } else {
                 reference.status = "selected";
             }
-            
         };
         const onAddReference = () => {
             showLibrary.value = false;
             library.forEach(ref => {
                 if (ref.status == "selected") {
-                    fact.references.push(ref);
+                    references.value.push(ref);
                     ref.status = "added";
                 }
             });
         };
         const deleteReference = (reference, index) => {
             reference.status = "available";
-            fact.references.splice(index, 1);
+            references.value.splice(index, 1);
         };
         const onCancelReference = () => {
             showLibrary.value = false;
@@ -162,14 +170,29 @@ export default defineComponent({
             window.open(file.url);
         };
 
-        const onSaveFact = () => {
+        const onSaveFact = async () => {
+            console.log(evidences.value);
+            const fact = {
+                description: description.value,
+                evidences: evidences.value,
+                references: references.value
+            };
             const res = validateFact(fact, alert);
             if (res.ok) {
-                saveFact(store, fact);
+                try {
+                    const res = await saveFact(store, fact);
+                    if ("error" in res) {
+                        alert.save = res.error;
+                    } else {
+                        router.push("/fact/" + res.hash);
+                    }
+                } catch (err) {
+                    alert.save = parseErrorMsg(err);
+                }
             }
         };
         const loadMoreFacts = () => {
-            getLibrary(offset.value, 20).then((facts) => {
+            getLibraryMock(offset.value, 20).then((facts) => {
                 offset.value += facts.length;
                 facts.forEach(fact => {
                     const processed = {
@@ -194,29 +217,35 @@ export default defineComponent({
             }
         };
 
-        const uploadCustomRequest = (options: any) => {
-            for (const file of fact.evidences) {
+        const uploadCustomRequest = async (options: any) => {
+            for (const file of evidences.value) {
                 if (options.file.uid == file.uid) {
-                    console.log(options.file);
-                    uploadEvidence(store, options.file).then(res => {
-                        const uploaded = res.uploaded[0];
-                        if (uploaded.hash) {
-                            file.hash = uploaded.hash;
-                            options.onSuccess(uploaded, options.file);
+                    try {
+                        const hash = await genHash(options.file);
+                        const results = await fetchEvidences(store, [hash]);
+                        if (results.length == 0) {
+                            const uploaded = await uploadEvidence(store, options.file);
+                            if ("error" in uploaded) {
+                                options.onError(
+                                    new Error(uploaded.error), uploaded, options.file
+                                );
+                            } else {
+                                options.onSuccess(uploaded, options.file);
+                            }
                         } else {
-                            options.onError(
-                                new Error(uploaded.message!), uploaded, options.file
-                            );
+                            options.onSuccess(results[0], options.file);
                         }
-                    }).catch(err => {
+                    } catch (err) {
                         options.onError(err, {}, options.file);
-                    })
+                    }
                 }
             }
         };
 
         return {
-            fact,
+            description,
+            evidences,
+            references,
             alert,
             library,
             uploadCustomRequest,

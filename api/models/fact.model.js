@@ -1,21 +1,35 @@
+const { DataTypes, Deferrable } = Sequelize = require("sequelize");
+
 module.exports = (sequelize, Sequelize) => {
-    const Fact = sequelize.define("facts", {
+    const File = sequelize.define("Files", {
         hash: {
-            type: Sequelize.STRING,
+            type: DataTypes.STRING,
             primaryKey: true,
         },
-        startTime: {
-            type: Sequelize.DATEONLY,
+        mimetype: {
+            type: DataTypes.STRING,
         },
-        endTime: {
-            type: Sequelize.DATEONLY,
-        },
-        references: {
-            type: Sequelize.STRING,
-        },
-        evidences: {
-            type: Sequelize.STRING,
+        size: {
+            type: DataTypes.INTEGER,
         },
     });
-    return Fact;
+
+    const Fact = sequelize.define("facts", {
+        hash: {
+            type: DataTypes.STRING,
+            primaryKey: true,
+        },
+        description: {
+            type: DataTypes.TEXT,
+        },
+        evidences: {
+            type: DataTypes.ARRAY(DataTypes.STRING),
+            defaultValue: [],
+        },
+        references: {
+            type: DataTypes.ARRAY(DataTypes.STRING),
+            defaultValue: [],
+        }
+    });
+    return {Fact, File};
 };

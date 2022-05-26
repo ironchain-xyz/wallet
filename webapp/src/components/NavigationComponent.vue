@@ -32,7 +32,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { UserOutlined, HomeOutlined } from '@ant-design/icons-vue';
-import router from '../router';
 import { useStore } from '../store';
 import { authenticate, logout } from '../services/auth';
 import { string } from 'vue-types';
@@ -45,9 +44,6 @@ export default defineComponent({
   setup() {
     const store = useStore();
     if (!authenticate(store)) return;
-    if (!store.state.profile?.username) {
-      router.push('init');
-    }
     return {
       onLogout: () => logout(store),
     };

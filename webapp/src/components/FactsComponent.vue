@@ -27,7 +27,7 @@ import { defineComponent, ref, watch, onBeforeMount } from 'vue';
 import type { SelectProps } from 'ant-design-vue';
 import { parseErrorMsg } from '@/services/utils';
 import { useStore } from '@/store';
-import { fetchFacts, Fact } from '@/services/fact';
+import { fetchOwnedFacts, Fact } from '@/services/fact';
 
 export default defineComponent({
     components: {},
@@ -51,7 +51,7 @@ export default defineComponent({
         watch(sortedBy, () => {
             facts.value = [];
             loading.value = true;
-            fetchFacts(store, { owner, sortedBy: sortedBy.value }).then(res => {
+            fetchOwnedFacts(store, { owner }).then(res => {
                 facts.value = res
             }).catch(err => {
                 fetchErrMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
@@ -62,7 +62,7 @@ export default defineComponent({
         onBeforeMount(() => {
             facts.value = [];
             loading.value = true;
-            fetchFacts(store, { owner, sortedBy: sortedBy.value }).then(res => {
+            fetchOwnedFacts(store, { owner }).then(res => {
                 facts.value = res
             }).catch(err => {
                 fetchErrMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
