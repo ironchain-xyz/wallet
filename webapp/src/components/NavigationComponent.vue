@@ -20,8 +20,8 @@
           </a-menu-item>
         </a-menu>
       </div>
-      <div class="nav-item">
-        <a-button type="primary" @click="onLogout" style="font-size: 20px" size="large">
+      <div class="nav-item" style="margin-top: 15px">
+        <a-button type="primary" @click="onLogout">
           Logout
         </a-button>
       </div>

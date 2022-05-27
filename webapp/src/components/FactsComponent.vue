@@ -1,81 +1,74 @@
 <template>
-    <div>
+    <a-row justify="center">
         <a-button type="primary" size="large" href="/fact/new">
             Create your fact
         </a-button>
-    </div>
-    <div v-if="facts.length == 0 && !fetchErrMsg" style="margin-top: 100px;">
-        <h1>IronchainDAO</h1>
-        <h2>
-            We persist reality.
-        </h2>
-    </div>
-    <div v-if="facts.length > 0 || !!fetchErrMsg" style="margin-top: 50px;">
-        <a-select v-model:value="sortedBy" :options="sortedByOptions"></a-select>
+    </a-row>
+    <a-row v-for="fact in facts" v-bind:key="fact.hash" style="margin-top: 20px;" justify="center">
+        <a :href="factUrl(fact)">
+            <FactPreview :fact="fact" />
+        </a>
+    </a-row>
+    <a-row>
         <a-spin v-if="loading" />
-        <div v-for="fact in facts" v-bind:key="fact.hash">
-            {{ fact.description }}
-        </div>
-        <div v-if="!!fetchErrMsg" style="margin-top: 100px;">
-            {{ fetchErrMsg }}
-        </div>
-    </div>
+    </a-row>
+    <a-row v-if="!!errMsg" style="margin-top: 100px;">
+        <span>{{ errMsg }}</span>
+    </a-row>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, onBeforeMount } from 'vue';
-import type { SelectProps } from 'ant-design-vue';
+import { defineComponent, reactive, ref, onBeforeMount } from 'vue';
 import { parseErrorMsg } from '@/services/utils';
 import { useStore } from '@/store';
-import { fetchOwnedFacts, Fact } from '@/services/fact';
+import { fetchCreatedFacts, Fact } from '@/services/fact';
+import FactPreview from './fact/FactPreviewComponent.vue';
 
 export default defineComponent({
-    components: {},
+    components: {FactPreview},
     setup() {
         const store = useStore();
-        const owner = store.state.profile!.username!;
-        const sortedByOptions = ref<SelectProps['options']>([
-            {
-                value: 'latest',
-                label: 'Show latest',
-            },
-            {
-                value: 'hottest',
-                label: 'Show hottest',
-            },
-        ]);
-        let sortedBy = ref<string>("latest");
+        const creator = store.state.user!.email;
         let loading = ref<boolean>(false);
         let facts = ref<Fact[]>([]);
-        let fetchErrMsg = ref<string>("");
-        watch(sortedBy, () => {
-            facts.value = [];
-            loading.value = true;
-            fetchOwnedFacts(store, owner).then(res => {
-                facts.value = res
-            }).catch(err => {
-                fetchErrMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
-            }).finally(() => {
-                loading.value = false;
-            });
-        });
+        let errMsg = ref<string>("");
+        const evidencesLookup = reactive<{}>({});
+        const referencesLookup = reactive<{}>({});
+
         onBeforeMount(() => {
             facts.value = [];
             loading.value = true;
-            fetchOwnedFacts(store, owner).then(res => {
-                facts.value = res
+            fetchCreatedFacts(store, creator).then(res => {
+                for (const e of res.evidences) {
+                    evidencesLookup[e.hash] = e;
+                }
+                for (const r of res.references) {
+                    referencesLookup[r.hash] = r;
+                }
+                res.facts.forEach(fact => {
+                    fact.evidences = fact.evidences.map(
+                        e => evidencesLookup[e]
+                    );
+                    fact.references = fact.references.map(
+                        r => referencesLookup[r]
+                    );
+                    facts.value.push(fact);
+                });
             }).catch(err => {
-                fetchErrMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
+                errMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
             }).finally(() => {
                 loading.value = false;
             });
         });
+
+        const factUrl = (fact) => {
+            return "/fact/" + fact.hash;
+        }
         return {
             loading,
-            fetchErrMsg,
+            errMsg,
             facts,
-            sortedBy,
-            sortedByOptions,
+            factUrl
         };
     }
 });
@@ -88,5 +81,11 @@ h1 {
 
 h2 {
     color: @text-color;
+}
+
+a {
+    width: calc(100% - 40px);
+    max-width: 800px;
+    margin-top: 20px;
 }
 </style>

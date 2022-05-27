@@ -9,14 +9,14 @@ export interface Reference {
     hash: string;
     description: string;
     createdBy: string;
-    createdAt: number;
+    createdAt: Date;
 }
 
 export interface FactPreview {
     hash: string;
     description: string;
     createdBy: string;
-    createdAt: number;
+    createdAt: Date;
     status?: "available" | "selected" | "added";
 }
 
@@ -73,13 +73,16 @@ export async function saveFact(store: Store<State>, fact: NewFact): Promise<Fact
     return res.data;
 }
 
-export async function fetchOwnedFacts(store: Store<State>, owner: string) : Promise<Fact[]> {
-    const url = API_URL + "fact/owned";
+export async function fetchCreatedFacts(
+    store: Store<State>,
+    creator: string
+) : Promise<{facts: Fact[], evidences: File[], references: Fact[]}> {
+    const url = API_URL + "fact/created";
     const res = await axios.get(url, {
         headers: authHeader(store),
-        params: {owner}
+        params: {createdBy: creator}
     });
-    return res.data.result;
+    return res.data;
 }
 
 export async function fetchFacts(store: Store<State>, hashes: string[]) : Promise<Fact[]> {
@@ -110,7 +113,7 @@ function genPreview(offset, max) : FactPreview[] {
         res.push({
             hash: i.toString(),
             description: content[random()], 
-            createdAt: 1653434738,
+            createdAt: new Date(),
             createdBy: "shudong"
         });
     }

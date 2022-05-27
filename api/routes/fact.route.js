@@ -61,12 +61,50 @@ router.get('/', asyncHandler(async (req, res) => {
     });
 }));
 
-router.get('/owned', asyncHandler(async (req, res) => {
+async function extractEvidences(facts) {
+    var hashes = new Set();
+    for (const fact of facts) {
+        for (const hash of fact.evidences) {
+            hashes.add(hash);
+        }
+    }
+    return await File.findAll({
+        where: {hash: Array.from(hashes)},
+        include: [{
+            model: User,
+            as: "creator",
+            attributes: ["username"]
+        }]
+    })
+}
+
+async function extractReferences(facts) {
+    var hashes = new Set();
+    for (const fact of facts) {
+        for (const hash of fact.references) {
+            hashes.add(hash);
+        }
+    }
+    return await Fact.findAll({
+        where: {hash: Array.from(hashes)},
+        include: [{
+            model: User,
+            as: "creator",
+            attributes: ["username"]
+        }]
+    })
+}
+
+router.get('/created', asyncHandler(async (req, res) => {
     const facts = await Fact.findAll({
-        where: {createdBy: req.query.owner}
+        where: {createdBy: req.query.createdBy}
     });
+    const evidences = await extractEvidences(facts);
+    const references = await extractReferences(facts);
     res.send({
-        result: facts.map(fact => ({
+        evidences,
+        references,
+        facts: facts.map(fact => ({
             hash: fact.hash,
             description: fact.description,
             createdAt: fact.createdAt,

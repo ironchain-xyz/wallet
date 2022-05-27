@@ -12,23 +12,9 @@
             </a-row>
             <a-row>
                 <div v-for="(evidence, index) in evidences" v-bind:key="index">
-                    <a-tooltip placement="bottom" :title="evidence.name">
-                        <a :href="fileUrl(evidence)" class="evidenceWrapper">
-                            <img v-if="isImage(evidence)" :src="fileUrl(evidence)" :alt="evidence.hash"/>
-                            <template v-if="!isImage(evidence)">
-                                <div>
-                                    <div>
-                                        <FileOutlined class="largeIcon" style="margin-top: 15px"/>
-                                    </div>
-                                    <div style="margin-top: 5px">{{prettyPrintName(evidence)}}</div>
-                                    <div style="margin-top: 5px">{{calFileSize(evidence)}}</div>
-                                </div>
-                            </template>
-                        </a>
-                    </a-tooltip>
+                    <Evidence :preview="false" :evidence="evidence" style="width: 200px; min-height: 200px;"></Evidence>
                 </div>
             </a-row>
-
             <a-row  v-if="references.length > 0" class="titleGap">
                 <a-typography-title :level="3">References</a-typography-title>
             </a-row>
@@ -51,14 +37,14 @@ import { useRoute } from 'vue-router'
 
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
-import { FileOutlined } from '@ant-design/icons-vue';
 import { Fact, fetchFacts } from '../services/fact';
 import { File, fetchEvidences} from '../services/evidence';
 import { shortDescription } from '../services/utils'
 import { BASE_URL } from '@/lib/constants';
+import Evidence from './evidence/EvidenceComponent.vue';
 
 export default defineComponent({
-    components: {FileOutlined},
+    components: { Evidence},
     setup() {
         const store = useStore();
         if (!authenticate(store)) return;
@@ -89,10 +75,16 @@ export default defineComponent({
             return BASE_URL + "static/evidences/" + file.contentHash;
         }
 
-        const isImage = (file: File) => {
-            return file.mimeType == "image/png" ||
+        const fileType = (file: File) => {
+            if (file.mimeType == "image/png" ||
                 file.mimeType == "image/jpeg" || 
-                file.mimeType == "image/jpg";
+                file.mimeType == "image/jpg") {
+                return "image";
+            } else if (file.mimeType == "video/mp4") {
+                return "video";
+            } else {
+                return "file";
+            }
         }
 
         const calFileSize = (file: File) => {
@@ -119,8 +111,8 @@ export default defineComponent({
             }
             let filename = file.name.substring(0, len - ext.length - 1);
             console.log(filename);
-            if (filename.length > 4) {
-                filename = filename.substring(0, 3);
+            if (filename.length > 10) {
+                filename = filename.substring(0, 7);
                 return filename + "..." + ext;
             } else {
                 return filename + "." + ext;
@@ -134,7 +126,7 @@ export default defineComponent({
             evidences,
             shortDescription,
             fileUrl,
-            isImage,
+            fileType,
             calFileSize,
             prettyPrintName
         }
@@ -159,24 +151,5 @@ export default defineComponent({
 
 .titleGap {
     margin-top: 40px;
-}
-
-.evidenceWrapper {
-    width: 100px;
-    height: 100px;
-    border: 1px solid #ececec;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 10px;
-}
-
-img {
-    width:100%;
-    max-height: 100%;
-}
-
-.largeIcon {
-    font-size: 32px;
 }
 </style>
