@@ -12,17 +12,20 @@
             </a-row>
             <a-row>
                 <div v-for="(evidence, index) in evidences" v-bind:key="index">
-                    <a :href="fileUrl(evidence)" class="evidenceWrapper">
-                        <img v-if="isImage(evidence)" :src="fileUrl(evidence)" :alt="evidence.hash"/>
-                        <template v-if="!isImage(evidence)">
-                            <div>
+                    <a-tooltip placement="bottom" :title="evidence.name">
+                        <a :href="fileUrl(evidence)" class="evidenceWrapper">
+                            <img v-if="isImage(evidence)" :src="fileUrl(evidence)" :alt="evidence.hash"/>
+                            <template v-if="!isImage(evidence)">
                                 <div>
-                                    <FileOutlined class="largeIcon" style="margin-top: 15px"/>
+                                    <div>
+                                        <FileOutlined class="largeIcon" style="margin-top: 15px"/>
+                                    </div>
+                                    <div style="margin-top: 5px">{{prettyPrintName(evidence)}}</div>
+                                    <div style="margin-top: 5px">{{calFileSize(evidence)}}</div>
                                 </div>
-                                <div style="margin-top: 5px">{{calFileSize(evidence)}}</div>
-                            </div>
-                        </template>
-                    </a>
+                            </template>
+                        </a>
+                    </a-tooltip>
                 </div>
             </a-row>
 
@@ -49,7 +52,8 @@ import { useRoute } from 'vue-router'
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
 import { FileOutlined } from '@ant-design/icons-vue';
-import {File, Fact, fetchFacts, fetchEvidences} from '../services/fact';
+import { Fact, fetchFacts } from '../services/fact';
+import { File, fetchEvidences} from '../services/evidence';
 import { shortDescription } from '../services/utils'
 import { BASE_URL } from '@/lib/constants';
 
@@ -82,13 +86,13 @@ export default defineComponent({
         });
 
         const fileUrl = (file: File) => {
-            return BASE_URL + "static/evidences/" + file.hash;
+            return BASE_URL + "static/evidences/" + file.contentHash;
         }
 
         const isImage = (file: File) => {
-            return file.mimetype == "image/png" ||
-                file.mimetype == "image/jpeg" || 
-                file.mimetype == "image/jpg";
+            return file.mimeType == "image/png" ||
+                file.mimeType == "image/jpeg" || 
+                file.mimeType == "image/jpg";
         }
 
         const calFileSize = (file: File) => {
@@ -107,6 +111,22 @@ export default defineComponent({
             return "> 1GB";
         }
 
+        const prettyPrintName = (file: File) => {
+            const len = file.name.length;
+            let ext = file.name.split('.').pop();
+            if (!ext || ext.length == len) {
+                ext = "";
+            }
+            let filename = file.name.substring(0, len - ext.length - 1);
+            console.log(filename);
+            if (filename.length > 4) {
+                filename = filename.substring(0, 3);
+                return filename + "..." + ext;
+            } else {
+                return filename + "." + ext;
+            }
+        }
+
         return {
             route,
             description,
@@ -115,7 +135,8 @@ export default defineComponent({
             shortDescription,
             fileUrl,
             isImage,
-            calFileSize
+            calFileSize,
+            prettyPrintName
         }
     }
 });

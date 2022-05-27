@@ -33,7 +33,7 @@
 import { defineComponent } from 'vue';
 import { UserOutlined, HomeOutlined } from '@ant-design/icons-vue';
 import { useStore } from '../store';
-import { authenticate, logout } from '../services/auth';
+import { logout } from '../services/auth';
 import { string } from 'vue-types';
 
 export default defineComponent({
@@ -43,7 +43,6 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    if (!authenticate(store)) return;
     return {
       onLogout: () => logout(store),
     };

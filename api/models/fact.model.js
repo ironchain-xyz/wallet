@@ -6,11 +6,18 @@ module.exports = (sequelize, Sequelize) => {
             type: DataTypes.STRING,
             primaryKey: true,
         },
-        mimetype: {
+        mimeType: {
+            type: DataTypes.STRING,
+        },
+        name: {
             type: DataTypes.STRING,
         },
         size: {
             type: DataTypes.INTEGER,
+        },
+        contentHash: {
+            type: DataTypes.STRING,
+            allowNull: false,
         },
     });
 

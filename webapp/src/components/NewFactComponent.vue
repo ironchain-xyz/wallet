@@ -104,17 +104,14 @@ import router from '../router';
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
 import {
-    RawFile,
     FactPreview,
     NewFactAlert,
     validateFact,
     saveFact,
-    uploadEvidence,
-    fetchEvidences,
     getLibraryMock
 } from '../services/fact';
+import { RawFile, newEvidence, uploadEvidence, checkRawEvidence} from '../services/evidence';
 import { genHash, parseErrorMsg } from '../services/utils'
-import type { UploadProps } from 'ant-design-vue';
 
 function shortDescription(description: string) : string {
     if (description.length > 100) {
@@ -166,12 +163,11 @@ export default defineComponent({
             showLibrary.value = false;
         };
 
-        const handlePreview = async (file: UploadProps['fileList'][number]) => {
+        const handlePreview = async (file: any) => {
             window.open(file.url);
         };
 
         const onSaveFact = async () => {
-            console.log(evidences.value);
             const fact = {
                 description: description.value,
                 evidences: evidences.value,
@@ -221,9 +217,9 @@ export default defineComponent({
             for (const file of evidences.value) {
                 if (options.file.uid == file.uid) {
                     try {
-                        const hash = await genHash(options.file);
-                        const results = await fetchEvidences(store, [hash]);
-                        if (results.length == 0) {
+                        const contentHash = await genHash(options.file);
+                        const exists = await checkRawEvidence(store, contentHash);
+                       if (!exists) {
                             const uploaded = await uploadEvidence(store, options.file);
                             if ("error" in uploaded) {
                                 options.onError(
@@ -233,7 +229,13 @@ export default defineComponent({
                                 options.onSuccess(uploaded, options.file);
                             }
                         } else {
-                            options.onSuccess(results[0], options.file);
+                            const file = await newEvidence(store, {
+                                filename: options.file.name,
+                                size: options.file.size,
+                                mimeType: options.file.type,
+                                contentHash,
+                            });
+                            options.onSuccess(file, options.file);
                         }
                     } catch (err) {
                         options.onError(err, {}, options.file);

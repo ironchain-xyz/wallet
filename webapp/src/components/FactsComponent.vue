@@ -33,7 +33,7 @@ export default defineComponent({
     components: {},
     setup() {
         const store = useStore();
-        const owner = store.state.user!.username!;
+        const owner = store.state.profile!.username!;
         const sortedByOptions = ref<SelectProps['options']>([
             {
                 value: 'latest',
@@ -51,7 +51,7 @@ export default defineComponent({
         watch(sortedBy, () => {
             facts.value = [];
             loading.value = true;
-            fetchOwnedFacts(store, { owner }).then(res => {
+            fetchOwnedFacts(store, owner).then(res => {
                 facts.value = res
             }).catch(err => {
                 fetchErrMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
@@ -62,7 +62,7 @@ export default defineComponent({
         onBeforeMount(() => {
             facts.value = [];
             loading.value = true;
-            fetchOwnedFacts(store, { owner }).then(res => {
+            fetchOwnedFacts(store, owner).then(res => {
                 facts.value = res
             }).catch(err => {
                 fetchErrMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);

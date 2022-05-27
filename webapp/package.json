@@ -14,6 +14,7 @@
     "axios": "^0.27.2",
     "core-js": "^3.8.3",
     "crypto-js": "^4.1.1",
+    "mime-types": "^2.1.35",
     "vue": "^3.2.13",
     "vue-class-component": "^8.0.0-0",
     "vue-loader": "^17.0.0",

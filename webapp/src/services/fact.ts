@@ -3,18 +3,7 @@ import axios, { AxiosResponse } from 'axios';
 import { State } from "../store";
 import { authHeader, parseErrorMsg } from './utils';
 import { API_URL } from '../lib/constants';
-
-export interface File {
-    hash: string;
-    mimetype: string;
-    size: number;
-}
-
-export interface RawFile {
-    status: "uploading" | "done" | "error" | "removed";
-    uid: string;
-    response?: File;
-}
+import { File, RawFile } from './evidence';
 
 export interface Reference {
     hash: string;
@@ -84,11 +73,11 @@ export async function saveFact(store: Store<State>, fact: NewFact): Promise<Fact
     return res.data;
 }
 
-export async function fetchOwnedFacts(store: Store<State>, params: {owner: string}) : Promise<Fact[]> {
+export async function fetchOwnedFacts(store: Store<State>, owner: string) : Promise<Fact[]> {
     const url = API_URL + "fact/owned";
     const res = await axios.get(url, {
         headers: authHeader(store),
-        params
+        params: {owner}
     });
     return res.data.result;
 }
@@ -100,38 +89,6 @@ export async function fetchFacts(store: Store<State>, hashes: string[]) : Promis
         params: {hashes: hashes.join(',')}
     });
     return res.data.result;
-}
-
-export async function fetchEvidences(
-    store: Store<State>,
-    hashes: string[]
-):  Promise<File[]>{
-    const res = await axios.get(
-        API_URL + "evidence",
-        {
-            params: {hashes: hashes.join(',')},
-            headers: authHeader(store)
-        }
-    );
-    return res.data.result;
-}
-
-
-export async function uploadEvidence(
-    store: Store<State>,
-    file: string | Blob
-):  Promise<File | {error: string}>{
-    const data = new FormData();
-    data.append('evidences', file);
-    const headers = authHeader(store);
-    const config= {
-        "headers": {
-            "content-type": 'multipart/form-data; boundary=----WebKitFormBoundaryqTqJIxvkWFYqvP5s',
-            ...headers
-        }
-    }
-    const res = await axios.post(API_URL + "evidence/upload", data, config);
-    return res.data.uploaded[0];
 }
 
 function random() { // min and max included 
