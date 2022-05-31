@@ -1,8 +1,24 @@
 <template>
     <a-card class="container">
+        <a-row style="margin-bottom: 20px">
+            <a-col :span="18" style="text-align: left">
+                Created by {{fact.createdBy || "Someone"}} {{printDate(fact.createdAt)}}
+            </a-col>
+            <a-col :span="6">
+                <a-button type="text" @click="toggleCollection">
+                    <template #icon>
+                        <HeartOutlined v-if="!isCollected"/>
+                        <HeartTwoTone twoToneColor="#eb2f96" v-if="isCollected"/>
+                    </template>
+                    {{fact.collectors.length}}
+                </a-button>
+            </a-col>
+        </a-row>
         <a-row>
             <a-col :span="18" style="text-align: left">
-                {{fact.description}}
+                <a :href="factUrl">
+                    <span>{{fact.description}}</span>
+                </a> 
             </a-col>
             <a-col :span="6" style="display: flex">
                 <Evidence
@@ -14,34 +30,31 @@
                 ></Evidence>
             </a-col>
         </a-row>
-        <a-row>
-
-        </a-row>
-        <a-row>
-            Created {{printDate(fact.createdAt)}}
-        </a-row>
-        <a-row v-if="!!fact.createdBy">
-            Created by {{fact.createdBy}}
-        </a-row>
     </a-card>
 </template>
 
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { Fact } from '../../services/fact';
+import { defineComponent, computed } from 'vue';
+import { useStore } from '../../store';
+
+import { Fact, addToCollection, removeFromCollection } from '../../services/fact';
 import Evidence from '../evidence/EvidenceComponent.vue'
+import { HeartOutlined, HeartTwoTone } from '@ant-design/icons-vue';
 
 export default defineComponent({
-    components: {Evidence},
+    components: {Evidence, HeartOutlined, HeartTwoTone},
     props: {
-        fact: Fact,
+        fact: Object as () => Fact
     },
-    setup() {
+    setup(props, { emit }) {
+        const store = useStore();
+
         const printDate = (date: Date) => {
-            const diff = Math.abs(Date.now() - new Date(date).valueOf());
+            date = new Date(date);
+            const diff = Math.abs(Date.now() - date.valueOf());
             if (diff > 1000 * 60 * 60 * 24) {
-                return date.toLocaleDateString("en-US");
+                return "on " + date.toLocaleDateString("en-US");
             } else if (diff > 1000 * 60 * 60) {
                 return Math.floor(diff / (1000 * 60 * 60)).toString() + " hours ago";
             } else if (diff > 1000 * 60) {
@@ -51,9 +64,39 @@ export default defineComponent({
             } else {
                 return "Just now";
             }
-        }
+        };
+
+        const factUrl = computed(() => {
+            return "/fact/" + props.fact.hash;
+        });
+
+        const isCollected = computed(() => {
+            const username = store.state.profile!.username!;
+            return props.fact.collectors.includes(username);
+        });
+
+        const toggleCollection = () => {
+            if (isCollected.value) {
+                removeFromCollection(store, props.fact.hash).then(() => {
+                    emit("toggleCollection", {
+                        action: "remove", 
+                        fact: props.fact.hash,
+                    });
+                });
+            } else {
+                addToCollection(store, props.fact.hash).then(() => {
+                    emit("toggleCollection", {
+                        action: "add",
+                        fact: props.fact.hash
+                    });
+                });
+            }
+        };
         return {
-            printDate
+            printDate,
+            factUrl,
+            toggleCollection,
+            isCollected,
         };
     }
 });
@@ -62,6 +105,7 @@ export default defineComponent({
 <style lang="less" scoped>
 .container {
     max-width: 800px;
+    width: 100%;
 }
 
 .evidence {

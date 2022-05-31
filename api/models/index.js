@@ -27,8 +27,20 @@ const {Fact, File} = require("./fact.model.js")(sequelize, Sequelize);
 db.facts = Fact;
 db.files = File;
 
-db.facts.belongsToMany(db.users, {as: "collectedBy", through: "user_facts_collection"});
-db.users.belongsToMany(db.facts, {as: "collections", through: "user_facts_collection"});
+// super many to many associations
+db.collections = sequelize.define("Collections", {
+    collected: {
+        type: Sequelize.DataTypes.BOOLEAN,
+        allowNull: false,
+    },
+});
+db.facts.belongsToMany(db.users, {through: db.collections});
+db.users.belongsToMany(db.facts, {through: db.collections});
+db.users.hasMany(db.collections);
+db.collections.belongsTo(db.users);
+db.facts.hasMany(db.collections);
+db.collections.belongsTo(db.facts);
+
 db.users.hasMany(db.facts, {
     as: "createdFacts",
     foreignKey: {

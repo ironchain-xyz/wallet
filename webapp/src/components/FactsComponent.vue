@@ -5,9 +5,7 @@
         </a-button>
     </a-row>
     <a-row v-for="fact in facts" v-bind:key="fact.hash" style="margin-top: 20px;" justify="center">
-        <a :href="factUrl(fact)">
-            <FactPreview :fact="fact" />
-        </a>
+        <FactPreview :fact="fact" @toggleCollection="toggleCollection"/>
     </a-row>
     <a-row>
         <a-spin v-if="loading" />
@@ -28,7 +26,6 @@ export default defineComponent({
     components: {FactPreview},
     setup() {
         const store = useStore();
-        const creator = store.state.user!.email;
         let loading = ref<boolean>(false);
         let facts = ref<Fact[]>([]);
         let errMsg = ref<string>("");
@@ -38,7 +35,7 @@ export default defineComponent({
         onBeforeMount(() => {
             facts.value = [];
             loading.value = true;
-            fetchCreatedFacts(store, creator).then(res => {
+            fetchCreatedFacts(store).then(res => {
                 for (const e of res.evidences) {
                     evidencesLookup[e.hash] = e;
                 }
@@ -52,6 +49,7 @@ export default defineComponent({
                     fact.references = fact.references.map(
                         r => referencesLookup[r]
                     );
+                    fact.collectors = fact.collectors || [];
                     facts.value.push(fact);
                 });
             }).catch(err => {
@@ -61,14 +59,25 @@ export default defineComponent({
             });
         });
 
-        const factUrl = (fact) => {
-            return "/fact/" + fact.hash;
-        }
+        const toggleCollection = (params: {action: "remove" | "add", fact: string}) => {
+            const username = store.state.profile!.username!;
+            for (let i = 0; i < facts.value.length; i++) {
+                if (facts.value[i].hash == params.fact) {
+                    if (params.action == "remove") {
+                        facts.value[i].collectors = facts.value[i].collectors.filter((user) => user != username);
+                    } else if (params.action == "add") {
+                        console.log(facts.value[i].collectors);
+                        facts.value[i].collectors.push(username);
+                        console.log(facts.value[i].collectors)
+                    }
+                }
+            }
+        };
         return {
             loading,
             errMsg,
             facts,
-            factUrl
+            toggleCollection,
         };
     }
 });

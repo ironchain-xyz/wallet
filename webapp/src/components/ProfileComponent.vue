@@ -16,7 +16,7 @@
                     <a-typography-title :level="4">Email</a-typography-title>
                     <a-typography-paragraph>{{ email }}</a-typography-paragraph>
                 </div>
-                <div class="field">
+                <div class="field" style="max-width: 200px; margin-left: auto; margin-right: auto;">
                     <a-typography-title :level="4">Username</a-typography-title>
                     <a-typography-paragraph v-model:content="username" :editable="{ onEnd: onUsernameChange }">
                     </a-typography-paragraph>

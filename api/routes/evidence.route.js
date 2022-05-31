@@ -104,10 +104,31 @@ const saveFileAndCreateNewEvidence = async (tmpFile, info) => {
     return createNewEvidence(info);
 };
 
-router.get('/raw', asyncHandler(async (req, res) => {
+router.get('/checkRaw', asyncHandler(async (req, res) => {
     const filePath = path.join(EVIDENCE_PATH, req.query.contentHash);
     const exists = await fileExists(filePath);
     res.send({ exists });
+}));
+
+router.get('/raw', asyncHandler(async (req, res) => {
+    var options = {
+        root: EVIDENCE_PATH,
+        dotfiles: 'deny',
+        headers: {
+          'x-timestamp': Date.now(),
+          'x-sent': true,
+        }
+    };
+    var fileName = req.query.contentHash;
+    res.setHeader(
+        "Content-Type", req.query.mimeType
+    ).sendFile(req.query.contentHash, options, function (err) {
+        if (err) {
+          next(err)
+        } else {
+          console.log('Sent:', fileName)
+        }
+    });
 }));
 
 router.get('/', asyncHandler(async (req, res) => {

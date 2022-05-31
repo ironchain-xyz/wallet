@@ -73,7 +73,6 @@ export default defineComponent({
                 ext = "";
             }
             let filename = file.name.substring(0, len - ext.length - 1);
-            console.log(filename);
             if (filename.length > 10) {
                 filename = filename.substring(0, 7);
                 return filename + "..." + ext;
@@ -112,7 +111,7 @@ video {
 }
 
 .largeIcon {
-    font-size: 32px;
+    font-size: 16px;
 }
 
 .adjustedIcon {

@@ -59,32 +59,9 @@
             </a-row>
             <a-row style="margin-top: 10px;">
                 <a-button type="dashed" size="large" @click="onShowLibrary">
-                    Select from library
+                    Select from collections
                 </a-button>
             </a-row>
-            <a-modal
-                :visible="showLibrary"
-                title="Select fact to reference"
-                @ok="onAddReference"
-                @cancel="onCancelReference"
-            >
-                <div @scroll="onScroll" style="height: calc(50vh); overflow: auto; background-color: #ececec;">
-                    <a-card
-                        :hoverable="reference.status !== 'selected'"
-                        :class="reference.status || 'available'"
-                        v-for="(reference, index) in library"
-                        v-bind:key="index"
-                        @click="() => selectReference(reference)"
-                    >
-                        <a-card-meta :description="reference.shortDescription">
-                            <template #avatar>
-                                <a-avatar :src="reference.createdBy" />
-                            </template>
-                        </a-card-meta>
-                    </a-card>
-                </div>
-            </a-modal>                          
-
             <a-row class="titleGap" type="flex" style="justify-content: center;">
                 <div v-if="!!alert.save" class="alertGap">
                     <a-alert :message="alert.save" type="error" />
@@ -94,6 +71,28 @@
                 </a-button>
             </a-row>
         </div>
+        <a-modal
+            :visible="showLibrary"
+            title="Select fact to reference"
+            @ok="onAddReference"
+            @cancel="onCancelReference"
+        >
+            <div @scroll="onScroll" style="height: calc(50vh); overflow: auto; background-color: #ececec;">
+                <a-card
+                    :hoverable="reference.status !== 'selected'"
+                    :class="reference.status || 'available'"
+                    v-for="(reference, index) in library"
+                    v-bind:key="index"
+                    @click="() => selectReference(reference)"
+                >
+                    <a-card-meta :description="reference.shortDescription">
+                        <template #avatar>
+                            <a-avatar :src="reference.createdBy" />
+                        </template>
+                    </a-card-meta>
+                </a-card>
+            </div>
+        </a-modal>                          
     </div>
 </template>
 
@@ -107,18 +106,10 @@ import {
     FactPreview,
     NewFactAlert,
     validateFact,
-    saveFact,
-    getLibraryMock
+    newFact
 } from '../services/fact';
 import { RawFile, newEvidence, uploadEvidence, checkRawEvidence} from '../services/evidence';
 import { genHash, parseErrorMsg } from '../services/utils'
-
-function shortDescription(description: string) : string {
-    if (description.length > 100) {
-        return description.substring(0, 100) + "...";
-    }
-    return description;
-}
 
 export default defineComponent({
     components: {
@@ -138,7 +129,6 @@ export default defineComponent({
 
         const library = reactive<FactPreview[]>([]);
         const showLibrary = ref<boolean>(false);
-        const offset = ref<number>(0);
         const selectReference = (reference) => {
             if (reference.status == "selected") {
                 reference.status = "available";
@@ -176,7 +166,7 @@ export default defineComponent({
             const res = validateFact(fact, alert);
             if (res.ok) {
                 try {
-                    const res = await saveFact(store, fact);
+                    const res = await newFact(store, fact);
                     if ("error" in res) {
                         alert.save = res.error;
                     } else {
@@ -188,18 +178,7 @@ export default defineComponent({
             }
         };
         const loadMoreFacts = () => {
-            getLibraryMock(offset.value, 20).then((facts) => {
-                offset.value += facts.length;
-                facts.forEach(fact => {
-                    const processed = {
-                        ...fact,
-                        shortDescription: shortDescription(fact.description)
-                    }
-                    library.push(processed);
-                });
-            }).catch(err => {
-                console.log(`Failed to search facts with error ${err}`);
-            });
+            console.log("load more");
         };
         const onShowLibrary = () => {
             showLibrary.value = true;

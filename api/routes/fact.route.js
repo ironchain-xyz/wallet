@@ -6,6 +6,7 @@ const asyncHandler = require('express-async-handler')
 const { ethers } = require("ethers");
 
 const db = require("../models");
+const Collection = db.collections;
 const User = db.users;
 const Fact = db.facts;
 const File = db.files;
@@ -50,7 +51,7 @@ router.get('/', asyncHandler(async (req, res) => {
         ]
     });
     res.send({
-        result: facts.map(fact => ({
+        results: facts.map(fact => ({
             hash: fact.hash,
             description: fact.description,
             createdAt: fact.createdAt,
@@ -97,7 +98,16 @@ async function extractReferences(facts) {
 
 router.get('/created', asyncHandler(async (req, res) => {
     const facts = await Fact.findAll({
-        where: {createdBy: req.query.createdBy}
+        where: {createdBy: req.user.email},
+        include: {
+            model: Collection,
+            required: false,
+            where: {collected: true},
+            include: {
+                model: User,
+                attributes: ["username"]
+            }
+        }
     });
     const evidences = await extractEvidences(facts);
     const references = await extractReferences(facts);
@@ -109,9 +119,57 @@ router.get('/created', asyncHandler(async (req, res) => {
             description: fact.description,
             createdAt: fact.createdAt,
             evidences: fact.evidences,
-            references: fact.references
+            references: fact.references,
+            collectors: fact.Collections.map(c => c.user.username)
         })),
     });
+}));
+
+router.get('/collections', asyncHandler(async (req, res) => {
+    const collections = Collection.findAll({
+        where: {userEmail: req.user.email, factHash: true},
+        include: Fact
+    })
+    res.send({facts: []});
+}));
+
+router.post('/addToCollection', asyncHandler(async (req, res) => {
+    const collect = await Collection.findOne({
+        where: {
+            userEmail: req.user.email,
+            factHash: req.body.hash,
+        },
+        attributes: ["userEmail", "factHash", "collected"]
+    });
+    if (!collect) {
+        await Collection.create({
+            userEmail: req.user.email,
+            factHash: req.body.hash,
+            collected: true
+        });
+        res.send({ok: true});
+    } else if (collect.collected) {
+        res.send({ok: true, message: "Already collected"});
+    } else {
+        await collect.update({collected: true});
+        res.send({ok: true});
+    }
+}));
+
+router.post('/removeFromCollection', asyncHandler(async (req, res) => {
+    console.log("remove collection");
+    const collect = await Collection.findOne({
+        where: {
+            userEmail: req.user.email,
+            factHash: req.body.hash,
+        },
+        attributes: ["userEmail", "factHash", "collected"]
+    });
+    if (!collect || !collect.collected) {
+        return res.send({error: "Not collected"});
+    }
+    await collect.update({collected: false});
+    res.send({ok: true});
 }));
 
 module.exports = router

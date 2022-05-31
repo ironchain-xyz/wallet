@@ -24,7 +24,7 @@ export async function checkRawEvidence(
     contentHash: string
 ):  Promise<boolean>{
     const res = await axios.get(
-        API_URL + "evidence/raw",
+        API_URL + "evidence/checkRaw",
         {
             params: {contentHash},
             headers: authHeader(store)
