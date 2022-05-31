@@ -1,5 +1,5 @@
 <template>
-    <a-row v-for="fact in facts" v-bind:key="fact.hash" justify="center" class="preview">
+    <a-row v-for="fact in facts" v-bind:key="fact.hash" type="flex" justify="center" class="preview">
         <FactPreview :fact="fact" @toggleCollection="toggleCollection"/>
     </a-row>
     <a-row>

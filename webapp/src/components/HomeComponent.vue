@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="content">
     <Navigation />
     <div v-if="authenticated">
       <a-row justify="center" style="margin-bottom: 50px;">
@@ -7,15 +7,18 @@
             Create your fact
         </a-button>
       </a-row>
-      <a-row type="flex" justify="center">
-        <a-tabs v-model:activeKey="activeKey" class="tab">
-          <a-tab-pane key="1" tab="Created">
-            <Facts mode="created"></Facts>
-          </a-tab-pane>
-          <a-tab-pane key="2" tab="Collected">
-            <Facts mode="collected"></Facts>
-          </a-tab-pane>
-        </a-tabs>
+      <a-row justify="center">
+        <a-select
+          v-model:value="mode"
+          :options="options"
+        >
+        </a-select>
+      </a-row>
+      <a-row v-if="mode == 'created'" justify="center">
+        <Facts mode="created"></Facts>
+      </a-row>
+      <a-row v-if="mode == 'collected'" justify="center">
+        <Facts mode="collected"></Facts>
       </a-row>
     </div>
   </div>
@@ -33,7 +36,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const authenticated = ref<boolean>(false);
-    const activeKey = ref<string>("1");
+    const mode = ref<string>("created");
 
     if (!authenticate(store)) {
       return;
@@ -41,9 +44,21 @@ export default defineComponent({
       authenticated.value = true;
     }
 
+    const options = ref<any>([
+      {
+        value: 'created',
+        label: 'Created Facts',
+      },
+      {
+        value: 'collected',
+        label: 'Collected Facts',
+      },
+    ]);
+
     return {
       authenticated,
-      activeKey,
+      mode,
+      options
     };
   },
 })
@@ -51,7 +66,7 @@ export default defineComponent({
 
 
 <style lang="less" scoped>
-.tab {
-    width: 100%;
+.content {
+    min-width: 50%;
 }
 </style>
