@@ -14,21 +14,19 @@
                 </a-button>
             </a-col>
         </a-row>
+        <a-row style="margin-bottom: 20px">
+            <a :href="factUrl">
+                <span>{{fact.description}}</span>
+            </a> 
+        </a-row>
         <a-row>
-            <a-col :span="18" style="text-align: left">
-                <a :href="factUrl">
-                    <span>{{fact.description}}</span>
-                </a> 
-            </a-col>
-            <a-col :span="6" style="display: flex">
-                <Evidence
-                    class="evidence" 
-                    v-for="evidence in fact.evidences"
-                    v-bind:key="evidence.hash"
-                    :preview="true"
-                    :evidence="evidence"
-                ></Evidence>
-            </a-col>
+            <Evidence
+                class="evidence" 
+                v-for="evidence in fact.evidences"
+                v-bind:key="evidence.hash"
+                :preview="true"
+                :evidence="evidence"
+            ></Evidence>
         </a-row>
     </a-card>
 </template>

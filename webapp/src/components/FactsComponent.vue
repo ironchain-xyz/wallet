@@ -1,5 +1,5 @@
 <template>
-    <a-row v-for="fact in facts" v-bind:key="fact.hash" style="margin-top: 20px;" justify="center">
+    <a-row v-for="fact in facts" v-bind:key="fact.hash" justify="center" class="preview">
         <FactPreview :fact="fact" @toggleCollection="toggleCollection"/>
     </a-row>
     <a-row>
@@ -105,9 +105,8 @@ h2 {
     color: @text-color;
 }
 
-a {
-    width: calc(100% - 40px);
-    max-width: 800px;
+.preview {
+    width: 100%;
     margin-top: 20px;
 }
 </style>

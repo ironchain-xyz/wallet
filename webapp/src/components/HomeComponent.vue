@@ -1,21 +1,22 @@
 <template>
-  <div class="home">
+  <div>
     <Navigation />
-    <div class="content" v-if="authenticated">
-      <a-row justify="center">
+    <div v-if="authenticated">
+      <a-row justify="center" style="margin-bottom: 50px;">
         <a-button type="primary" size="large" href="/fact/new">
             Create your fact
         </a-button>
       </a-row>
-      <a-tabs v-model:activeKey="activeKey">
-        <a-tab-pane key="1" tab="created">
-          <Facts mode="created"></Facts>
-        </a-tab-pane>
-        <a-tab-pane key="2" tab="collected">
-          <Facts mode="collected"></Facts>
-        </a-tab-pane>
-      </a-tabs>
-      
+      <a-row type="flex" justify="center">
+        <a-tabs v-model:activeKey="activeKey" class="tab">
+          <a-tab-pane key="1" tab="Created">
+            <Facts mode="created"></Facts>
+          </a-tab-pane>
+          <a-tab-pane key="2" tab="Collected">
+            <Facts mode="collected"></Facts>
+          </a-tab-pane>
+        </a-tabs>
+      </a-row>
     </div>
   </div>
 </template>
@@ -47,3 +48,10 @@ export default defineComponent({
   },
 })
 </script>
+
+
+<style lang="less" scoped>
+.tab {
+    width: 100%;
+}
+</style>
