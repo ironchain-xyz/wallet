@@ -1,8 +1,21 @@
 <template>
   <div class="home">
     <Navigation />
-    <div class="content">
-      <Facts v-if="authenticated"></Facts>
+    <div class="content" v-if="authenticated">
+      <a-row justify="center">
+        <a-button type="primary" size="large" href="/fact/new">
+            Create your fact
+        </a-button>
+      </a-row>
+      <a-tabs v-model:activeKey="activeKey">
+        <a-tab-pane key="1" tab="created">
+          <Facts mode="created"></Facts>
+        </a-tab-pane>
+        <a-tab-pane key="2" tab="collected">
+          <Facts mode="collected"></Facts>
+        </a-tab-pane>
+      </a-tabs>
+      
     </div>
   </div>
 </template>
@@ -19,6 +32,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const authenticated = ref<boolean>(false);
+    const activeKey = ref<string>("1");
 
     if (!authenticate(store)) {
       return;
@@ -26,7 +40,10 @@ export default defineComponent({
       authenticated.value = true;
     }
 
-    return {authenticated};
+    return {
+      authenticated,
+      activeKey,
+    };
   },
 })
 </script>

@@ -126,11 +126,40 @@ router.get('/created', asyncHandler(async (req, res) => {
 }));
 
 router.get('/collections', asyncHandler(async (req, res) => {
-    const collections = Collection.findAll({
-        where: {userEmail: req.user.email, factHash: true},
-        include: Fact
-    })
-    res.send({facts: []});
+    const collections = await Collection.findAll({
+        where: {userEmail: req.user.email, collected: true},
+        include: {
+            model: Fact,
+            include: {
+                model: Collection,
+                required: false,
+                where: {collected: true},
+                include: {
+                    model: User,
+                    attributes: ["username"]
+                }
+            }
+        }
+    });
+    if (collections) {
+        const facts = collections.map(c => c.fact);
+        const evidences = await extractEvidences(facts);
+        const references = await extractReferences(facts);
+        res.send({
+            evidences,
+            references,
+            facts: facts.map(fact => ({
+                hash: fact.hash,
+                description: fact.description,
+                createdAt: fact.createdAt,
+                evidences: fact.evidences,
+                references: fact.references,
+                collectors: fact.Collections.map(c => c.user.username)
+            })),
+        });
+    } else {
+        res.send({evidences: [], references: [], facts: []});
+    }
 }));
 
 router.post('/addToCollection', asyncHandler(async (req, res) => {

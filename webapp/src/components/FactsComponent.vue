@@ -1,9 +1,4 @@
 <template>
-    <a-row justify="center">
-        <a-button type="primary" size="large" href="/fact/new">
-            Create your fact
-        </a-button>
-    </a-row>
     <a-row v-for="fact in facts" v-bind:key="fact.hash" style="margin-top: 20px;" justify="center">
         <FactPreview :fact="fact" @toggleCollection="toggleCollection"/>
     </a-row>
@@ -19,23 +14,41 @@
 import { defineComponent, reactive, ref, onBeforeMount } from 'vue';
 import { parseErrorMsg } from '@/services/utils';
 import { useStore } from '@/store';
-import { fetchCreatedFacts, Fact } from '@/services/fact';
+import { Fact } from '@/services/fact';
+import { File } from '@/services/evidence';
 import FactPreview from './fact/FactPreviewComponent.vue';
+import { fetchCreatedFacts, fetchCollectedFacts } from '@/services/fact';
+import { Store } from 'vuex';
+import { State } from "../store";
+
+async function fetchData(
+    mode: string, store: Store<State>
+) : Promise<{facts: Fact[], evidences: File[], references: Fact[]}>{
+    if (mode == "created") {
+        return await fetchCreatedFacts(store);
+    }
+    if (mode == "collected") {
+        return await fetchCollectedFacts(store);
+    }
+    return {facts: [], evidences: [], references: []};
+}
 
 export default defineComponent({
     components: {FactPreview},
-    setup() {
+    props: {
+        mode: String,
+    },
+    setup(props) {
         const store = useStore();
         let loading = ref<boolean>(false);
         let facts = ref<Fact[]>([]);
         let errMsg = ref<string>("");
         const evidencesLookup = reactive<{}>({});
         const referencesLookup = reactive<{}>({});
-
         onBeforeMount(() => {
             facts.value = [];
             loading.value = true;
-            fetchCreatedFacts(store).then(res => {
+            fetchData(props.mode, store).then(res => {
                 for (const e of res.evidences) {
                     evidencesLookup[e.hash] = e;
                 }
