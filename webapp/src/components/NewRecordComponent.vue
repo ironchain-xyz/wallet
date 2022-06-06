@@ -2,14 +2,14 @@
     <div class="formContainer">
         <div class="formContent">
             <a-row>
-                <a-typography-title :level="2">New Fact</a-typography-title>
+                <a-typography-title :level="2">New Record</a-typography-title>
             </a-row>
             <a-row>
                 <a-textarea
                     :rows="4"
                     @change="() => alert.description = ''"
                     v-model:value="description"
-                    placeholder="Describe the fact, append tags with # at the end"
+                    placeholder="Describe the record, append tags with # at the end"
                     style="font-size: large"
                 />
             </a-row>
@@ -58,7 +58,7 @@
                 </a-card>
             </a-row>
             <a-row style="margin-top: 10px;">
-                <a-button type="dashed" size="large" @click="onShowLibrary">
+                <a-button type="dashed" size="large" @click="onShowCollections">
                     Select from collections
                 </a-button>
             </a-row>
@@ -66,14 +66,14 @@
                 <div v-if="!!alert.save" class="alertGap">
                     <a-alert :message="alert.save" type="error" />
                 </div>
-                <a-button type="primary" size="large" block @click="onSaveFact">
+                <a-button type="primary" size="large" block @click="onSaveRecord">
                     Save
                 </a-button>
             </a-row>
         </div>
         <a-modal
-            :visible="showLibrary"
-            title="Select fact to reference"
+            :visible="showCollections"
+            title="Select record to reference"
             @ok="onAddReference"
             @cancel="onCancelReference"
         >
@@ -81,7 +81,7 @@
                 <a-card
                     :hoverable="reference.status !== 'selected'"
                     :class="reference.status || 'available'"
-                    v-for="(reference, index) in library"
+                    v-for="(reference, index) in collections"
                     v-bind:key="index"
                     @click="() => selectReference(reference)"
                 >
@@ -103,12 +103,13 @@ import router from '../router';
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
 import {
-    FactPreview,
-    NewFactAlert,
-    validateFact,
-    newFact
-} from '../services/fact';
-import { RawFile, newEvidence, uploadEvidence, checkRawEvidence} from '../services/evidence';
+    RecordReference,
+    NewRecordAlert,
+    validateRecord,
+    newRecord,
+    fetchCollectedRecords,
+} from '../services/record';
+import { RawFile, uploadEvidence, checkRawEvidence} from '../services/evidence';
 import { genHash, parseErrorMsg } from '../services/utils'
 
 export default defineComponent({
@@ -122,13 +123,13 @@ export default defineComponent({
             router.push('init');
         }
 
-        const alert = reactive<NewFactAlert>({});
+        const alert = reactive<NewRecordAlert>({});
         const description = ref<string>("");
-        const references = ref<FactPreview[]>([]);
+        const references = ref<RecordReference[]>([]);
         const evidences = ref<RawFile[]>([]);
 
-        const library = reactive<FactPreview[]>([]);
-        const showLibrary = ref<boolean>(false);
+        const collections = reactive<RecordReference[]>([]);
+        const showCollections = ref<boolean>(false);
         const selectReference = (reference) => {
             if (reference.status == "selected") {
                 reference.status = "available";
@@ -137,8 +138,8 @@ export default defineComponent({
             }
         };
         const onAddReference = () => {
-            showLibrary.value = false;
-            library.forEach(ref => {
+            showCollections.value = false;
+            collections.forEach(ref => {
                 if (ref.status == "selected") {
                     references.value.push(ref);
                     ref.status = "added";
@@ -150,45 +151,58 @@ export default defineComponent({
             references.value.splice(index, 1);
         };
         const onCancelReference = () => {
-            showLibrary.value = false;
+            showCollections.value = false;
         };
 
         const handlePreview = async (file: any) => {
             window.open(file.url);
         };
 
-        const onSaveFact = async () => {
-            const fact = {
+        const onSaveRecord = async () => {
+            const record = {
                 description: description.value,
                 evidences: evidences.value,
                 references: references.value
             };
-            const res = validateFact(fact, alert);
+            const res = validateRecord(record, alert);
             if (res.ok) {
                 try {
-                    const res = await newFact(store, fact);
+                    const res = await newRecord(store, record);
                     if ("error" in res) {
                         alert.save = res.error;
                     } else {
-                        router.push("/fact/" + res.hash);
+                        router.push("/record/" + res.hash);
                     }
                 } catch (err) {
                     alert.save = parseErrorMsg(err);
                 }
             }
         };
-        const loadMoreFacts = () => {
-            console.log("load more");
+        const query = reactive<{
+            collectedAt?: string,
+            offset: number,
+            limit: number,
+        }>({offset: 0, limit: 20,});
+        const loadMoreCollections = () => {
+            fetchCollectedRecords(store, query).then(res => {
+                if (res.records.length > 0) {
+                    if (!query.collectedAt) {
+                        query.collectedAt = res.records[0].collectedAt;
+                    }
+                    query.offset += res.records.length;
+                }
+                res.records.forEach(record => collections.push(record));
+            });
         };
-        const onShowLibrary = () => {
-            showLibrary.value = true;
-            if (library.length == 0) {
-                loadMoreFacts();
+        const onShowCollections = () => {
+            showCollections.value = true;
+            if (collections.length == 0) {
+                loadMoreCollections();
             }
         };
         const onScroll = ({ target: { scrollTop, clientHeight, scrollHeight }}) => {
             if (scrollTop + clientHeight >= scrollHeight) {
-                loadMoreFacts()
+                loadMoreCollections()
             }
         };
 
@@ -198,7 +212,7 @@ export default defineComponent({
                     try {
                         const contentHash = await genHash(options.file);
                         const exists = await checkRawEvidence(store, contentHash);
-                       if (!exists) {
+                        if (!exists) {
                             const uploaded = await uploadEvidence(store, options.file);
                             if ("error" in uploaded) {
                                 options.onError(
@@ -208,13 +222,12 @@ export default defineComponent({
                                 options.onSuccess(uploaded, options.file);
                             }
                         } else {
-                            const file = await newEvidence(store, {
+                            options.onSuccess({
                                 filename: options.file.name,
                                 size: options.file.size,
                                 mimeType: options.file.type,
-                                contentHash,
-                            });
-                            options.onSuccess(file, options.file);
+                                rawFile: [contentHash],
+                            }, options.file);
                         }
                     } catch (err) {
                         options.onError(err, {}, options.file);
@@ -228,16 +241,16 @@ export default defineComponent({
             evidences,
             references,
             alert,
-            library,
+            collections,
             uploadCustomRequest,
             selectReference,
             onAddReference,
             onCancelReference,
             deleteReference,
-            onSaveFact,
+            onSaveRecord,
             handlePreview,
-            onShowLibrary,
-            showLibrary,
+            onShowCollections,
+            showCollections,
             onScroll,
         };
     }

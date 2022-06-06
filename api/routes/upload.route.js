@@ -13,23 +13,6 @@ const EVIDENCE_PATH = path.join(__dirname, "../files/evidences");
 
 const db = require("../models");
 const RawFile = db.rawFiles;
-const File = db.files;
-const User = db.users;
-
-const { ethers } = require("ethers");
-function genFileHash(filename, mimeType, contentHash) {
-    const hash = ethers.utils.sha256(ethers.utils.defaultAbiCoder.encode(
-        ["string", "string", "string"],
-        [filename, mimeType, contentHash]
-    ));
-    return hash.substring(2);
-}
-
-const CreatorSelector = {
-    model: User,
-    as: "creator",
-    attributes: ["username"]
-};
 
 const fileExists = async (filePath) => {
     return new Promise((resolve, reject) => {
@@ -38,17 +21,6 @@ const fileExists = async (filePath) => {
                 resolve(false);
             }
             resolve(true);
-        })
-    });
-};
-
-const fileSize = async (filePath) => {
-    return new Promise((resolve, reject) => {
-        fs.stat(filePath, (err, stat) => {
-            if (err) {
-                reject(false);
-            }
-            resolve(stat.size);
         })
     });
 };
@@ -67,41 +39,9 @@ const rename = (oldFile, newFile) => {
     });
 };
 
-const createNewEvidence = async (info) => {
-    const hash = genFileHash(
-        info.filename,
-        info.mimeType,
-        info.contentHash
-    );
-    let file = await File.findOne(
-        { where: { hash } },
-        { includes: [CreatorSelector] }
-    );
-    if (!file) {
-        try {
-            file = await File.create({
-                hash,
-                name: info.filename,
-                mimeType: info.mimeType,
-                size: info.size,
-                contentHash: info.contentHash,
-                createdBy: info.createdBy
-            }, {
-                includes: [{
-                    model: User,
-                    as: "creator"
-                }]
-            });
-        } catch(err) {
-            console.log(err);
-        }
-    }
-    return file;
-}
-
-const saveFileAndCreateNewEvidence = async (tmpFile, info) => {
-    await rename(tmpFile, path.join(EVIDENCE_PATH, info.contentHash));
-    return createNewEvidence(info);
+const createRawFile = async (tmpFile, hash, size) => {
+    await rename(tmpFile, path.join(EVIDENCE_PATH, hash));
+    return await RawFile.create({hash, size});
 };
 
 router.get('/checkRaw', asyncHandler(async (req, res) => {
@@ -131,24 +71,6 @@ router.get('/raw', asyncHandler(async (req, res) => {
     });
 }));
 
-router.get('/', asyncHandler(async (req, res) => {
-    const files = await File.findAll({
-        where: { hash: req.query.hashes.split(",") },
-        include: [CreatorSelector],
-    });
-    res.send({ result: files });
-}));
-
-router.post('/new', asyncHandler(async (req, res) => {
-    const filePath = path.join(EVIDENCE_PATH, req.body.contentHash);
-    const file = await createNewEvidence({
-        ...req.body,
-        createdBy: req.user.email,
-        size: await fileSize(filePath),
-    });
-    res.send(file);
-}));
-
 router.post('/upload', asyncHandler(async (req, res) => {
     var files = 0, finished = false, uploaded = [];
     const bb = busboy({ headers: req.headers, limits: { files: 5 } });
@@ -173,16 +95,7 @@ router.post('/upload', asyncHandler(async (req, res) => {
         });
 
         outStream.on('finish', () => {
-            const contentHash = hash.digest('hex');
-            saveFileAndCreateNewEvidence(
-                tmpFile,
-                {
-                    ...info,
-                    contentHash,
-                    createdBy: req.user.email,
-                    size,
-                }
-            ).then((file) => {
+            createRawFile(tmpFile, hash.digest('hex'), size).then((file) => {
                 uploaded.push(file);
                 if (uploaded.length == files && finished) {
                     res.send({ uploaded });

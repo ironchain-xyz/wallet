@@ -12,7 +12,11 @@
             </a-row>
             <a-row>
                 <div v-for="(evidence, index) in evidences" v-bind:key="index">
-                    <Evidence :preview="false" :evidence="evidence" style="width: 200px; min-height: 200px;"></Evidence>
+                    <EvidenceComponent
+                        :preview="false"
+                        :evidence="evidence"
+                        style="width: 200px; min-height: 200px;"
+                    />
                 </div>
             </a-row>
             <a-row  v-if="references.length > 0" class="titleGap">
@@ -37,79 +41,75 @@ import { useRoute } from 'vue-router'
 
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
-import { Fact, fetchFacts } from '../services/fact';
-import { File, fetchEvidences} from '../services/evidence';
+import { RecordPreview, fetchRecord } from '../services/record';
+import { Evidence } from '../services/evidence';
 import { shortDescription } from '../services/utils'
 import { BASE_URL } from '@/lib/constants';
-import Evidence from './evidence/EvidenceComponent.vue';
+import EvidenceComponent from './evidence/EvidenceComponent.vue';
 
 export default defineComponent({
-    components: { Evidence},
+    components: { EvidenceComponent },
     setup() {
         const store = useStore();
         if (!authenticate(store)) return;
 
         const route = useRoute();
         const description = ref<string>("");
-        const references = ref<Fact[]>([]);
-        const evidences = ref<File[]>([]);
+        const references = ref<RecordPreview[]>([]);
+        const evidences = ref<Evidence[]>([]);
 
         onMounted(async () => {
             const hash = route.params.hash as string;
-            const facts = await fetchFacts(store, [hash]);
-            if (facts.length == 0) {
-                description.value = "Fact not found";
+            const record = await fetchRecord(store, hash);
+            if (!record) {
+                description.value = "record not found";
             } else {
-                const fact = facts[0];
-                description.value = fact.description;
-                const [e, r] = await Promise.all([
-                    fetchEvidences(store, fact.evidences as string[]),
-                    fetchFacts(store, fact.references as string[])
-                ]);
-                evidences.value = e;
-                references.value = r;
+                description.value = record.description;
+                evidences.value = record.evidences;
+                references.value = record.references;
             }
         });
 
-        const fileUrl = (file: File) => {
-            return BASE_URL + "static/evidences/" + file.contentHash;
+        const fileUrl = (e: Evidence) => {
+            return BASE_URL + "static/evidences/" + e.rawFile.hash;
         }
 
-        const fileType = (file: File) => {
-            if (file.mimeType == "image/png" ||
-                file.mimeType == "image/jpeg" || 
-                file.mimeType == "image/jpg") {
+        const fileType = (e: Evidence) => {
+            if (e.mimeType == "image/png" ||
+                e.mimeType == "image/jpeg" || 
+                e.mimeType == "image/jpg") {
                 return "image";
-            } else if (file.mimeType == "video/mp4") {
+            } else if (e.mimeType == "video/mp4") {
                 return "video";
             } else {
                 return "file";
             }
         }
 
-        const calFileSize = (file: File) => {
-            if (!file.size) {
+        const calFileSize = (e: Evidence) => {
+            const size = e.rawFile.size;
+            if (!size) {
                 return "Unknown Size"
             }
-            if (file.size < 1024) {
-                return file.size.toFixed(1) + "B";
+            if (size < 1024) {
+                return size.toFixed(1) + "B";
             }
-            if (file.size < 1024 * 1024) {
-                return (file.size / 1024).toFixed(1).toString() + "KB";
+            if (size < 1024 * 1024) {
+                return (size / 1024).toFixed(1).toString() + "KB";
             }
-            if (file.size < 1024 * 1024 * 1024) {
-                return (file.size / (1024 * 1024)).toFixed(1).toString() + "MB";
+            if (size < 1024 * 1024 * 1024) {
+                return (size / (1024 * 1024)).toFixed(1).toString() + "MB";
             }
             return "> 1GB";
         }
 
-        const prettyPrintName = (file: File) => {
-            const len = file.name.length;
-            let ext = file.name.split('.').pop();
+        const prettyPrintName = (e: Evidence) => {
+            const len = e.name.length;
+            let ext = e.name.split('.').pop();
             if (!ext || ext.length == len) {
                 ext = "";
             }
-            let filename = file.name.substring(0, len - ext.length - 1);
+            let filename = e.name.substring(0, len - ext.length - 1);
             console.log(filename);
             if (filename.length > 10) {
                 filename = filename.substring(0, 7);

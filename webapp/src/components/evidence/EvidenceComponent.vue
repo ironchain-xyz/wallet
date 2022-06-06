@@ -25,54 +25,55 @@
 import { defineComponent } from 'vue';
 import { FileOutlined } from '@ant-design/icons-vue';
 import { BASE_URL } from '@/lib/constants';
-import { File } from '../../services/evidence';
+import { Evidence } from '../../services/evidence';
 
 export default defineComponent({
     components: {FileOutlined},
     props: {
-        evidence: File,
+        evidence: Object as () => Evidence,
         preview: Boolean,
     },
     setup() {
-        const fileUrl = (file: File) => {
-            return BASE_URL + "static/evidences/" + file.contentHash;
+        const fileUrl = (e: Evidence) => {
+            return BASE_URL + "static/evidences/" + e.rawFile.hash;
         }
 
-        const fileType = (file: File) => {
-            if (file.mimeType == "image/png" ||
-                file.mimeType == "image/jpeg" || 
-                file.mimeType == "image/jpg") {
+        const fileType = (e: Evidence) => {
+            if (e.mimeType == "image/png" ||
+                e.mimeType == "image/jpeg" || 
+                e.mimeType == "image/jpg") {
                 return "image";
-            } else if (file.mimeType == "video/mp4") {
+            } else if (e.mimeType == "video/mp4") {
                 return "video";
             } else {
                 return "file";
             }
         }
 
-        const calFileSize = (file: File) => {
-            if (!file.size) {
+        const calFileSize = (e: Evidence) => {
+            const size = e.rawFile.size;
+            if (!size) {
                 return "Unknown Size"
             }
-            if (file.size < 1024) {
-                return file.size.toFixed(1) + "B";
+            if (size < 1024) {
+                return size.toFixed(1) + "B";
             }
-            if (file.size < 1024 * 1024) {
-                return (file.size / 1024).toFixed(1).toString() + "KB";
+            if (size < 1024 * 1024) {
+                return (size / 1024).toFixed(1).toString() + "KB";
             }
-            if (file.size < 1024 * 1024 * 1024) {
-                return (file.size / (1024 * 1024)).toFixed(1).toString() + "MB";
+            if (size < 1024 * 1024 * 1024) {
+                return (size / (1024 * 1024)).toFixed(1).toString() + "MB";
             }
             return "> 1GB";
         }
 
-        const prettyPrintName = (file: File) => {
-            const len = file.name.length;
-            let ext = file.name.split('.').pop();
+        const prettyPrintName = (e: Evidence) => {
+            const len = e.name.length;
+            let ext = e.name.split('.').pop();
             if (!ext || ext.length == len) {
                 ext = "";
             }
-            let filename = file.name.substring(0, len - ext.length - 1);
+            let filename = e.name.substring(0, len - ext.length - 1);
             if (filename.length > 10) {
                 filename = filename.substring(0, 7);
                 return filename + "..." + ext;

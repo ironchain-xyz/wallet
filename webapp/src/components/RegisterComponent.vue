@@ -25,7 +25,7 @@ export default defineComponent({
   components: { UserOutlined, },
   setup() {
     const store = useStore();
-    if (store.state.user?.email && store.state.user?.jwt) {
+    if (store.state.user?.jwt) {
       router.push('/');
       return;
     }

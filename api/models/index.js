@@ -18,85 +18,19 @@ const sequelize = new Sequelize(
 );
 
 const db = {};
-db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.invitations = require("./invitation.model.js")(sequelize, Sequelize);
-db.users = require("./user.model.js")(sequelize, Sequelize);
-const {Fact, File} = require("./fact.model.js")(sequelize, Sequelize);
-db.facts = Fact;
-db.files = File;
+db.invitations = require("./invitation.model.js")(sequelize);
+db.users = require("./user.model.js")(sequelize);
 
-// super many to many associations
-db.collections = sequelize.define("Collections", {
-    collected: {
-        type: Sequelize.DataTypes.BOOLEAN,
-        allowNull: false,
-    },
-});
-db.facts.belongsToMany(db.users, {through: db.collections});
-db.users.belongsToMany(db.facts, {through: db.collections});
-db.users.hasMany(db.collections);
-db.collections.belongsTo(db.users);
-db.facts.hasMany(db.collections);
-db.collections.belongsTo(db.facts);
+const {RawFile, Evidence}= require("./evidence.model.js")(sequelize);
+db.evidences = Evidence;
+db.rawFiles = RawFile;
 
-db.users.hasMany(db.facts, {
-    as: "createdFacts",
-    foreignKey: {
-        name: "createdBy",
-        allowNull: false
-    }
-});
-db.facts.belongsTo(db.users, {
-    as: "creator",
-    foreignKey: {
-        name: "createdBy",
-        allowNull: false
-    }
-});
+db.records = require("./record.model.js")(sequelize);
 
-db.users.hasMany(db.files, {
-    as: "createdFiles",
-    foreignKey: {
-        name: "createdBy",
-        allowNull: false
-    }
-});
-db.files.belongsTo(db.users, {
-    as: "creator",
-    foreignKey: {
-        name: "createdBy",
-        allowNull: false
-    }
-});
-
-db.users.hasMany(db.invitations, {
-    as: "invitations",
-    foreignKey: {
-        name: "createdBy",
-        allowNull: false
-    }
-});
-db.invitations.belongsTo(db.users, {
-    as: "creator",
-    foreignKey: {
-        name: "createdBy",
-        allowNull: false
-    }
-});
-
-db.users.hasOne(db.invitations, {
-    as: "referredBy",
-    foreignKey: {
-        name: "usedBy",
-    }
-});
-db.invitations.belongsTo(db.users, {
-    as: "beneficiary",
-    foreignKey: {
-        name: "usedBy",
-    }
-});
+db.evidences = require("./evidence.model.js")(sequelize);
+db.collections = require("./collection.model.js")(sequelize);
+db.reference = require("./reference.model.js")(sequelize);
 
 module.exports = db;

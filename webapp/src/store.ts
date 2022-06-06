@@ -13,6 +13,7 @@ export type OTP = {
 }
 
 export interface User {
+  id: string,
   email: string;
   otp: OTP;
   username?: string;

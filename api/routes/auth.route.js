@@ -28,8 +28,8 @@ async function genOTP(email, mocked=true) {
     return {value: OTP, sentAt: time.epoch()};
 }
 
-function genRefreshToken(email) {
-    return jwt.sign({email, createdAt: time.epoch()}, secret);
+function genRefreshToken(id) {
+    return jwt.sign({id, createdAt: time.epoch()}, secret);
 }
 
 function genAccessToken(refreshToken) {
@@ -60,8 +60,8 @@ function validateAccessToken(req, res, next) {
         if(time.epoch() - createdAt < ACCESS_TOKEN_LIFETIME) {
             res.status(400).send({message: "no need to refresh"});
         } else {
-            const {email} = jwt.verify(refreshToken, secret);
-            req.email = email;
+            const {id} = jwt.verify(refreshToken, secret);
+            req.userId = id;
             req.refreshToken = refreshToken;
             next();
         }
@@ -72,7 +72,7 @@ function validateAccessToken(req, res, next) {
 
 router.post("/register", validateEmail, asyncHandler(async (req, res) => {
     const email = req.body.email;
-    const user = await User.findByPk(email);
+    let user = await User.findOne({where: {email}});
     if (user) {
         return res.status(400).send({message: 'user already registerd'});
     }
@@ -85,9 +85,9 @@ router.post("/register", validateEmail, asyncHandler(async (req, res) => {
         return res.status(400).send({message: 'invitation code has been used'});
     }
 
-    await User.create({email});
+    user = await User.create({email});
     await invitation.update({
-        usedBy: email
+        usedBy: user.id
     }, {
         include: {
             model: User,
@@ -100,11 +100,10 @@ router.post("/register", validateEmail, asyncHandler(async (req, res) => {
 // generate and send one time passcode
 router.post("/passcode", validateEmail, asyncHandler(async (req, res) => {
     const email = req.body.email;
-    let user = await User.findByPk(email);
+    let user = await User.findOne({where: {email}});
     if (!user) {
         if (USER_WHITELIST.includes(email)) {
-            await User.create({email});
-            user = await User.findByPk(email);
+            user = await User.create({email});
         } else {
             return res.status(400).send({message: 'user not registerd'});
         }
@@ -129,7 +128,7 @@ router.post("/passcode", validateEmail, asyncHandler(async (req, res) => {
 
 // verify passcode
 router.post("/verify", asyncHandler(async (req, res) => {
-    const user = await User.findByPk(req.body.email);
+    const user = await User.findOne({where: {email: req.body.email}});
     if (!user) {
         return res.status(400).send({message: "email not found"});
     }
@@ -140,13 +139,14 @@ router.post("/verify", asyncHandler(async (req, res) => {
     } else if (otp.expiryTime < time.epoch()) {
         res.status(400).send({message: "Expired passcode"});
     } else {
-        const refreshToken = genRefreshToken(user.email);
+        const refreshToken = genRefreshToken(user.id);
         const userUpdate = user.status == "verified"
             ? {refreshToken, emailOtp: ""}
             : {refreshToken, emailOtp: "", status: "verified"};
         await user.update(userUpdate);
         const accessToken = genAccessToken(refreshToken);
         res.json({
+            id: user.id,
             email: user.email,
             username: user.username,
             jwt: {
@@ -159,7 +159,7 @@ router.post("/verify", asyncHandler(async (req, res) => {
 
 router.post("/refresh", validateAccessToken, asyncHandler(async (req, res) => {
     const user = await User.findByPk(
-        req.email,
+        req.userId,
         {attributes: ["refreshToken"]}
     );
     if (!user || user.refreshToken != req.refreshToken) {

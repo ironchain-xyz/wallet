@@ -5,17 +5,21 @@ import { State } from "../store";
 import { authHeader } from './utils';
 import { API_URL } from '../lib/constants';
 
-export interface File {
+export interface Evidence {
+    id: number;
     hash: string;
     mimeType: string;
-    size: number;
     name: string;
-    contentHash: string;
+    rawFile: {
+        hash: string,
+        size: number
+    }
 }
 
 export interface RawFile {
     status: "uploading" | "done" | "error" | "removed";
     uid: string;
+    size: number;
     response?: File;
 }
 
@@ -31,37 +35,6 @@ export async function checkRawEvidence(
         }
     );
     return res.data.exists;
-}
-
-export async function fetchEvidences(
-    store: Store<State>,
-    hashes: string[]
-):  Promise<File[]>{
-    const res = await axios.get(
-        API_URL + "evidence",
-        {
-            params: {hashes: hashes.join(',')},
-            headers: authHeader(store)
-        }
-    );
-    return res.data.result;
-}
-
-export async function newEvidence(
-    store: Store<State>,
-    data: {
-        contentHash: string,
-        size: number,
-        mimeType: string,
-        filename: string
-    }
-):  Promise<File>{
-    const config= {
-        "headers": authHeader(store)
-    }
-    const res = await axios.post(API_URL + "evidence/new", data, config);
-    console.log(res.data);
-    return res.data;
 }
 
 export async function uploadEvidence(

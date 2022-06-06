@@ -40,7 +40,7 @@ router.post('/profile/setusername', asyncHandler(async (req, res) => {
             message: "Invalid username!"
         });
     } else {
-        const user = await User.findByPk(req.user.email);
+        const user = await User.findByPk(req.user.id);
         await user.update({username});
         res.send({ok: true});
     }
@@ -57,14 +57,14 @@ router.post('/profile/init', asyncHandler(async (req, res) => {
             message: "Username already used!"
         });
     } else {
-        const user = await User.findByPk(req.user.email);
+        const user = await User.findByPk(req.user.id);
         await user.update({username});
         res.send({ok: true});
     }
 }));
 
 router.post('/invitationCode', asyncHandler(async (req,res) => {
-    const createdBy = req.user.email;
+    const createdBy = req.user.id;
     const invitations = await Invitations.findAll(
         {where: {createdBy}}
     );
@@ -84,7 +84,7 @@ router.post('/invitationCode', asyncHandler(async (req,res) => {
 }));
 
 router.post('/logout', asyncHandler(async (req,res) => {
-    const user = await User.findByPk(req.user.email);
+    const user = await User.findByPk(req.user.id);
     await user.update({refreshToken: ""});
     res.send({ok: true});
 }));

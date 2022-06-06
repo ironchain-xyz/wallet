@@ -95,7 +95,7 @@ export async function verifyOTP(store: Store<State>, passcode: string): Promise<
     let msg = "";
     try {
         const res = await axios.post(url, { email: store.state.user!.email, passcode });
-        store.commit('setUser', { email: res.data.email, jwt: res.data.jwt });
+        store.commit('setUser', { id: res.data.id, email: res.data.email, jwt: res.data.jwt });
         store.commit('setProfile', { username: res.data.username });
     } catch (err: any) {
         msg = parseErrorMsg(err);
@@ -118,7 +118,7 @@ export async function logout(store: Store<State>) {
 }
 
 export function authenticate(store: Store<State>) {
-    if (!store.state.user?.email || !store.state.user?.jwt) {
+    if (!store.state.user?.jwt) {
         store.commit("clear");
         router.push('/login');
         return false;

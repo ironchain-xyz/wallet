@@ -26,7 +26,7 @@ import { initProfile } from "../services/profile";
 export default defineComponent({
   setup() {
     const store = useStore();
-    if (!store.state.user?.email || !store.state.user?.jwt) {
+    if (!store.state.user?.jwt) {
         store.commit("clear");
         router.push('/login');
         return false;

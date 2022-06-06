@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import Profile from '../views/ProfileView.vue'
-import NewFact from '../views/NewFactView.vue'
-import Fact from '../views/FactView.vue'
+import NewRecord from '../views/NewRecordView.vue'
+import Record from '../views/RecordView.vue'
 
 const routes = [
   {
@@ -36,14 +36,14 @@ const routes = [
     component: () => import('../views/VerifyView.vue')
   },
   {
-    path: '/fact/new',
-    name: "newFact",
-    component: NewFact,
+    path: '/record/new',
+    name: "newRecord",
+    component: NewRecord,
   },
   {
-    path: '/fact/:hash',
-    name: "fact",
-    component: Fact,
+    path: '/record/:hash',
+    name: "record",
+    component: Record,
   }
 ]
 

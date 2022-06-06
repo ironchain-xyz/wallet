@@ -32,7 +32,7 @@ export default defineComponent({
     },
     setup() {
         const store = useStore();
-        if (!store.state.user?.email || !store.state.user?.otp) {
+        if (!store.state.user?.otp) {
             store.commit("clear");
             router.push('/login');
             return;

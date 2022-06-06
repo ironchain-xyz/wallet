@@ -56,8 +56,7 @@ app.use(asyncHandler(async (req, res, next) => {
     if (accessToken) {
         try {
             const {refreshToken} = await jwt.verify(accessToken, secret);
-            const {email} = jwt.verify(refreshToken, secret)
-            req.user = {email};
+            req.user = jwt.verify(refreshToken, secret);
             next();
         } catch (err) {
             res.status(401).send({
@@ -74,11 +73,11 @@ app.use(asyncHandler(async (req, res, next) => {
 const auth = require('./routes/auth.route');
 app.use('/api/auth/', auth);
 
-const upload = require('./routes/evidence.route');
+const upload = require('./routes/upload.route');
 app.use('/api/evidence/', upload);
 
-const fact = require('./routes/fact.route');
-app.use('/api/fact/', fact);
+const record = require('./routes/record.route');
+app.use('/api/record/', record);
 
 const main = require('./routes/main.route');
 app.use('/api/', main);

@@ -3,8 +3,8 @@
     <Navigation />
     <div v-if="authenticated">
       <a-row justify="center" style="margin-bottom: 50px;">
-        <a-button type="primary" size="large" href="/fact/new">
-            Create your fact
+        <a-button type="primary" size="large" href="/record/new">
+            Create a record
         </a-button>
       </a-row>
       <a-row justify="center">
@@ -15,10 +15,10 @@
         </a-select>
       </a-row>
       <a-row v-if="mode == 'created'" justify="center">
-        <Facts mode="created"></Facts>
+        <Records mode="created"></Records>
       </a-row>
       <a-row v-if="mode == 'collected'" justify="center">
-        <Facts mode="collected"></Facts>
+        <Records mode="collected"></Records>
       </a-row>
     </div>
   </div>
@@ -27,12 +27,12 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import Navigation from '@/components/NavigationComponent.vue'
-import Facts from '@/components/FactsComponent.vue'
+import Records from '@/components/RecordsComponent.vue'
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
 
 export default defineComponent({
-  components: { Navigation, Facts },
+  components: { Navigation, Records },
   setup() {
     const store = useStore();
     const authenticated = ref<boolean>(false);
@@ -40,18 +40,17 @@ export default defineComponent({
 
     if (!authenticate(store)) {
       return;
-    } else {
-      authenticated.value = true;
     }
 
+    authenticated.value = true;
     const options = ref<any>([
       {
         value: 'created',
-        label: 'Created Facts',
+        label: 'Created Records',
       },
       {
         value: 'collected',
-        label: 'Collected Facts',
+        label: 'Collected Records',
       },
     ]);
 

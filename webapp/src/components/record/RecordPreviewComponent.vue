@@ -2,7 +2,7 @@
     <a-card class="container">
         <a-row style="margin-bottom: 20px">
             <a-col :span="18" style="text-align: left">
-                Created by {{fact.createdBy || "Someone"}} {{printDate(fact.createdAt)}}
+                Created by {{record!.createdBy || "Someone"}} {{printDate(record!.createdAt)}}
             </a-col>
             <a-col :span="6">
                 <a-button type="text" @click="toggleCollection">
@@ -10,20 +10,20 @@
                         <HeartOutlined v-if="!isCollected"/>
                         <HeartTwoTone twoToneColor="#eb2f96" v-if="isCollected"/>
                     </template>
-                    {{fact.collectors.length}}
+                    {{record!.collectors.length}}
                 </a-button>
             </a-col>
         </a-row>
         <a-row style="margin-bottom: 20px">
-            <a :href="factUrl">
-                <span>{{fact.description}}</span>
+            <a :href="recordUrl">
+                <span>{{record!.description}}</span>
             </a> 
         </a-row>
         <a-row>
             <Evidence
                 class="evidence" 
-                v-for="evidence in fact.evidences"
-                v-bind:key="evidence.hash"
+                v-for="evidence in record!.evidences"
+                v-bind:key="evidence.id"
                 :preview="true"
                 :evidence="evidence"
             ></Evidence>
@@ -36,14 +36,14 @@
 import { defineComponent, computed } from 'vue';
 import { useStore } from '../../store';
 
-import { Fact, addToCollection, removeFromCollection } from '../../services/fact';
+import { Record, addToCollection, removeFromCollection } from '@/services/record';
 import Evidence from '../evidence/EvidenceComponent.vue'
 import { HeartOutlined, HeartTwoTone } from '@ant-design/icons-vue';
 
 export default defineComponent({
     components: {Evidence, HeartOutlined, HeartTwoTone},
     props: {
-        fact: Object as () => Fact
+        record: Object as () => Record
     },
     setup(props, { emit }) {
         const store = useStore();
@@ -64,35 +64,35 @@ export default defineComponent({
             }
         };
 
-        const factUrl = computed(() => {
-            return "/fact/" + props.fact.hash;
+        const recordUrl = computed(() => {
+            return "/record/" + props.record.hash;
         });
 
         const isCollected = computed(() => {
             const username = store.state.profile!.username!;
-            return props.fact.collectors.includes(username);
+            return props.record.collectors.includes(username);
         });
 
         const toggleCollection = () => {
             if (isCollected.value) {
-                removeFromCollection(store, props.fact.hash).then(() => {
+                removeFromCollection(store, props.record.hash).then(() => {
                     emit("toggleCollection", {
                         action: "remove", 
-                        fact: props.fact.hash,
+                        record: props.record.hash,
                     });
                 });
             } else {
-                addToCollection(store, props.fact.hash).then(() => {
+                addToCollection(store, props.record.hash).then(() => {
                     emit("toggleCollection", {
                         action: "add",
-                        fact: props.fact.hash
+                        record: props.record.hash
                     });
                 });
             }
         };
         return {
             printDate,
-            factUrl,
+            recordUrl,
             toggleCollection,
             isCollected,
         };
