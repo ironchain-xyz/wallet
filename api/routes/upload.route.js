@@ -14,16 +14,16 @@ const EVIDENCE_PATH = path.join(__dirname, "../files/evidences");
 const db = require("../models");
 const RawFile = db.rawFiles;
 
-const fileExists = async (filePath) => {
+const fileSize = async (filePath) => {
     return new Promise((resolve, reject) => {
-        fs.access(filePath, fs.F_OK, (err) => {
+        fs.stats(filePath, (err, stats) => {
             if (err) {
-                resolve(false);
+                reject();
             }
-            resolve(true);
+            resolve(stats.size);
         })
     });
-};
+}
 
 const rename = (oldFile, newFile) => {
     return new Promise((resolve, reject) => {
@@ -44,13 +44,23 @@ const createRawFile = async (tmpFile, hash, size) => {
     return await RawFile.create({hash, size});
 };
 
-router.get('/checkRaw', asyncHandler(async (req, res) => {
-    const filePath = path.join(EVIDENCE_PATH, req.query.contentHash);
-    const exists = await fileExists(filePath);
-    res.send({ exists });
+router.get('/raw', asyncHandler(async (req, res) => {
+    let file = await RawFile.findByPk(req.query.hash);
+    if (file) {
+        res.send({ exists: true, file });
+    }
+
+    try {
+        const filePath = path.join(EVIDENCE_PATH, req.query.hash);
+        const size = await fileSize(filePath);
+        file = await RawFile.create({hash: req.query.hash, size});
+        res.send({exists: true, file})
+    } catch (_err) {
+        res.send({exists: false})
+    }
 }));
 
-router.get('/raw', asyncHandler(async (req, res) => {
+router.get('/raw/download', asyncHandler(async (req, res) => {
     var options = {
         root: EVIDENCE_PATH,
         dotfiles: 'deny',
@@ -59,10 +69,10 @@ router.get('/raw', asyncHandler(async (req, res) => {
           'x-sent': true,
         }
     };
-    var fileName = req.query.contentHash;
+    var fileName = req.query.hash;
     res.setHeader(
         "Content-Type", req.query.mimeType
-    ).sendFile(req.query.contentHash, options, function (err) {
+    ).sendFile(req.query.hash, options, function (err) {
         if (err) {
           next(err)
         } else {

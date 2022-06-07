@@ -20,27 +20,31 @@ export interface RawFile {
     status: "uploading" | "done" | "error" | "removed";
     uid: string;
     size: number;
-    response?: File;
+    response?: {
+        mimeType: string;
+        name: string;
+        raw: string;
+    };
 }
 
-export async function checkRawEvidence(
+export async function getRawFile(
     store: Store<State>,
-    contentHash: string
-):  Promise<boolean>{
+    hash: string
+):  Promise<{exists: boolean}>{
     const res = await axios.get(
-        API_URL + "evidence/checkRaw",
+        API_URL + "evidence/raw",
         {
-            params: {contentHash},
+            params: {hash},
             headers: authHeader(store)
         }
     );
-    return res.data.exists;
+    return res.data;
 }
 
 export async function uploadEvidence(
     store: Store<State>,
     file: string | Blob
-):  Promise<File | {error: string}>{
+):  Promise<Evidence | {error: string}>{
     const data = new FormData();
     data.append('evidences', file);
     const headers = authHeader(store);

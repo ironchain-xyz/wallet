@@ -8,7 +8,7 @@ import { Evidence, RawFile } from './evidence';
 export interface RecordPreview {
     hash: string;
     description: string;
-    createdBy: string;
+    creator: {username: string};
     createdAt: string;
     evidencesHashes: string[];
     referenceHashes: string[];
@@ -52,12 +52,12 @@ export function validateRecord(record: NewRecord, alert: NewRecordAlert): { aler
     }
 
     for (const index in record.evidences || []) {
-        const file = record.evidences[index];
-        if (file.status == "error") {
+        const e = record.evidences[index];
+        if (e.status == "error") {
             alert.evidences = "Please remove invalid files"
             ok = false;
         }
-        if (file.status == "uploading") {
+        if (e.status == "uploading") {
             alert.evidences = "Please wait util all files uploaded"
             ok = false;
         }
@@ -65,8 +65,9 @@ export function validateRecord(record: NewRecord, alert: NewRecordAlert): { aler
     return { ok, alert };
 }
 
-export async function newRecord(store: Store<State>, record: NewRecord): Promise<Record | {error: string}> {
+export async function newRecord(store: Store<State>, record: NewRecord): Promise<{hash: string}> {
     const url = API_URL + "record/new";
+    console.log(record);
     const res = await axios.post(url, {
         description: record.description,
         evidences: record.evidences.map(e => e.response),
@@ -81,7 +82,8 @@ export async function fetchRecord(
 ) : Promise<Record> {
     const url = API_URL + "record/";
     const res = await axios.get(url, {headers: authHeader(store), params: {hash}});
-    return res.data.record;
+    console.log(res.data);
+    return res.data;
 }
 
 export async function fetchCreatedRecords(

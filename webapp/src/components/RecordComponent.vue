@@ -49,6 +49,9 @@ import EvidenceComponent from './evidence/EvidenceComponent.vue';
 
 export default defineComponent({
     components: { EvidenceComponent },
+    props: {
+        record: Object as () => Evidence,
+    },
     setup() {
         const store = useStore();
         if (!authenticate(store)) return;
@@ -110,7 +113,6 @@ export default defineComponent({
                 ext = "";
             }
             let filename = e.name.substring(0, len - ext.length - 1);
-            console.log(filename);
             if (filename.length > 10) {
                 filename = filename.substring(0, 7);
                 return filename + "..." + ext;

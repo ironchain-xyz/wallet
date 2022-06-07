@@ -109,7 +109,7 @@ import {
     newRecord,
     fetchCollectedRecords,
 } from '../services/record';
-import { RawFile, uploadEvidence, checkRawEvidence} from '../services/evidence';
+import { RawFile, uploadEvidence, getRawFile} from '../services/evidence';
 import { genHash, parseErrorMsg } from '../services/utils'
 
 export default defineComponent({
@@ -130,7 +130,7 @@ export default defineComponent({
 
         const collections = reactive<RecordReference[]>([]);
         const showCollections = ref<boolean>(false);
-        const selectReference = (reference) => {
+        const selectReference = (reference: RecordReference) => {
             if (reference.status == "selected") {
                 reference.status = "available";
             } else {
@@ -146,7 +146,7 @@ export default defineComponent({
                 }
             });
         };
-        const deleteReference = (reference, index) => {
+        const deleteReference = (reference: RecordReference, index: number) => {
             reference.status = "available";
             references.value.splice(index, 1);
         };
@@ -168,11 +168,7 @@ export default defineComponent({
             if (res.ok) {
                 try {
                     const res = await newRecord(store, record);
-                    if ("error" in res) {
-                        alert.save = res.error;
-                    } else {
-                        router.push("/record/" + res.hash);
-                    }
+                    router.push("/record/" + res.hash);
                 } catch (err) {
                     alert.save = parseErrorMsg(err);
                 }
@@ -210,8 +206,8 @@ export default defineComponent({
             for (const file of evidences.value) {
                 if (options.file.uid == file.uid) {
                     try {
-                        const contentHash = await genHash(options.file);
-                        const exists = await checkRawEvidence(store, contentHash);
+                        const hash = await genHash(options.file);
+                        const { exists } = await getRawFile(store, hash);
                         if (!exists) {
                             const uploaded = await uploadEvidence(store, options.file);
                             if ("error" in uploaded) {
@@ -219,14 +215,17 @@ export default defineComponent({
                                     new Error(uploaded.error), uploaded, options.file
                                 );
                             } else {
-                                options.onSuccess(uploaded, options.file);
+                                options.onSuccess({
+                                    name: options.file.name,
+                                    mimeType: options.file.type,
+                                    raw: uploaded.hash,
+                                }, options.file);
                             }
                         } else {
                             options.onSuccess({
-                                filename: options.file.name,
-                                size: options.file.size,
+                                name: options.file.name,
                                 mimeType: options.file.type,
-                                rawFile: [contentHash],
+                                raw: hash,
                             }, options.file);
                         }
                     } catch (err) {

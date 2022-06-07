@@ -7,9 +7,10 @@ const asyncHandler = require('express-async-handler')
 const db = require("../models");
 const User = db.users;
 const Evidence = db.evidences;
+const RawFile = db.rawFiles;
 const Record = db.records;
 
-const Reference = db.refereces;
+const Reference = db.references;
 const Collection = db.collections;
 
 const { ethers } = require("ethers");
@@ -36,30 +37,24 @@ function genRecordHash(data) {
 
 router.get('/', asyncHandler(async (req, res) => {
     const record = await Record.findByPk(
-        req.body.hash,
+        req.query.hash,
         {
-            includes: [
+            include: [
                 {
-                    model: Collection,
+                    model: Evidence,
+                    as: "evidences",
                     required: false,
-                    where: {collected: true},
                     include: {
-                        model: User,
-                        attributes: ["username"]
+                        model: RawFile,
                     }
                 },
                 {
                     model: Reference,
+                    as: "references",
                     required: false,
                     include: {
-                        model: User,
-                        as: "creator",
-                        attributes: ["username"]
+                        model: Record,
                     }
-                },
-                {
-                    model: Evidence,
-                    required: false,
                 },
                 {
                     model: User,
@@ -69,12 +64,12 @@ router.get('/', asyncHandler(async (req, res) => {
             ],
         }
     );
-    res.send({record});
+    res.send(record);
 }));
 
 router.post('/new', asyncHandler(async (req, res) => {
-    for (const evidence of req.body.evidences) {
-        evidence.hash = genEvidenceHash(evidence);
+    for (const e of req.body.evidences) {
+        e.hash = genEvidenceHash(e.name, e.mimeType, e.raw);
     }
     const hash = genRecordHash(req.body);
     let record = await Record.findByPk(hash);
@@ -82,66 +77,66 @@ router.post('/new', asyncHandler(async (req, res) => {
         res.status(400).send({error: `record already exists at ${hash}`});
     }
 
-    record = await Record.create({
+    await Record.create({
         hash,
         description: req.body.description,
         evidenceHashes: req.body.evidences.map(e => e.hash),
         referenceHashes: req.body.references.map(r => r.hash),
         evidences: req.body.evidences,
-        records: req.body.references,
+        references: req.body.references.map(
+            r => ({recordId: hash, referenceId: r.hash})
+        ),
         createdBy: req.user.id,
     }, {
-        includes: [
+        include: [
             { model: User, as: "creator" },
             {
                 model: Evidence,
-                includes: {
-                    model: RawFile
-                }
+                as: "evidences",
             },
             {
-                model: Record
+                model: Reference,
+                as: "references"
             }
         ]
     });
-    res.send({record});
+    res.send({hash});    
 }));
 
 const { Op } = require('sequelize');
 router.get('/created', asyncHandler(async (req, res) => {
     const query = req.query.startAt ? {
         createdBy: req.user.id,
-        createdAt: {[Op.gte]: req.query.startAt}
-    } : {createdBy: req.user.id};
+        createdAt: {[Op.lte]: req.query.startAt}
+    } : {
+        createdBy: req.user.id
+    };
     const records = await Record.findAll({
-        where: query,
-        orderBy: [["createdAt", DESC]],
+        where: {createdBy: req.user.id},
+        order: [["createdAt", "DESC"]],
         limit: req.query.limit,
         offset: req.query.offset,
         include: [
             {
                 model: Collection,
+                as: "collectors",
                 required: false,
                 where: {collected: true},
+            },
+            {
+                model: Evidence,
+                as: "evidences",
+                required: false,
                 include: {
-                    model: User,
-                    attributes: ["username"]
+                    model: RawFile,
                 }
             },
             {
                 model: Reference,
+                as: "references",
                 required: false,
                 include: {
-                    model: User,
-                    as: "creator",
-                    attributes: ["username"]
-                }
-            },
-            {
-                model: Evidence,
-                required: false,
-                include: {
-                    model: RawFile
+                    model: Record,
                 }
             },
             {
@@ -158,39 +153,34 @@ router.get('/collections', asyncHandler(async (req, res) => {
     const query = req.query.startAt ? {
         userId: req.user.id,
         collected: true,
-        updatedAt: {[Op.gte]: req.query.startAt}
-    } : {userId: req.user.id, collected: true};
-    const collections = await Collection.findAll({
+        updatedAt: {[Op.lte]: req.query.startAt}
+    } : {
+        userId: req.user.id,
+        collected: true
+    };
+    const records = await Collection.findAll({
         where: query,
-        orderBy: [["updatedAt", DESC]],
+        order: [["updatedAt", "DESC"]],
         limit: req.query.limit,
         offset: req.query.offset,
         include: {
             model: Record,
             include: [
                 {
-                    model: Collection,
-                    required: false,
-                    where: {collected: true},
-                    include: [
-                        {
-                            model: User,
-                            attributes: ["username"]
-                        },
-                    ]
-                },
-                {
-                    model: Reference,
+                    model: Evidence,
+                    as: "evidences",
                     required: false,
                     include: {
-                        model: User,
-                        as: "creator",
-                        attributes: ["username"]
+                        model: RawFile,
                     }
                 },
                 {
-                    model: Evidence,
+                    model: Reference,
+                    as: "references",
                     required: false,
+                    include: {
+                        model: Record,
+                    }
                 },
                 {
                     model: User,
@@ -200,7 +190,8 @@ router.get('/collections', asyncHandler(async (req, res) => {
             ]
         },
     });
-    res.send({collections});
+    console.log(records);
+    res.send({records});
 }));
 
 router.post('/addToCollection', asyncHandler(async (req, res) => {

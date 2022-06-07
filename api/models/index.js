@@ -20,17 +20,14 @@ const sequelize = new Sequelize(
 const db = {};
 db.sequelize = sequelize;
 
-db.invitations = require("./invitation.model.js")(sequelize);
 db.users = require("./user.model.js")(sequelize);
+db.invitations = require("./invitation.model.js")(sequelize, db.users);
 
-const {RawFile, Evidence}= require("./evidence.model.js")(sequelize);
-db.evidences = Evidence;
-db.rawFiles = RawFile;
+db.rawFiles = require("./rawFile.model.js")(sequelize);
+db.evidences = require("./evidence.model.js")(sequelize, db.rawFiles);
+db.records = require("./record.model.js")(sequelize, db.users, db.evidences);
 
-db.records = require("./record.model.js")(sequelize);
-
-db.evidences = require("./evidence.model.js")(sequelize);
-db.collections = require("./collection.model.js")(sequelize);
-db.reference = require("./reference.model.js")(sequelize);
+db.collections = require("./collection.model.js")(sequelize, db.users, db.records);
+db.references = require("./reference.model.js")(sequelize, db.records);
 
 module.exports = db;

@@ -1,6 +1,6 @@
 const { DataTypes } = Sequelize = require("sequelize");
 
-module.exports = (sequelize) => {
+module.exports = (sequelize, User, Record) => {
     const Collection = sequelize.define("Collections", {
         collected: {
             type: DataTypes.BOOLEAN,
@@ -8,14 +8,11 @@ module.exports = (sequelize) => {
         },
     });
 
-    const User = require("./user.model.js")(sequelize);
-    const Record = require("./record.model.js")(sequelize);
-
     Record.belongsToMany(User, {through: Collection});
     User.belongsToMany(Record, {through: Collection});
-    User.hasMany(Collection);
+    User.hasMany(Collection, {as: "collections"});
     Collection.belongsTo(User);
-    Record.hasMany(Collection);
+    Record.hasMany(Collection, {as: "collectors"});
     Collection.belongsTo(Record);
 
     return Collection;

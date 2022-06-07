@@ -2,7 +2,7 @@
     <a-card class="container">
         <a-row style="margin-bottom: 20px">
             <a-col :span="18" style="text-align: left">
-                Created by {{record!.createdBy || "Someone"}} {{printDate(record!.createdAt)}}
+                Created by {{record!.creator.username || "Someone"}} {{printDate(record!.createdAt)}}
             </a-col>
             <a-col :span="6">
                 <a-button type="text" @click="toggleCollection">
@@ -69,8 +69,8 @@ export default defineComponent({
         });
 
         const isCollected = computed(() => {
-            const username = store.state.profile!.username!;
-            return props.record.collectors.includes(username);
+            const uid = store.state.user!.id!;
+            return props.record.collectors.some(c => c.userId == uid);
         });
 
         const toggleCollection = () => {

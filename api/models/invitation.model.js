@@ -1,8 +1,6 @@
 const Sequelize = require("sequelize");
 
-module.exports = (sequelize) => {
-    const User = require("./user.model.js")(sequelize);
-
+module.exports = (sequelize, User) => {
     const Invitation = sequelize.define("invitations", {
         code: {
             type: Sequelize.STRING,
