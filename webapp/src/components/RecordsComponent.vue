@@ -1,6 +1,7 @@
 <template>
     <a-row v-for="record in records" v-bind:key="record.hash" type="flex" justify="center" class="preview">
-        <RecordPreview :record="record" @toggleCollection="toggleCollection"/>
+        <CreatedRecord v-if="mode == 'created'" :record="record" @toggleCollection="toggleCollection"/>
+        <CollectedRecord v-if="mode == 'collected'" :record="record" @toggleCollection="toggleCollection"/>
     </a-row>
     <a-row>
         <a-spin v-if="loading" />
@@ -14,7 +15,9 @@
 import { defineComponent, reactive, ref, onBeforeMount } from 'vue';
 import { parseErrorMsg } from '@/services/utils';
 import { useStore } from '@/store';
-import RecordPreview from './record/RecordPreviewComponent.vue';
+import CreatedRecord from './record/CreatedRecordComponent.vue';
+import CollectedRecord from './record/CollectedRecordComponent.vue';
+
 import { Record, RecordQuery, fetchCreatedRecords, fetchCollectedRecords } from '@/services/record';
 import { Store } from 'vuex';
 import { State } from "../store";
@@ -23,18 +26,18 @@ async function fetchMoreRecords(
     mode: string,
     store: Store<State>,
     query: RecordQuery
-) : Promise<{records: Record[]}>{
+) : Promise<Record[]>{
     if (mode == "created") {
-        return await fetchCreatedRecords(store, query);
+        return await fetchCreatedRecords(store, query)
     }
     if (mode == "collected") {
         return await fetchCollectedRecords(store, query);
     }
-    return {records: []};
+    return [];
 }
 
 export default defineComponent({
-    components: {RecordPreview},
+    components: {CreatedRecord, CollectedRecord},
     props: {
         mode: String,
     },
@@ -50,13 +53,13 @@ export default defineComponent({
             records.value = [];
             loading.value = true;
             fetchMoreRecords(props.mode, store, query).then(res => {
-                query.limit += res.records.length;
-                if (res.records.length > 0) {
-                    query.startAt = query.startAt || res.records[0].createdAt;
-                }
-                res.records.forEach(record => {
+                res.forEach(record => {
                     records.value.push(record);
                 });
+                query.limit += res.length;
+                if (res.length > 0) {
+                    query.startAt = query.startAt || res[0].createdAt;
+                }
             }).catch(err => {
                 errMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
             }).finally(() => {
@@ -65,13 +68,15 @@ export default defineComponent({
         });
 
         const toggleCollection = (params: {action: "remove" | "add", record: string}) => {
-            const username = store.state.profile!.username!;
+            const userId = store.state.user!.id!;
             for (let i = 0; i < records.value.length; i++) {
                 if (records.value[i].hash == params.record) {
                     if (params.action == "remove") {
-                        records.value[i].collectors = records.value[i].collectors.filter((user) => user != username);
+                        records.value[i].collectors = records.value[i].collectors.filter(
+                            u => u.userId != userId
+                        );
                     } else if (params.action == "add") {
-                        records.value[i].collectors.push(username);
+                        records.value[i].collectors.push({userId});
                     }
                 }
             }

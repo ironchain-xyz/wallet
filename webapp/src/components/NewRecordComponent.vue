@@ -175,19 +175,19 @@ export default defineComponent({
             }
         };
         const query = reactive<{
-            collectedAt?: string,
+            startAt?: string,
             offset: number,
             limit: number,
         }>({offset: 0, limit: 20,});
         const loadMoreCollections = () => {
             fetchCollectedRecords(store, query).then(res => {
-                if (res.records.length > 0) {
-                    if (!query.collectedAt) {
-                        query.collectedAt = res.records[0].collectedAt;
+                if (res.length > 0) {
+                    if (!query.startAt) {
+                        query.startAt = res[0].collectedAt;
                     }
-                    query.offset += res.records.length;
+                    query.offset += res.length;
                 }
-                res.records.forEach(record => collections.push(record));
+                res.forEach(record => collections.push(record));
             });
         };
         const onShowCollections = () => {

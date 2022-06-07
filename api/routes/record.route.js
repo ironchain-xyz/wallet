@@ -167,6 +167,12 @@ router.get('/collections', asyncHandler(async (req, res) => {
             model: Record,
             include: [
                 {
+                    model: Collection,
+                    as: "collectors",
+                    required: false,
+                    where: {collected: true},
+                },
+                {
                     model: Evidence,
                     as: "evidences",
                     required: false,
@@ -190,7 +196,6 @@ router.get('/collections', asyncHandler(async (req, res) => {
             ]
         },
     });
-    console.log(records);
     res.send({records});
 }));
 

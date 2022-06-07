@@ -17,7 +17,7 @@ export interface RecordPreview {
 
 export interface Record extends RecordPreview {
     collectedAt: string;
-    collectors: string[];
+    collectors: {userId: string}[];
     evidences: Evidence[];
     references: RecordPreview[];
 }
@@ -89,19 +89,19 @@ export async function fetchRecord(
 export async function fetchCreatedRecords(
     store: Store<State>,
     params: RecordQuery
-) : Promise<{records: Record[]}> {
+) : Promise<Record[]> {
     const url = API_URL + "record/created";
     const res = await axios.get(url, {headers: authHeader(store), params});
-    return res.data;
+    return res.data.records;
 }
 
 export async function fetchCollectedRecords(
     store: Store<State>,
     params: RecordQuery
-) : Promise<{records: Record[]}> {
+) : Promise<Record[]> {
     const url = API_URL + "record/collections";
     const res = await axios.get(url, {headers: authHeader(store), params});
-    return res.data;
+    return res.data.records.map(r => ({...r.record, collectedAt: r.updatedAt}));
 }
 
 export async function addToCollection(store: Store<State>, hash: string) : Promise<Record[]> {
