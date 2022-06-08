@@ -141,6 +141,7 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     margin-top: 10%;
+    margin-bottom: 10%;
     height: 100%;
     width: 100%;
 }

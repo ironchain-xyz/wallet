@@ -29,6 +29,11 @@
                         </a-typography-paragraph>
                     </div>
                 </div>
+                <div>
+                    <a-button type="primary" @click="onLogout">
+                        Logout
+                    </a-button>
+                </div>
             </div>
         </div>
     </div>
@@ -37,8 +42,9 @@
 <script lang="ts">
 import { defineComponent, reactive, ref, computed, onBeforeMount } from 'vue';
 import { useStore } from '../store';
-import { getInvitationCode, updateUsername } from '../services/profile';
+import { getInvitationCode, updateUsername } from '@/services/profile';
 import Navigation from '@/components/NavigationComponent.vue'
+import { logout } from '../services/auth';
 
 interface InvitationCode {
     code: string;
@@ -75,6 +81,7 @@ export default defineComponent({
             alert,
             invitationCodes,
             onUsernameChange,
+            onLogout: () => logout(store),
         };
     },
 });

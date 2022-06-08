@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import Profile from '../views/ProfileView.vue'
 import NewRecord from '../views/NewRecordView.vue'
 import Record from '../views/RecordView.vue'
+import CollectedRecords from '../views/CollectedRecordsView.vue'
 
 const routes = [
   {
@@ -44,7 +45,12 @@ const routes = [
     path: '/record/:hash',
     name: "record",
     component: Record,
-  }
+  },
+  {
+    path: '/collected',
+    name: "collectedRecords",
+    component: CollectedRecords,
+  },
 ]
 
 const router = createRouter({

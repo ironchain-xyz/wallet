@@ -13,8 +13,12 @@
                     <div>
                         <FileOutlined class="largeIcon" :class="preview ? 'centerIcon' : 'adjustedIcon'"/>
                     </div>
-                    <div v-if="!preview" style="margin-top: 5px">{{prettyPrintName(evidence)}}</div>
-                    <div v-if="!preview" style="margin-top: 5px">{{calFileSize(evidence)}}</div>
+                    <div v-if="!preview" style="margin-top: 5px">
+                        {{prettyPrintName(evidence)}}
+                    </div>
+                    <div v-if="!preview" style="margin-top: 5px">
+                        {{formatFileSize(evidence?.rawFile.size)}}
+                    </div>
                 </div>
             </template>
         </a-popover>
@@ -25,7 +29,8 @@
 import { defineComponent } from 'vue';
 import { FileOutlined } from '@ant-design/icons-vue';
 import { BASE_URL } from '@/lib/constants';
-import { Evidence } from '../../services/evidence';
+import { Evidence } from '@/services/evidence';
+import { formatFileSize } from '@/lib/format';
 
 export default defineComponent({
     components: {FileOutlined},
@@ -50,23 +55,6 @@ export default defineComponent({
             }
         }
 
-        const calFileSize = (e: Evidence) => {
-            const size = e.rawFile.size;
-            if (!size) {
-                return "Unknown Size"
-            }
-            if (size < 1024) {
-                return size.toFixed(1) + "B";
-            }
-            if (size < 1024 * 1024) {
-                return (size / 1024).toFixed(1).toString() + "KB";
-            }
-            if (size < 1024 * 1024 * 1024) {
-                return (size / (1024 * 1024)).toFixed(1).toString() + "MB";
-            }
-            return "> 1GB";
-        }
-
         const prettyPrintName = (e: Evidence) => {
             const len = e.name.length;
             let ext = e.name.split('.').pop();
@@ -84,7 +72,7 @@ export default defineComponent({
 
         return {
             fileUrl,
-            calFileSize,
+            formatFileSize,
             fileType,
             prettyPrintName,
         }

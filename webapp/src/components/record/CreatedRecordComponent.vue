@@ -2,7 +2,7 @@
     <a-card class="container">
         <a-row style="margin-bottom: 20px">
             <a-col :span="18" style="text-align: left">
-                Created by {{record!.creator.username || "Someone"}} {{printDate(record!.createdAt)}}
+                Created by {{record!.creator.username || "Someone"}} {{formatDate(record!.createdAt)}}
             </a-col>
             <a-col :span="6">
                 <a-button type="text" @click="toggleCollection">
@@ -37,8 +37,9 @@ import { defineComponent, computed } from 'vue';
 import { useStore } from '../../store';
 
 import { Record, addToCollection, removeFromCollection } from '@/services/record';
-import Evidence from '../evidence/EvidenceComponent.vue'
+import Evidence from '@/components/evidence/EvidenceComponent.vue'
 import { HeartOutlined, HeartTwoTone } from '@ant-design/icons-vue';
+import { formatDate } from '@/lib/format';
 
 export default defineComponent({
     components: {Evidence, HeartOutlined, HeartTwoTone},
@@ -47,23 +48,6 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const store = useStore();
-
-        const printDate = (date: Date) => {
-            date = new Date(date);
-            const diff = Math.abs(Date.now() - date.valueOf());
-            if (diff > 1000 * 60 * 60 * 24) {
-                return "on " + date.toLocaleDateString("en-US");
-            } else if (diff > 1000 * 60 * 60) {
-                return Math.floor(diff / (1000 * 60 * 60)).toString() + " hours ago";
-            } else if (diff > 1000 * 60) {
-                return Math.floor(diff / (1000 * 60)).toString() + " minutes ago";
-            } else if (diff > 1000) {
-                return Math.floor(diff / 1000).toString() + " seconds ago";
-            } else {
-                return "Just now";
-            }
-        };
-
         const recordUrl = computed(() => {
             return "/record/" + props.record.hash;
         });
@@ -91,7 +75,7 @@ export default defineComponent({
             }
         };
         return {
-            printDate,
+            formatDate,
             recordUrl,
             toggleCollection,
             isCollected,

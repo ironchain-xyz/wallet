@@ -1,7 +1,6 @@
 <template>
     <a-row v-for="record in records" v-bind:key="record.hash" type="flex" justify="center" class="preview">
-        <CreatedRecord v-if="mode == 'created'" :record="record" @toggleCollection="toggleCollection"/>
-        <CollectedRecord v-if="mode == 'collected'" :record="record" @toggleCollection="toggleCollection"/>
+        <CreatedRecord :record="record" @toggleCollection="toggleCollection"/>
     </a-row>
     <a-row>
         <a-spin v-if="loading" />
@@ -15,33 +14,13 @@
 import { defineComponent, reactive, ref, onBeforeMount } from 'vue';
 import { parseErrorMsg } from '@/services/utils';
 import { useStore } from '@/store';
-import CreatedRecord from './record/CreatedRecordComponent.vue';
-import CollectedRecord from './record/CollectedRecordComponent.vue';
+import CreatedRecord from './CreatedRecordComponent.vue';
 
-import { Record, RecordQuery, fetchCreatedRecords, fetchCollectedRecords } from '@/services/record';
-import { Store } from 'vuex';
-import { State } from "../store";
-
-async function fetchMoreRecords(
-    mode: string,
-    store: Store<State>,
-    query: RecordQuery
-) : Promise<Record[]>{
-    if (mode == "created") {
-        return await fetchCreatedRecords(store, query)
-    }
-    if (mode == "collected") {
-        return await fetchCollectedRecords(store, query);
-    }
-    return [];
-}
+import { Record, RecordQuery, fetchCreatedRecords } from '@/services/record';
 
 export default defineComponent({
-    components: {CreatedRecord, CollectedRecord},
-    props: {
-        mode: String,
-    },
-    setup(props) {
+    components: {CreatedRecord},
+    setup() {
         const store = useStore();
 
         let loading = ref<boolean>(false);
@@ -52,7 +31,7 @@ export default defineComponent({
         onBeforeMount(() => {
             records.value = [];
             loading.value = true;
-            fetchMoreRecords(props.mode, store, query).then(res => {
+            fetchCreatedRecords(store, query).then(res => {
                 res.forEach(record => {
                     records.value.push(record);
                 });
@@ -92,14 +71,6 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
-h1 {
-    color: @heading-color;
-}
-
-h2 {
-    color: @text-color;
-}
-
 .preview {
     width: 100%;
     margin-top: 20px;

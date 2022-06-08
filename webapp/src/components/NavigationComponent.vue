@@ -10,7 +10,7 @@
             <template #icon>
               <home-outlined />
             </template>
-            <a href="/">Home</a>
+            <a href="/">Home Records</a>
           </a-menu-item>
           <a-menu-item key="profile">
             <template #icon>
@@ -21,9 +21,9 @@
         </a-menu>
       </div>
       <div class="nav-item" style="margin-top: 15px">
-        <a-button type="primary" @click="onLogout">
-          Logout
-        </a-button>
+          <a-button type="primary" href="/record/new">
+              Create Record
+          </a-button>
       </div>
     </div>
   </a-affix>
