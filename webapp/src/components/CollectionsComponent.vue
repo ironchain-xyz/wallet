@@ -3,12 +3,7 @@
     <Navigation />
     <div style="padding-bottom: 100px;" v-if="authenticated">
         <a-row justify="center">
-            <a-button type="primary" href="/record/new">
-                Create Record
-            </a-button>
-        </a-row>
-        <a-row justify="center">
-            <CreatedRecords />
+            <CollectedRecords />
         </a-row>
     </div>
   </div>
@@ -17,13 +12,13 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import Navigation from '@/components/NavigationComponent.vue'
-import CreatedRecords from '@/components/record/CreatedRecordsComponent.vue'
+import CollectedRecords from '@/components/record/CollectedRecordsComponent.vue'
 
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
 
 export default defineComponent({
-  components: { Navigation, CreatedRecords },
+  components: { Navigation, CollectedRecords },
   setup() {
     const store = useStore();
     const authenticated = ref<boolean>(false);

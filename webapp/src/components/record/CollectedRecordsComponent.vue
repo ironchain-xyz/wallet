@@ -1,20 +1,13 @@
 <template>
-    <div class="content">
-        <a-row justify="center">
-            <a-button type="primary" size="large" href="/">
-                Home
-            </a-button>
-        </a-row>
-        <a-row v-for="record in records" v-bind:key="record.hash" type="flex" justify="center" class="preview">
-            <CollectedRecord :record="record" @toggleCollection="toggleCollection"/>
-        </a-row>
-        <a-row>
-            <a-spin v-if="loading" />
-        </a-row>
-        <a-row v-if="!!errMsg" style="margin-top: 100px;">
-            <span>{{ errMsg }}</span>
-        </a-row>
-    </div>
+    <a-row v-for="record in records" v-bind:key="record.hash" type="flex" justify="center" class="preview">
+        <CollectedRecord :record="record" @toggleCollection="toggleCollection"/>
+    </a-row>
+    <a-row>
+        <a-spin v-if="loading" />
+    </a-row>
+    <a-row v-if="!!errMsg" style="margin-top: 100px;">
+        <span>{{ errMsg }}</span>
+    </a-row>
 </template>
 
 <script lang="ts">
@@ -78,11 +71,6 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
-.content {
-    min-width: 50%;
-    padding-bottom: 200px;
-}
-
 .preview {
     width: 100%;
     margin-top: 20px;

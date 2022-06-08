@@ -29,7 +29,7 @@
                         </a-typography-paragraph>
                     </div>
                 </div>
-                <div>
+                <div class="field">
                     <a-button type="primary" @click="onLogout">
                         Logout
                     </a-button>

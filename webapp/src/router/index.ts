@@ -3,7 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import Profile from '../views/ProfileView.vue'
 import NewRecord from '../views/NewRecordView.vue'
 import Record from '../views/RecordView.vue'
-import CollectedRecords from '../views/CollectedRecordsView.vue'
+import Collections from '../views/CollectionsView.vue'
 
 const routes = [
   {
@@ -47,9 +47,9 @@ const routes = [
     component: Record,
   },
   {
-    path: '/collected',
-    name: "collectedRecords",
-    component: CollectedRecords,
+    path: '/collections',
+    name: "Collections",
+    component: Collections,
   },
 ]
 

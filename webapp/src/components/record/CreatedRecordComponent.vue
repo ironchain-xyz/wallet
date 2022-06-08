@@ -2,7 +2,7 @@
     <a-card class="container">
         <a-row style="margin-bottom: 20px">
             <a-col :span="18" style="text-align: left">
-                Created by {{record!.creator.username || "Someone"}} {{formatDate(record!.createdAt)}}
+                Created {{formatDate(record!.createdAt)}}
             </a-col>
             <a-col :span="6">
                 <a-button type="text" @click="toggleCollection">
