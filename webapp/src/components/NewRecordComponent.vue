@@ -24,6 +24,7 @@
                     <a-upload
                         name="evidence"
                         v-model:file-list="evidences"
+                        accept="image/*,video/*"
                         list-type="picture-card"
                         @preview="handlePreview"
                         :customRequest="uploadCustomRequest"
@@ -54,13 +55,7 @@
                         <span>{{reference!.description}}</span>
                     </a-row>
                     <a-row>
-                        <Evidence
-                            class="evidence" 
-                            v-for="evidence in reference!.evidences"
-                            v-bind:key="evidence.id"
-                            :preview="true"
-                            :evidence="evidence"
-                        />
+                        <Evidences :evidence="reference!.evidences"/>
                     </a-row>
                 </a-card>
             </a-row>
@@ -132,12 +127,12 @@ import {
 } from '../services/record';
 import { RawFile, uploadEvidence, getRawFile} from '../services/evidence';
 import { genHash, parseErrorMsg } from '../services/utils';
-import Evidence from '@/components/evidence/EvidenceComponent.vue'
+import Evidences from '@/components/evidence/EvidencesComponent.vue'
 
 export default defineComponent({
     components: {
         UploadOutlined,
-        Evidence
+        Evidences
     },
     setup() {
         const store = useStore();
@@ -299,24 +294,7 @@ export default defineComponent({
     margin-top: 40px;
 }
 
-.itemGap {
-    margin-top: 20px;
-}
-
 .alertGap {
     margin-top: 5px;
-}
-
-.selected {
-    border: 3px solid #fcba03;
-    margin: 5px;
-}
-
-.available {
-    margin: 5px;
-}
-
-.added {
-    display: none;
 }
 </style>

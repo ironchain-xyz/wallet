@@ -16,40 +16,12 @@
                 <a-typography-title :level="3">Evidences</a-typography-title>
             </a-row>
             <a-row>
-                <div v-for="(evidence, index) in evidences" v-bind:key="index">
-                    <EvidenceComponent
-                        :preview="false"
-                        :evidence="evidence"
-                        style="width: 200px; min-height: 200px;"
-                    />
-                </div>
+                <Evidences :evidences="evidences" />
             </a-row>
             <a-row  v-if="references.length > 0" class="titleGap">
                 <a-typography-title :level="3">References</a-typography-title>
             </a-row>
-            <a-row v-for="reference in references" v-bind:key="reference.hash">
-                <a-card style="width: 100%; margin-top: 10px;">
-                    <a-row style="margin-bottom: 20px">
-                        Created by {{reference.creator.username || "Someone"}} {{formatDate(reference!.createdAt)}}
-                    </a-row>
-                    <a-row style="margin-bottom: 20px">
-                        <a :href="recordUrl(reference.hash)">{{reference.description}}</a>
-                    </a-row>
-                    <a-row style="margin-bottom: 20px">
-                        <EvidenceComponent
-                            class="evidence" 
-                            v-for="evidence in reference.evidences"
-                            v-bind:key="evidence.id"
-                            :preview="true"
-                            :evidence="evidence"
-                        />
-                    </a-row>
-                    <a-row v-for="(refHash, index) in reference.referenceHashes" v-bind:key="refHash">
-                        Reference {{index + 1}}: 
-                        <a :href="recordUrl(refHash)">{{refHash}}</a>
-                    </a-row>
-                </a-card>
-            </a-row>            
+            <References :references="references" />
         </div>
     </div>
 </template>
@@ -64,11 +36,12 @@ import { RecordPreview, fetchRecord } from '../services/record';
 import { Evidence } from '../services/evidence';
 import { shortDescription } from '../services/utils'
 import { BASE_URL } from '@/lib/constants';
-import EvidenceComponent from './evidence/EvidenceComponent.vue';
+import Evidences from '@/components/evidence/EvidencesComponent.vue';
+import References from '@/components/record/ReferencesComponent.vue';
 import { formatDate } from '@/lib/format';
 
 export default defineComponent({
-    components: { EvidenceComponent },
+    components: { Evidences, References },
     props: {
         record: Object as () => Evidence,
     },
@@ -96,10 +69,6 @@ export default defineComponent({
         const fileUrl = (e: Evidence) => {
             return BASE_URL + "static/evidences/" + e.rawFile.hash;
         };
-
-        const recordUrl = (hash: string) => {
-            return  "/record/" + hash;
-        }
 
         const fileType = (e: Evidence) => {
             if (e.mimeType == "image/png" ||
@@ -137,7 +106,6 @@ export default defineComponent({
             evidences,
             shortDescription,
             fileUrl,
-            recordUrl,
             fileType,
             calFileSize,
             formatDate

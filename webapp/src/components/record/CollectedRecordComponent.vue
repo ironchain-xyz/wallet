@@ -18,14 +18,9 @@
             </a> 
         </a-row>
         <a-row>
-            <Evidence
-                class="evidence" 
-                v-for="evidence in record!.evidences"
-                v-bind:key="evidence.id"
-                :preview="true"
-                :evidence="evidence"
-            ></Evidence>
+            <Evidences :evidences="record.evidences"/>
         </a-row>
+        <References :references="record.references" />
     </a-card>
 </template>
 
@@ -34,12 +29,13 @@ import { defineComponent, computed } from 'vue';
 import { useStore } from '../../store';
 
 import { Record, removeFromCollection } from '@/services/record';
-import Evidence from '@/components/evidence/EvidenceComponent.vue'
+import Evidences from '@/components/evidence/EvidencesComponent.vue';
+import References from '@/components/record/ReferencesComponent.vue';
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { formatDate } from '@/lib/format';
 
 export default defineComponent({
-    components: {Evidence, DeleteOutlined},
+    components: {Evidences, References, DeleteOutlined},
     props: {
         record: Object as () => Record
     },
@@ -78,11 +74,5 @@ export default defineComponent({
 .container {
     max-width: 800px;
     width: 100%;
-}
-
-.evidence {
-    display: flex;
-    width: 50px;
-    min-height: 50px; 
 }
 </style>
