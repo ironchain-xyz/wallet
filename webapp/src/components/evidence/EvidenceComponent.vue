@@ -4,7 +4,12 @@
             <template #content>
                 <a :href="fileUrl(evidence)">View Source</a>
             </template>
-            <img v-if="fileType(evidence) == 'image'" :src="fileUrl(evidence)" :alt="evidence.hash"/>
+            <img
+                v-if="fileType(evidence) == 'image'"
+                :src="fileUrl(evidence)"
+                :alt="evidence.hash"
+                style="max-height: 100px; max-width: 100px;"
+            />
             <video v-if="fileType(evidence) == 'video'" controls>
                 <source :src="fileUrl(evidence)" type="video/mp4">
             </video>

@@ -49,12 +49,24 @@ router.get('/', asyncHandler(async (req, res) => {
                     }
                 },
                 {
-                    model: Reference,
-                    as: "references",
+                    model: Record,
+                    as: "reference",
                     required: false,
-                    include: {
-                        model: Record,
-                    }
+                    include: [
+                        {
+                            model: Evidence,
+                            as: "evidences",
+                            required: false,
+                            include: {
+                                model: RawFile,
+                            }
+                        },
+                        {
+                            model: User,
+                            as: "creator",
+                            attributes: ["username"]
+                        }
+                    ]
                 },
                 {
                     model: User,
@@ -77,14 +89,14 @@ router.post('/new', asyncHandler(async (req, res) => {
         res.status(400).send({error: `record already exists at ${hash}`});
     }
 
-    await Record.create({
+    record = await Record.create({
         hash,
         description: req.body.description,
         evidenceHashes: req.body.evidences.map(e => e.hash),
         referenceHashes: req.body.references.map(r => r.hash),
         evidences: req.body.evidences,
         references: req.body.references.map(
-            r => ({recordId: hash, referenceId: r.hash})
+            r => ({referenceHash: r.hash})
         ),
         createdBy: req.user.id,
     }, {
@@ -100,7 +112,7 @@ router.post('/new', asyncHandler(async (req, res) => {
             }
         ]
     });
-    res.send({hash});    
+    res.send({hash});
 }));
 
 const { Op } = require('sequelize');
@@ -132,12 +144,24 @@ router.get('/created', asyncHandler(async (req, res) => {
                 }
             },
             {
-                model: Reference,
-                as: "references",
+                model: Record,
+                as: "reference",
                 required: false,
-                include: {
-                    model: Record,
-                }
+                include: [
+                    {
+                        model: Evidence,
+                        as: "evidences",
+                        required: false,
+                        include: {
+                            model: RawFile,
+                        }
+                    },
+                    {
+                        model: User,
+                        as: "creator",
+                        attributes: ["username"]
+                    }
+                ]
             },
             {
                 model: User,
@@ -181,12 +205,24 @@ router.get('/collections', asyncHandler(async (req, res) => {
                     }
                 },
                 {
-                    model: Reference,
-                    as: "references",
+                    model: Record,
+                    as: "reference",
                     required: false,
-                    include: {
-                        model: Record,
-                    }
+                    include: [
+                        {
+                            model: Evidence,
+                            as: "evidences",
+                            required: false,
+                            include: {
+                                model: RawFile,
+                            }
+                        },
+                        {
+                            model: User,
+                            as: "creator",
+                            attributes: ["username"]
+                        }
+                    ]
                 },
                 {
                     model: User,

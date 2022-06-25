@@ -1,6 +1,11 @@
 <template>
     <div class="formContainer">
         <div class="formContent">
+            <a-row type="flex" justify="center" style="margin-bottom: 50px">
+                <a-button type="primary" size="large" href="/">
+                    Home
+                </a-button>
+            </a-row>     
             <a-row>
                 <a-typography-title :level="3">Description</a-typography-title>
             </a-row>
@@ -22,15 +27,29 @@
             <a-row  v-if="references.length > 0" class="titleGap">
                 <a-typography-title :level="3">References</a-typography-title>
             </a-row>
-            <a-row v-for="(reference, index) in references" v-bind:key="index">
-                <a-card style="width: 100%; margin: 5px" :title="reference.hash">
-                    <a-card-meta :description="shortDescription(reference.description)">
-                        <template #avatar>
-                            <a-avatar :src="reference.createdBy" />
-                        </template>
-                    </a-card-meta>
+            <a-row v-for="reference in references" v-bind:key="reference.hash">
+                <a-card style="width: 100%; margin-top: 10px;">
+                    <a-row style="margin-bottom: 20px">
+                        Created by {{reference.creator.username || "Someone"}} {{formatDate(reference!.createdAt)}}
+                    </a-row>
+                    <a-row style="margin-bottom: 20px">
+                        <a :href="recordUrl(reference.hash)">{{reference.description}}</a>
+                    </a-row>
+                    <a-row style="margin-bottom: 20px">
+                        <EvidenceComponent
+                            class="evidence" 
+                            v-for="evidence in reference.evidences"
+                            v-bind:key="evidence.id"
+                            :preview="true"
+                            :evidence="evidence"
+                        />
+                    </a-row>
+                    <a-row v-for="(refHash, index) in reference.referenceHashes" v-bind:key="refHash">
+                        Reference {{index + 1}}: 
+                        <a :href="recordUrl(refHash)">{{refHash}}</a>
+                    </a-row>
                 </a-card>
-            </a-row>                       
+            </a-row>            
         </div>
     </div>
 </template>
@@ -46,6 +65,7 @@ import { Evidence } from '../services/evidence';
 import { shortDescription } from '../services/utils'
 import { BASE_URL } from '@/lib/constants';
 import EvidenceComponent from './evidence/EvidenceComponent.vue';
+import { formatDate } from '@/lib/format';
 
 export default defineComponent({
     components: { EvidenceComponent },
@@ -68,13 +88,17 @@ export default defineComponent({
                 description.value = "record not found";
             } else {
                 description.value = record.description;
-                evidences.value = record.evidences;
-                references.value = record.references;
+                evidences.value = record.evidences || [];
+                references.value = record.references || [];
             }
         });
 
         const fileUrl = (e: Evidence) => {
             return BASE_URL + "static/evidences/" + e.rawFile.hash;
+        };
+
+        const recordUrl = (hash: string) => {
+            return  "/record/" + hash;
         }
 
         const fileType = (e: Evidence) => {
@@ -106,21 +130,6 @@ export default defineComponent({
             return "> 1GB";
         }
 
-        const prettyPrintName = (e: Evidence) => {
-            const len = e.name.length;
-            let ext = e.name.split('.').pop();
-            if (!ext || ext.length == len) {
-                ext = "";
-            }
-            let filename = e.name.substring(0, len - ext.length - 1);
-            if (filename.length > 10) {
-                filename = filename.substring(0, 7);
-                return filename + "..." + ext;
-            } else {
-                return filename + "." + ext;
-            }
-        }
-
         return {
             route,
             description,
@@ -128,9 +137,10 @@ export default defineComponent({
             evidences,
             shortDescription,
             fileUrl,
+            recordUrl,
             fileType,
             calFileSize,
-            prettyPrintName
+            formatDate
         }
     }
 });

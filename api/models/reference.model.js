@@ -1,14 +1,10 @@
 module.exports = (sequelize, Record) => {
     const Reference = sequelize.define("References", {});
     Record.belongsToMany(Record, {
-        as: "referencer",
+        as: "reference",
         through: Reference,
-        foreignKey: 'referenceId'
     });
-    Record.hasMany(Reference, {
-        as: "references",
-        foreignKey: "recordId"
-    });
+    Record.hasMany(Reference, {as: "references"});
     Reference.belongsTo(Record);
     return Reference;
 };

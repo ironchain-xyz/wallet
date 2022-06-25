@@ -46,15 +46,22 @@
                 <a-typography-title :level="3">References</a-typography-title>
             </a-row>
             <a-row v-for="(reference, index) in references" v-bind:key="index">
-                <a-card style="width: 100%; margin: 5px" :title="reference.hash">
-                    <a-card-meta :description="reference.description">
-                        <template #avatar>
-                            <a-avatar :src="reference.createdBy" />
-                        </template>
-                    </a-card-meta>
-                    <template #extra>
-                        <a-button @click="() => deleteReference(reference, index)">Delete</a-button>
-                    </template>
+                 <a-card style="width: 100%; margin-top: 10px;">
+                    <a-row style="margin-bottom: 20px">
+                        Created by {{reference!.creator.username || "Someone"}} {{formatDate(reference!.createdAt)}}
+                    </a-row>
+                    <a-row style="margin-bottom: 20px">
+                        <span>{{reference!.description}}</span>
+                    </a-row>
+                    <a-row>
+                        <Evidence
+                            class="evidence" 
+                            v-for="evidence in reference!.evidences"
+                            v-bind:key="evidence.id"
+                            :preview="true"
+                            :evidence="evidence"
+                        />
+                    </a-row>
                 </a-card>
             </a-row>
             <a-row style="margin-top: 10px;">
@@ -62,12 +69,15 @@
                     Select from collections
                 </a-button>
             </a-row>
-            <a-row class="titleGap" type="flex" style="justify-content: center;">
+            <a-row class="titleGap" type="flex" style="justify-content: space-around;">
                 <div v-if="!!alert.save" class="alertGap">
                     <a-alert :message="alert.save" type="error" />
                 </div>
-                <a-button type="primary" size="large" block @click="onSaveRecord">
+                <a-button type="primary" size="large" @click="onSaveRecord">
                     Save
+                </a-button>
+                <a-button type="primary" size="large" href="/">
+                    Cancel
                 </a-button>
             </a-row>
         </div>
@@ -85,11 +95,21 @@
                     v-bind:key="index"
                     @click="() => selectReference(reference)"
                 >
-                    <a-card-meta :description="reference.shortDescription">
-                        <template #avatar>
-                            <a-avatar :src="reference.createdBy" />
-                        </template>
-                    </a-card-meta>
+                    <a-row style="margin-bottom: 20px">
+                        Created by {{reference!.creator.username || "Someone"}} {{formatDate(reference!.createdAt)}}
+                    </a-row>
+                    <a-row style="margin-bottom: 20px">
+                        <span>{{reference!.description}}</span>
+                    </a-row>
+                    <a-row>
+                        <Evidence
+                            class="evidence" 
+                            v-for="evidence in reference!.evidences"
+                            v-bind:key="evidence.id"
+                            :preview="true"
+                            :evidence="evidence"
+                        />
+                    </a-row>
                 </a-card>
             </div>
         </a-modal>                          
@@ -102,6 +122,7 @@ import { UploadOutlined } from '@ant-design/icons-vue';
 import router from '../router';
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
+import { formatDate } from '@/lib/format';
 import {
     RecordReference,
     NewRecordAlert,
@@ -110,11 +131,13 @@ import {
     fetchCollectedRecords,
 } from '../services/record';
 import { RawFile, uploadEvidence, getRawFile} from '../services/evidence';
-import { genHash, parseErrorMsg } from '../services/utils'
+import { genHash, parseErrorMsg } from '../services/utils';
+import Evidence from '@/components/evidence/EvidenceComponent.vue'
 
 export default defineComponent({
     components: {
         UploadOutlined,
+        Evidence
     },
     setup() {
         const store = useStore();
@@ -251,6 +274,7 @@ export default defineComponent({
             onShowCollections,
             showCollections,
             onScroll,
+            formatDate
         };
     }
 });

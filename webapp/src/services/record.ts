@@ -82,7 +82,7 @@ export async function fetchRecord(
 ) : Promise<Record> {
     const url = API_URL + "record/";
     const res = await axios.get(url, {headers: authHeader(store), params: {hash}});
-    console.log(res.data);
+    res.data.references = res.data.reference;
     return res.data;
 }
 
@@ -92,7 +92,10 @@ export async function fetchCreatedRecords(
 ) : Promise<Record[]> {
     const url = API_URL + "record/created";
     const res = await axios.get(url, {headers: authHeader(store), params});
-    return res.data.records;
+    return res.data.records.map(r => ({
+        ...r,
+        references: r.reference,
+    }));
 }
 
 export async function fetchCollectedRecords(
@@ -101,7 +104,11 @@ export async function fetchCollectedRecords(
 ) : Promise<Record[]> {
     const url = API_URL + "record/collections";
     const res = await axios.get(url, {headers: authHeader(store), params});
-    return res.data.records.map(r => ({...r.record, collectedAt: r.updatedAt}));
+    return res.data.records.map(r => ({
+        ...r.record,
+        references: r.record.reference,
+        collectedAt: r.updatedAt,
+    }));
 }
 
 export async function addToCollection(store: Store<State>, hash: string) : Promise<Record[]> {
