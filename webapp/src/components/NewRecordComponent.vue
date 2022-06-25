@@ -114,9 +114,9 @@
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue';
 import { UploadOutlined } from '@ant-design/icons-vue';
-import router from '../router';
-import { useStore } from '../store';
-import { authenticate } from '../services/auth';
+import router from '@/router';
+import { useStore } from '@/store';
+import { authenticate } from '@/services/auth';
 import { formatDate } from '@/lib/format';
 import {
     RecordReference,
@@ -124,10 +124,10 @@ import {
     validateRecord,
     newRecord,
     fetchCollectedRecords,
-} from '../services/record';
-import { RawFile, uploadEvidence, getRawFile} from '../services/evidence';
-import { genHash, parseErrorMsg } from '../services/utils';
-import Evidences from '@/components/evidence/EvidencesComponent.vue'
+} from '@/services/record';
+import { RawFile, uploadEvidence, getRawFile} from '@/services/evidence';
+import { genHash, parseErrorMsg } from '@/services/utils';
+import Evidences from '@/components/record/EvidencesComponent.vue'
 
 export default defineComponent({
     components: {

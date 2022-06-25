@@ -26,10 +26,10 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { useStore } from '../../store';
+import { useStore } from '@/store';
 
 import { Record, removeFromCollection } from '@/services/record';
-import Evidences from '@/components/evidence/EvidencesComponent.vue';
+import Evidences from '@/components/record/EvidencesComponent.vue';
 import References from '@/components/record/ReferencesComponent.vue';
 import { DeleteOutlined } from '@ant-design/icons-vue';
 import { formatDate } from '@/lib/format';

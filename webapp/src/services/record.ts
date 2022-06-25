@@ -86,6 +86,18 @@ export async function fetchRecord(
     return res.data;
 }
 
+export async function fetchLatestRecords(
+    store: Store<State>,
+    params: RecordQuery
+) : Promise<Record[]> {
+    const url = API_URL + "record/latest";
+    const res = await axios.get(url, {headers: authHeader(store), params});
+    return res.data.records.map(r => ({
+        ...r,
+        references: r.reference,
+    }));
+}
+
 export async function fetchCreatedRecords(
     store: Store<State>,
     params: RecordQuery

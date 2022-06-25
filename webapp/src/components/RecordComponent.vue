@@ -30,13 +30,13 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router'
 
-import { useStore } from '../store';
-import { authenticate } from '../services/auth';
-import { RecordPreview, fetchRecord } from '../services/record';
-import { Evidence } from '../services/evidence';
-import { shortDescription } from '../services/utils'
+import { useStore } from '@/store';
+import { authenticate } from '@/services/auth';
+import { RecordPreview, fetchRecord } from '@/services/record';
+import { Evidence } from '@/services/evidence';
+import { shortDescription } from '@/services/utils'
 import { BASE_URL } from '@/lib/constants';
-import Evidences from '@/components/evidence/EvidencesComponent.vue';
+import Evidences from '@/components/record/EvidencesComponent.vue';
 import References from '@/components/record/ReferencesComponent.vue';
 import { formatDate } from '@/lib/format';
 

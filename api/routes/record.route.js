@@ -124,7 +124,60 @@ router.get('/created', asyncHandler(async (req, res) => {
         createdBy: req.user.id
     };
     const records = await Record.findAll({
-        where: {createdBy: req.user.id},
+        where: query,
+        order: [["createdAt", "DESC"]],
+        limit: req.query.limit,
+        offset: req.query.offset,
+        include: [
+            {
+                model: Collection,
+                as: "collectors",
+                required: false,
+                where: {collected: true},
+            },
+            {
+                model: Evidence,
+                as: "evidences",
+                required: false,
+                include: {
+                    model: RawFile,
+                }
+            },
+            {
+                model: Record,
+                as: "reference",
+                required: false,
+                include: [
+                    {
+                        model: Evidence,
+                        as: "evidences",
+                        required: false,
+                        include: {
+                            model: RawFile,
+                        }
+                    },
+                    {
+                        model: User,
+                        as: "creator",
+                        attributes: ["username"]
+                    }
+                ]
+            },
+            {
+                model: User,
+                as: "creator",
+                attributes: ["username"]
+            }
+        ],
+    });
+    res.send({records});
+}));
+
+router.get('/latest', asyncHandler(async (req, res) => {
+    req.query.startAt = req.query.startAt || new Date();
+    const query = {createdAt: {[Op.lte]: req.query.startAt}};
+    const records = await Record.findAll({
+        where: query,
         order: [["createdAt", "DESC"]],
         limit: req.query.limit,
         offset: req.query.offset,

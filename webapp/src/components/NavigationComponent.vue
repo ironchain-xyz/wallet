@@ -6,11 +6,17 @@
       </div>
       <div style="margin-top: 10px">
         <a-menu mode="horizontal" class="menuItem">
-          <a-menu-item key="home">
+          <a-menu-item key="discover">
             <template #icon>
               <home-outlined />
             </template>
-            <a href="/">Home</a>
+            <a href="/">Discover</a>
+          </a-menu-item>
+          <a-menu-item key="home">
+            <template #icon>
+              <user-outlined />
+            </template>
+            <a href="/home">Home</a>
           </a-menu-item>
           <a-menu-item key="collections">
             <template #icon>
@@ -20,9 +26,9 @@
           </a-menu-item>
           <a-menu-item key="profile">
             <template #icon>
-              <user-outlined />
+              <setting-outlined />
             </template>
-            <a href="/profile">Profile</a>
+            <a href="/profile">Setting</a>
           </a-menu-item>
         </a-menu>
       </div>
@@ -32,13 +38,13 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { UserOutlined, HomeOutlined, HeartOutlined } from '@ant-design/icons-vue';
+import { UserOutlined, HomeOutlined, HeartOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { useStore } from '../store';
 import { logout } from '../services/auth';
 import { string } from 'vue-types';
 
 export default defineComponent({
-  components: { UserOutlined, HomeOutlined, HeartOutlined },
+  components: { UserOutlined, HomeOutlined, HeartOutlined, SettingOutlined },
   props: {
     tabKey: string,
   },

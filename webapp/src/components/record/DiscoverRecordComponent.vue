@@ -2,7 +2,7 @@
     <a-card class="container">
         <a-row style="margin-bottom: 20px">
             <a-col :span="18" style="text-align: left">
-                Created {{formatDate(record!.createdAt)}}
+                Created by {{record!.creator.username || "Someone"}} {{formatDate(record!.createdAt)}}
             </a-col>
             <a-col :span="6">
                 <a-button type="text" @click="toggleCollection">
@@ -25,6 +25,7 @@
         <References :references="record.references" />
     </a-card>
 </template>
+
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
