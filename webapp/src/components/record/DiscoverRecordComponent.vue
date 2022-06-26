@@ -33,7 +33,7 @@
                 type="flex"
                 justify="space-between"
                 align="middle"
-                style="margin-top: 5px; color: gray; font-size: 12px"
+                style="margin-top: 10px; color: gray; font-size: 12px"
             >
                 {{formatDate(record.createdAt)}}
             </a-row>

@@ -55,7 +55,6 @@ export default defineComponent({
 .evidenceWrapper {
     border: 1px solid #ececec;
     align-items: center;
-    margin-top: 10px;
 }
 
 .thumbnail {
