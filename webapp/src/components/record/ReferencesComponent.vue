@@ -1,20 +1,26 @@
 <template>
-    <a-row v-for="reference in references" v-bind:key="reference.hash">
-        <a-card style="width: 100%; margin-top: 10px;">
-            <a-row style="margin-bottom: 20px">
-                Created by {{reference.creator.username || "Someone"}} {{formatDate(reference!.createdAt)}}
+    <a-row
+        v-for="(reference, index) in references"
+        v-bind:key="reference.hash"
+        class="refWrapper"
+        type="flex"
+        justify="space-between"
+        align="middle"
+    >
+        <a-col style="margin-left: 20px;">
+            <a-avatar :size="30" class="avatar" shape="square">
+                {{ reference.creator.username.substring(0, 1).toUpperCase() }}
+            </a-avatar>
+            <a-row>
+                {{reference.creator.username}}
             </a-row>
-            <a-row style="margin-bottom: 20px">
-                <a :href='"/record/" + reference.hash'>{{reference.description}}</a>
-            </a-row>
-            <a-row style="margin-bottom: 20px">
-                <Evidences :evidences="reference.evidences" :thumbnail="true"/>
-            </a-row>
-            <a-row v-for="(refHash, index) in reference.referenceHashes" v-bind:key="refHash">
-                Reference {{index + 1}}: 
-                <a :href='"/record/" + hash'>{{refHash.substring(0, 10)}}</a>
-            </a-row>
-        </a-card>
+        </a-col>
+        <a-col>
+            <a :href='"/record/" + reference.hash'>{{reference.description.substring(0, 100)}}</a>
+        </a-col>
+        <a-col style="margin-right: 20px;">
+            <Evidences :evidences="reference.evidences.slice(0, 3)" :thumbnail="true"/>
+        </a-col> 
     </a-row>
 </template>
 
@@ -76,3 +82,18 @@ export default defineComponent({
     }
 });
 </script>
+
+<style lang="less" scoped>
+.avatar {
+    font-weight: bold;
+    background-color: #1890ff;
+}
+
+.refWrapper {
+    border-style: solid;
+    border-color: gray;
+    color: black;
+    padding: 5px;
+    margin-top: 10px;
+}
+</style>

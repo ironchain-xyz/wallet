@@ -97,7 +97,7 @@
                         <span>{{reference!.description}}</span>
                     </a-row>
                     <a-row>
-                        <Evidence
+                        <Evidences
                             class="evidence" 
                             v-for="evidence in reference!.evidences"
                             v-bind:key="evidence.id"

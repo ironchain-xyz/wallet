@@ -1,5 +1,5 @@
 <template>
-    <a-row class="evidenceWrapper" type="flex">
+    <a-row v-if="evidences.length > 0" class="evidenceWrapper" type="flex">
         <div v-for="evidence in evidences" v-bind:key="evidence.hash">
             <img
                 v-if="fileType(evidence) == 'image'"
@@ -55,7 +55,7 @@ export default defineComponent({
 .evidenceWrapper {
     border: 1px solid #ececec;
     align-items: center;
-    margin-right: 10px;
+    margin-top: 10px;
 }
 
 .thumbnail {

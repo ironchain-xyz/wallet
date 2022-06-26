@@ -1,31 +1,46 @@
 <template>
-    <a-card class="container">
-        <a-row style="margin-bottom: 20px">
-            <a-col :span="18" style="text-align: left">
-                Created by {{record!.creator.username || "Someone"}} {{formatDate(record!.createdAt)}}
-            </a-col>
-            <a-col :span="6">
-                <a-button type="text" @click="toggleCollection">
-                    <template #icon>
-                        <HeartOutlined v-if="!isCollected"/>
-                        <HeartTwoTone twoToneColor="#eb2f96" v-if="isCollected"/>
-                    </template>
-                    {{record!.collectors.length}}
-                </a-button>
-            </a-col>
-        </a-row>
-        <a-row style="margin-bottom: 20px">
-            <a :href="recordUrl">
-                <span>{{record!.description}}</span>
-            </a> 
-        </a-row>
-        <a-row>
-            <Evidences :evidences="record.evidences"/>
-        </a-row>
-        <References :references="record.references" />
-    </a-card>
+    <a-row class="container">
+        <a-col :span="4">
+            <a-avatar :size="50" class="avatar" shape="square">
+                {{ record.creator.username.substring(0, 1).toUpperCase() }}
+            </a-avatar>
+            <a-row type="flex" justify="center">
+                {{record.creator.username}}
+            </a-row>
+        </a-col>
+        <a-col :span="20">
+            <a-row justify="space-between">
+                <a-col>
+                    <a :href="recordUrl">
+                        <span>{{record!.description}}</span>
+                    </a> 
+                </a-col>
+                <a-col>
+                    <a-button type="text" @click="toggleCollection" style="padding: 0px;">
+                        <template #icon>
+                            <HeartOutlined v-if="!isCollected"/>
+                            <HeartTwoTone twoToneColor="#eb2f96" v-if="isCollected"/>
+                        </template>
+                        {{record!.collectors.length}}
+                    </a-button>
+                </a-col>
+            </a-row>
+            <a-row>
+                <Evidences :evidences="record.evidences"/>
+            </a-row>
+            <References :references="record.references" />
+            <a-row
+                type="flex"
+                justify="space-between"
+                align="middle"
+                style="margin-top: 5px; color: gray; font-size: 12px"
+            >
+                {{formatDate(record.createdAt)}}
+            </a-row>
+        </a-col>
+    </a-row>
+    <a-divider class="container"></a-divider>
 </template>
-
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
@@ -84,5 +99,10 @@ export default defineComponent({
 .container {
     max-width: 800px;
     width: 100%;
+}
+
+.avatar {
+    font-weight: bold;
+    background-color: #209645;
 }
 </style>

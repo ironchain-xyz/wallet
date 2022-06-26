@@ -7,19 +7,14 @@
                 <div class="field">
                     <a-alert v-if="!!alert" :message="alert" type="error" />
                 </div>
-                <div class="field">
-                    <a-avatar :size="80" class="avatar">
-                        {{ username.toUpperCase() }}
-                    </a-avatar>
-                </div>
-                <div class="field">
-                    <a-typography-title :level="4">Email</a-typography-title>
-                    <a-typography-paragraph>{{ email }}</a-typography-paragraph>
-                </div>
                 <div class="field" style="max-width: 200px; margin-left: auto; margin-right: auto;">
                     <a-typography-title :level="4">Username</a-typography-title>
                     <a-typography-paragraph v-model:content="username" :editable="{ onEnd: onUsernameChange }">
                     </a-typography-paragraph>
+                </div>
+                <div class="field">
+                    <a-typography-title :level="4">Email</a-typography-title>
+                    <a-typography-paragraph>{{ email }}</a-typography-paragraph>
                 </div>
                 <div class="field">
                     <a-typography-title :level="4">Invitation Codes</a-typography-title>
@@ -41,10 +36,10 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref, computed, onBeforeMount } from 'vue';
-import { useStore } from '../store';
+import { useStore } from '@/store';
 import { getInvitationCode, updateUsername } from '@/services/profile';
 import Navigation from '@/components/NavigationComponent.vue'
-import { logout } from '../services/auth';
+import { logout } from '@/services/auth';
 
 interface InvitationCode {
     code: string;
@@ -99,10 +94,5 @@ export default defineComponent({
 
 .field {
     margin-bottom: 50px;
-}
-
-.avatar {
-    font-weight: bold;
-    background-color: #1890ff;
 }
 </style>
