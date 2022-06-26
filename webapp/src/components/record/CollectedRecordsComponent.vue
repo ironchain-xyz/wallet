@@ -1,6 +1,6 @@
 <template>
-    <a-row v-for="record in records" v-bind:key="record.hash" type="flex" justify="center" class="preview">
-        <CollectedRecord :record="record" @toggleCollection="toggleCollection"/>
+    <a-row v-for="(record, index) in records" v-bind:key="record.hash" type="flex" justify="center" class="preview">
+        <CollectedRecord :record="record" :index="index" @toggleCollection="toggleCollection"/>
     </a-row>
     <a-row>
         <a-spin v-if="loading" />
@@ -46,20 +46,10 @@ export default defineComponent({
             });
         });
 
-        const toggleCollection = (params: {action: "remove" | "add", record: string}) => {
-            const userId = store.state.user!.id!;
-            for (let i = 0; i < records.value.length; i++) {
-                if (records.value[i].hash == params.record) {
-                    if (params.action == "remove") {
-                        records.value[i].collectors = records.value[i].collectors.filter(
-                            u => u.userId != userId
-                        );
-                    } else if (params.action == "add") {
-                        records.value[i].collectors.push({userId});
-                    }
-                }
-            }
+        const toggleCollection = (params: {index: number}) => {
+            records.value.splice(params.index, 1);
         };
+
         return {
             loading,
             errMsg,

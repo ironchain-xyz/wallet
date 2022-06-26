@@ -55,7 +55,8 @@ import { formatDate } from '@/lib/format';
 export default defineComponent({
     components: {Evidences, References, DeleteOutlined},
     props: {
-        record: Object as () => Record
+        record: Object as () => Record,
+        index: Number,
     },
     setup(props, { emit }) {
         const store = useStore();
@@ -67,8 +68,7 @@ export default defineComponent({
         const onCollect = () => {
             removeFromCollection(store, props.record.hash).then(() => {
                 emit("toggleCollection", {
-                    action: "remove", 
-                    record: props.record.hash,
+                    index: props.index,
                 });
             });
         };

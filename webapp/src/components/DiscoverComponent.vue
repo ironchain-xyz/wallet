@@ -2,14 +2,7 @@
   <div class="content">
     <Navigation />
     <div style="padding-bottom: 100px;" v-if="authenticated">
-        <a-row justify="center">
-            <a-button type="primary" href="/record/new">
-                Create Record
-            </a-button>
-        </a-row>
-        <a-row justify="center">
-            <DiscoverRecords />
-        </a-row>
+        <DiscoverRecords />
     </div>
   </div>
 </template>

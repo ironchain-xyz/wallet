@@ -1,10 +1,10 @@
 <template>
   <a-affix :offset-top="top">
-    <div class="nav-container">
-      <div class="nav-item">
+    <a-row class="nav-container">
+      <a-col class="nav-item">
         <img alt="Vue logo" src="../assets/logo.png" style="width:50px; height:50px;">
-      </div>
-      <div style="margin-top: 10px">
+      </a-col>
+      <a-col style="margin-top: 10px">
         <a-menu mode="horizontal" class="menuItem">
           <a-menu-item key="discover">
             <template #icon>
@@ -31,20 +31,32 @@
             <a href="/profile">Setting</a>
           </a-menu-item>
         </a-menu>
-      </div>
-    </div>
+      </a-col>
+      <a-col class="nav-item" style="margin-top: 20px">
+        <a-tooltip placement="right">
+          <template #title>
+            <span>Create Record</span>
+          </template>
+          <a href="/record/new">
+            <a-button type="primary" shape="circle">
+              <template #icon><PlusOutlined /></template>
+            </a-button>
+          </a>     
+        </a-tooltip>
+      </a-col>
+    </a-row>
   </a-affix>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { UserOutlined, HomeOutlined, HeartOutlined, SettingOutlined } from '@ant-design/icons-vue';
+import { UserOutlined, HomeOutlined, HeartOutlined, SettingOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { useStore } from '../store';
 import { logout } from '../services/auth';
 import { string } from 'vue-types';
 
 export default defineComponent({
-  components: { UserOutlined, HomeOutlined, HeartOutlined, SettingOutlined },
+  components: { UserOutlined, HomeOutlined, HeartOutlined, SettingOutlined, PlusOutlined },
   props: {
     tabKey: string,
   },
