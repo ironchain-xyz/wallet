@@ -13,8 +13,8 @@ app.use(express.static(path));
 
 var corsOptions = {
     origin: [
-        "http://localhost:8081",
-        "https://localhost:8081"
+        "http://localhost:8080",
+        "https://localhost:8080"
     ],
     credentials: true,
     exposedHeaders: ['set-cookie']
@@ -36,7 +36,7 @@ const db = require("./models");
 if (process.env.NODE_ENV == 'production') {
     db.sequelize.sync();
 } else {
-    db.sequelize.sync({ force: false }).then(() => {
+    db.sequelize.sync({ force: true }).then(() => {
         console.log("Drop and re-sync db.");
     });
 }
@@ -48,7 +48,7 @@ app.use(asyncHandler(async (req, res, next) => {
     if (req.path.startsWith("/static")) {
         return next();
     }
-    if (req.path.startsWith("/api/auth")) {
+    if (req.path.startsWith("/auth")) {
         return next();
     }
 
@@ -71,20 +71,20 @@ app.use(asyncHandler(async (req, res, next) => {
 }));
 
 const auth = require('./routes/auth.route');
-app.use('/api/auth/', auth);
+app.use('/auth/', auth);
 
 const upload = require('./routes/upload.route');
-app.use('/api/evidence/', upload);
+app.use('/evidence/', upload);
 
 const record = require('./routes/record.route');
-app.use('/api/record/', record);
+app.use('/record/', record);
 
 const main = require('./routes/main.route');
-app.use('/api/', main);
+app.use('/', main);
 
 app.use('/static/evidences', express.static(__dirname + '/files/evidences'));
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);
 });

@@ -5,7 +5,6 @@ const router = require("express").Router();
 const asyncHandler = require('express-async-handler')
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
-const nodemailer = require("../config/nodemailer.config.js");
 const time = require("../lib/time.js");
 const { randomCode } = require("../lib/util.js");
 
@@ -19,13 +18,25 @@ const ACCESS_TOKEN_LIFETIME = parseInt(process.env.ACCESS_TOKEN_LIFETIME);
 
 const USER_WHITELIST = ['dongs2011@gmail.com', 'ironchaindao@gmail.com'];
 
-async function genOTP(email, mocked=true) {
-    if (mocked) {
-        OTP = "123456";
+const sgMail = require('@sendgrid/mail')
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
+async function genOTP(email) {
+    console.log(process.env.MOCK_OTP);
+    if (process.env.MOCK_OTP == "true") {
+        console.log("mock OTP ");
+        return {value: "123456", sentAt: time.epoch()};
     } else {
-        await nodemailer.sendPasscode(email, randomCode(OTP_LEN));
+        OTP = randomCode(OTP_LEN);
+        await sgMail.send({
+            to: email,
+            from: "info@ironchain.xyz",
+            subject: 'Ironchain Login Code',
+            text: `Hi,\n\nYour Ironchain login code is ${OTP}. The code will expire in 10 minutes.\n\nRegards,\nIronChain`,
+            html: `<p>Hi,<br><br>Your Ironchain login code is <br><br><span style="color: #b58d21; font-size: 20px; font-weight: bold;">${OTP}</span><br><br>The code will expire in 10 minutes.<br><br>Regards,<br>IronChain</p>`,
+        });
+        return {value: OTP, sentAt: time.epoch()};
     }
-    return {value: OTP, sentAt: time.epoch()};
 }
 
 function genRefreshToken(id) {

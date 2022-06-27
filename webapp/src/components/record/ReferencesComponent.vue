@@ -1,6 +1,6 @@
 <template>
     <a-row
-        v-for="(reference, index) in references"
+        v-for="reference in references"
         v-bind:key="reference.hash"
         class="refWrapper"
         type="flex"
