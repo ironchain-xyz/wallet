@@ -1,6 +1,6 @@
 <template>
-    <a-row v-for="record in records" v-bind:key="record.hash" type="flex" justify="center" class="preview">
-        <DiscoverRecord :record="record" @toggleCollection="toggleCollection"/>
+    <a-row v-for="(record, index) in records" v-bind:key="record.hash" type="flex" justify="center" class="preview">
+        <RecordComponent :record="record" :index="index" :type="type" @toggleCollection="toggleCollection" />
     </a-row>
     <a-row>
         <a-spin v-if="loading" />
@@ -14,13 +14,32 @@
 import { defineComponent, reactive, ref, onBeforeMount } from 'vue';
 import { parseErrorMsg } from '@/services/utils';
 import { useStore } from '@/store';
-import DiscoverRecord from './DiscoverRecordComponent.vue';
+import RecordComponent from '@/components/record/RecordComponent.vue';
+import {
+    Record,
+    RecordQuery,
+    fetchCollectedRecords,
+    fetchCreatedRecords,
+    fetchLatestRecords
+} from '@/services/record';
 
-import { Record, RecordQuery, fetchLatestRecords } from '@/services/record';
+function fetchRecords(type, store, query) {
+    if (type == "collected") {
+        return fetchCollectedRecords(store, query);
+    } else if (type == "created") {
+        return fetchCreatedRecords(store, query);
+    } else if (type == "latest") {
+        return fetchLatestRecords(store, query);
+    }
+    return Promise.resolve([]);
+}
 
 export default defineComponent({
-    components: {DiscoverRecord},
-    setup() {
+    components: { RecordComponent },
+    props: {
+        type: String,
+    },
+    setup(props) {
         const store = useStore();
 
         let loading = ref<boolean>(false);
@@ -31,7 +50,7 @@ export default defineComponent({
         onBeforeMount(() => {
             records.value = [];
             loading.value = true;
-            fetchLatestRecords(store, query).then(res => {
+            fetchRecords(props.type, store, query).then(res => {
                 res.forEach(record => {
                     records.value.push(record);
                 });
@@ -49,20 +68,22 @@ export default defineComponent({
             });
         });
 
-        const toggleCollection = (params: {action: "remove" | "add", record: string}) => {
+        const toggleCollection = (params: {action: "enable" | "disable" | "remove", index: number}) => {
             const userId = store.state.user!.id!;
-            for (let i = 0; i < records.value.length; i++) {
-                if (records.value[i].hash == params.record) {
-                    if (params.action == "remove") {
-                        records.value[i].collectors = records.value[i].collectors.filter(
-                            u => u.userId != userId
-                        );
-                    } else if (params.action == "add") {
-                        records.value[i].collectors.push({userId});
-                    }
+            if (params.action == "disable") {
+                records.value[params.index].collectors = records.value[params.index].collectors.filter(
+                    u => u.userId != userId
+                );
+            } else if (params.action == "enable") {
+                records.value[params.index].collectors.push({userId});
+            } else if (params.action == "remove") {
+                records.value.splice(params.index, 1);
+                if (records.value.length == 0) {
+                    errMsg.value = "No Records"
                 }
             }
         };
+
         return {
             loading,
             errMsg,

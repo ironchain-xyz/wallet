@@ -11,15 +11,17 @@
         <a-col :span="20">
             <a-row justify="space-between">
                 <a-col>
-                    <a :href="recordUrl">
+                    <a :href='"/record/" + record.hash'>
                         <span>{{record!.description}}</span>
-                    </a>
+                    </a> 
                 </a-col>
                 <a-col>
-                    <a-button type="text" @click="onCollect">
+                    <a-button type="text" @click="onToggleCollection" style="padding: 0px;">
                         <template #icon>
-                            <DeleteOutlined twoToneColor="#eb2f96"/>
+                            <HeartOutlined v-if="!isCollected"/>
+                            <HeartTwoTone twoToneColor="#eb2f96" v-if="isCollected"/>
                         </template>
+                        {{record!.collectors.length}}
                     </a-button>
                 </a-col>
             </a-row>
@@ -33,9 +35,7 @@
                 align="middle"
                 style="margin-top: 10px; color: gray; font-size: 12px"
             >
-                <a-col>
-                    {{formatDate(record.createdAt)}}
-                </a-col>
+                {{formatDate(record.createdAt)}}
             </a-row>
         </a-col>
     </a-row>
@@ -44,45 +44,50 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { useStore } from '@/store';
+import { useStore } from '../../store';
 
-import { Record, removeFromCollection } from '@/services/record';
+import { Record, addToCollection, removeFromCollection } from '@/services/record';
 import Evidences from '@/components/record/EvidencesComponent.vue';
 import References from '@/components/record/ReferencesComponent.vue';
-import { DeleteOutlined } from '@ant-design/icons-vue';
+import { HeartOutlined, HeartTwoTone } from '@ant-design/icons-vue';
 import { formatDate } from '@/lib/format';
 
 export default defineComponent({
-    components: {Evidences, References, DeleteOutlined},
+    components: {Evidences, References, HeartOutlined, HeartTwoTone},
     props: {
         record: Object as () => Record,
         index: Number,
+        type: String,
     },
     setup(props, { emit }) {
         const store = useStore();
-
-        const recordUrl = computed(() => {
-            return "/record/" + props.record.hash;
-        });
-
-        const onCollect = () => {
-            removeFromCollection(store, props.record.hash).then(() => {
-                emit("toggleCollection", {
-                    index: props.index,
-                });
-            });
-        };
-
         const isCollected = computed(() => {
             const uid = store.state.user!.id!;
             return props.record.collectors.some(c => c.userId == uid);
         });
 
+        const onToggleCollection = () => {
+            if (isCollected.value) {
+                removeFromCollection(store, props.record.hash).then(() => {
+                    emit("toggleCollection", {
+                        action: props.type == "collected" ? "remove" : "disable", 
+                        index: props.index,
+                    });
+                });
+            } else {
+                addToCollection(store, props.record.hash).then(() => {
+                    emit("toggleCollection", {
+                        action: "enable",
+                        index: props.index,
+                    });
+                });
+            }
+        };
+
         return {
             formatDate,
-            recordUrl,
+            onToggleCollection,
             isCollected,
-            onCollect,
         };
     }
 });

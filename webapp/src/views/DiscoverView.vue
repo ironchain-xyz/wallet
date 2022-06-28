@@ -1,18 +1,18 @@
 <template>
   <ContentComponent>
-    <DiscoverRecords />
+    <RecordsContainer type="latest" />
   </ContentComponent>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import DiscoverRecords from '@/components/record/DiscoverRecordsComponent.vue'
-import ContentComponent from '@/components/ContentComponent.vue'
+import ContentComponent from '@/components/ContentComponent.vue';
+import RecordsContainer from '@/components/record/RecordsContainerComponent.vue';
 
 @Options({
   components: {
+    RecordsContainer,
     ContentComponent,
-    DiscoverRecords,
   },
 })
 export default class DiscoverView extends Vue { }
