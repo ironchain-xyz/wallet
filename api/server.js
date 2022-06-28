@@ -12,10 +12,9 @@ const app = express();
 app.use(express.static(path));
 
 var corsOptions = {
-    origin: [
-        "http://localhost:8080",
-        "https://localhost:8080"
-    ],
+    origin: process.env.NODE_ENV == 'production'
+      ? ["https://dao.ironchain.xyz"]
+      : ["http://localhost:8080"],
     credentials: true,
     exposedHeaders: ['set-cookie']
 };
