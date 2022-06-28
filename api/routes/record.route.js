@@ -41,6 +41,12 @@ router.get('/', asyncHandler(async (req, res) => {
         {
             include: [
                 {
+                    model: Collection,
+                    as: "collectors",
+                    required: false,
+                    where: {collected: true},
+                },
+                {
                     model: Evidence,
                     as: "evidences",
                     required: false,

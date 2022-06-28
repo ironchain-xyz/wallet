@@ -12,6 +12,7 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref, onBeforeMount } from 'vue';
+import { useRoute } from 'vue-router';
 import { parseErrorMsg } from '@/services/utils';
 import { useStore } from '@/store';
 import RecordComponent from '@/components/record/RecordComponent.vue';
@@ -20,7 +21,8 @@ import {
     RecordQuery,
     fetchCollectedRecords,
     fetchCreatedRecords,
-    fetchLatestRecords
+    fetchLatestRecords,
+    fetchRecord,
 } from '@/services/record';
 
 function fetchRecords(type, store, query) {
@@ -30,6 +32,12 @@ function fetchRecords(type, store, query) {
         return fetchCreatedRecords(store, query);
     } else if (type == "latest") {
         return fetchLatestRecords(store, query);
+    } else if (type == "single") {
+        const route = useRoute();
+        const hash = route.params.hash as string;
+        return fetchRecord(store, hash).then(res => {
+            return [res];
+        });
     }
     return Promise.resolve([]);
 }
@@ -54,7 +62,7 @@ export default defineComponent({
                 res.forEach(record => {
                     records.value.push(record);
                 });
-                query.limit += res.length;
+                query.offset += res.length;
                 if (res.length > 0) {
                     query.startAt = query.startAt || res[0].createdAt;
                 }

@@ -1,14 +1,19 @@
 <template>
-  <Record />
+  <ContentComponent>
+    <RecordsContainer type="single" />
+  </ContentComponent>
 </template>
 
 <script lang="ts">
-import Record from '@/components/RecordComponent.vue'; // @ is an alias to /src
+import { Options, Vue } from 'vue-class-component';
+import ContentComponent from '@/components/ContentComponent.vue';
+import RecordsContainer from '@/components/record/RecordsContainerComponent.vue';
 
-export default {
-  name: 'RecordView',
+@Options({
   components: {
-    Record
-  }
-}
+    RecordsContainer,
+    ContentComponent,
+  },
+})
+export default class DiscoverView extends Vue { }
 </script>

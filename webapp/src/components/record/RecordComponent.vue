@@ -39,7 +39,6 @@
             </a-row>
         </a-col>
     </a-row>
-    <a-divider class="container"></a-divider>
 </template>
 
 <script lang="ts">
