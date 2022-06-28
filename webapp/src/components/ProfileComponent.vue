@@ -1,44 +1,44 @@
 
 <template>
-    <div class="home">
-        <Navigation />
-        <div class="content">
+    <a-col>
+        <a-row justify="center" class="field" v-if="!!alert">
+            <a-alert :message="alert" type="error" />
+        </a-row>
+        <a-row justify="center" class="field">
             <div>
-                <div class="field">
-                    <a-alert v-if="!!alert" :message="alert" type="error" />
-                </div>
-                <div class="field" style="max-width: 200px; margin-left: auto; margin-right: auto;">
-                    <a-typography-title :level="4">Username</a-typography-title>
-                    <a-typography-paragraph v-model:content="username" :editable="{ onEnd: onUsernameChange }">
-                    </a-typography-paragraph>
-                </div>
-                <div class="field">
-                    <a-typography-title :level="4">Email</a-typography-title>
-                    <a-typography-paragraph>{{ email }}</a-typography-paragraph>
-                </div>
-                <div class="field">
-                    <a-typography-title :level="4">Invitation Codes</a-typography-title>
-                    <div v-for="({ code, used }, index) in invitationCodes" v-bind:key="index">
-                        <a-typography-paragraph :class="{ used, active: !used }" :copyable="!used">
-                            {{ code }}
-                        </a-typography-paragraph>
-                    </div>
-                </div>
-                <div class="field">
-                    <a-button type="primary" @click="onLogout">
-                        Logout
-                    </a-button>
-                </div>
+                <a-typography-title :level="4">Username</a-typography-title>
+                <a-typography-paragraph v-model:content="username" :editable="{ onEnd: onUsernameChange }">
+                </a-typography-paragraph>
             </div>
-        </div>
-    </div>
+        </a-row>
+        <a-row justify="center" class="field">
+            <div>
+                <a-typography-title :level="4">Email</a-typography-title>
+                <a-typography-paragraph>{{ email }}</a-typography-paragraph>
+            </div>
+        </a-row>
+        <a-row justify="center" class="field">
+            <div>
+                <a-typography-title :level="4">Invitation Codes</a-typography-title>
+                <a-row justify="center" v-for="({ code, used }, index) in invitationCodes" v-bind:key="index">
+                    <a-typography-paragraph :class="{ used, active: !used }" :copyable="!used">
+                        {{ code }}
+                    </a-typography-paragraph>
+                </a-row>
+            </div>
+        </a-row>
+        <a-row justify="center" class="field">
+            <a-button type="primary" @click="onLogout">
+                Logout
+            </a-button>
+        </a-row>
+    </a-col>
 </template>
 
 <script lang="ts">
 import { defineComponent, reactive, ref, computed, onBeforeMount } from 'vue';
 import { useStore } from '@/store';
 import { getInvitationCode, updateUsername } from '@/services/profile';
-import Navigation from '@/components/NavigationComponent.vue'
 import { logout } from '@/services/auth';
 
 interface InvitationCode {
@@ -47,7 +47,6 @@ interface InvitationCode {
 }
 
 export default defineComponent({
-    components: { Navigation },
     setup() {
         const store = useStore();
         let alert = ref<string>('');
@@ -94,5 +93,7 @@ export default defineComponent({
 
 .field {
     margin-bottom: 50px;
+    margin-left: auto;
+    margin-right: auto;
 }
 </style>

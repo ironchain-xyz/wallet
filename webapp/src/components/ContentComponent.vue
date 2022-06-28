@@ -1,24 +1,22 @@
 <template>
-  <div class="content">
-    <Navigation />
-    <div style="padding-bottom: 100px;" v-if="authenticated">
-        <a-row justify="center">
-            <CreatedRecords />
-        </a-row>
-    </div>
-  </div>
+    <a-row class="content">
+        <a-col>
+            <Navigation />
+        </a-col>
+        <a-col style="margin-left: 20px">
+            <slot></slot>
+        </a-col>
+    </a-row>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import Navigation from '@/components/NavigationComponent.vue'
-import CreatedRecords from '@/components/record/CreatedRecordsComponent.vue'
-
 import { useStore } from '../store';
 import { authenticate } from '../services/auth';
 
 export default defineComponent({
-  components: { Navigation, CreatedRecords },
+  components: { Navigation },
   setup() {
     const store = useStore();
     const authenticated = ref<boolean>(false);
@@ -34,11 +32,3 @@ export default defineComponent({
   },
 })
 </script>
-
-
-<style lang="less" scoped>
-.content {
-    min-width: 50%;
-    padding-bottom: 200px;
-}
-</style>

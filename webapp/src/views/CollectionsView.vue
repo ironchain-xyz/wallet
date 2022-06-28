@@ -1,15 +1,19 @@
 <template>
-  <Collections />
+  <ContentComponent>
+    <CollectedRecords />
+  </ContentComponent>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import Collections from '@/components/CollectionsComponent.vue'; // @ is an alias to /src
+import CollectedRecords from '@/components/record/CollectedRecordsComponent.vue'
+import ContentComponent from '@/components/ContentComponent.vue'
 
 @Options({
   components: {
-    Collections,
+    ContentComponent,
+    CollectedRecords,
   },
 })
-export default class CollectionsView extends Vue { }
+export default class DiscoverView extends Vue { }
 </script>

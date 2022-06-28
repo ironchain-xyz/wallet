@@ -1,14 +1,18 @@
 <template>
-  <Discover />
+  <ContentComponent>
+    <DiscoverRecords />
+  </ContentComponent>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import Discover from '@/components/DiscoverComponent.vue'; // @ is an alias to /src
+import DiscoverRecords from '@/components/record/DiscoverRecordsComponent.vue'
+import ContentComponent from '@/components/ContentComponent.vue'
 
 @Options({
   components: {
-    Discover,
+    ContentComponent,
+    DiscoverRecords,
   },
 })
 export default class DiscoverView extends Vue { }

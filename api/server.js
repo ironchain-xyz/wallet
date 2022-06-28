@@ -35,7 +35,7 @@ const db = require("./models");
 if (process.env.NODE_ENV == 'production') {
     db.sequelize.sync();
 } else {
-    db.sequelize.sync({ force: true }).then(() => {
+    db.sequelize.sync({ force: false }).then(() => {
         console.log("Drop and re-sync db.");
     });
 }

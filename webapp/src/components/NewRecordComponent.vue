@@ -1,114 +1,99 @@
 <template>
-    <div class="formContainer">
-        <div class="formContent">
-            <a-row>
-                <a-typography-title :level="2">New Record</a-typography-title>
-            </a-row>
-            <a-row>
-                <a-textarea
-                    :rows="4"
-                    @change="() => alert.description = ''"
-                    v-model:value="description"
-                    placeholder="Describe the record, append tags with # at the end"
-                    style="font-size: large"
-                />
-            </a-row>
-            <a-row v-if="!!alert.description" class="alertGap">
-                <a-alert :message="alert.description" type="error" />
-            </a-row>
-            <a-row class="titleGap">
-                <a-typography-title :level="3">Evidences</a-typography-title>
-            </a-row>
-            <a-row type="flex">
-                <div>
-                    <a-upload
-                        name="evidence"
-                        v-model:file-list="evidences"
-                        accept="image/*,video/*"
-                        list-type="picture-card"
-                        @preview="handlePreview"
-                        :customRequest="uploadCustomRequest"
-                        :maxCount="5"
-                        multiple
-                        @change="() => alert.evidences = ''"
-                    >
-                        <div v-if="evidences.length < 5"> 
-                            <upload-outlined />
-                            <div style="margin-top: 8px">Upload Files</div>
-                        </div>
-                    </a-upload>
+    <a-row>
+        <a-textarea
+            :rows="4"
+            @change="() => alert.description = ''"
+            v-model:value="description"
+            placeholder="Describe the record, append tags with # at the end"
+        />
+    </a-row>
+    <a-row v-if="!!alert.description" class="alertGap">
+        <a-alert :message="alert.description" type="error" />
+    </a-row>
+    <a-row type="flex" class="titleGap">
+        <div>
+            <a-upload
+                name="evidence"
+                v-model:file-list="evidences"
+                accept="image/*,video/*"
+                list-type="picture-card"
+                @preview="handlePreview"
+                :customRequest="uploadCustomRequest"
+                :maxCount="9"
+                multiple
+                @change="() => alert.evidences = ''"
+            >
+                <div v-if="evidences.length < 5"> 
+                    <upload-outlined />
+                    <div style="margin-top: 8px">Upload Evidences</div>
                 </div>
-                <div v-if="!!alert.evidences" class="alertGap">
-                    <a-alert :message="alert.evidences" type="error" />
-                </div>
-            </a-row>
-
-            <a-row class="titleGap">
-                <a-typography-title :level="3">References</a-typography-title>
-            </a-row>
-            <a-row v-for="(reference, index) in references" v-bind:key="index">
-                 <a-card style="width: 100%; margin-top: 10px;">
-                    <a-row style="margin-bottom: 20px">
-                        Created by {{reference!.creator.username || "Someone"}} {{formatDate(reference!.createdAt)}}
-                    </a-row>
-                    <a-row style="margin-bottom: 20px">
-                        <span>{{reference!.description}}</span>
-                    </a-row>
-                    <a-row>
-                        <Evidences :evidence="reference!.evidences"/>
-                    </a-row>
-                </a-card>
-            </a-row>
-            <a-row style="margin-top: 10px;">
-                <a-button type="dashed" size="large" @click="onShowCollections">
-                    Select from collections
-                </a-button>
-            </a-row>
-            <a-row class="titleGap" type="flex" style="justify-content: space-around;">
-                <div v-if="!!alert.save" class="alertGap">
-                    <a-alert :message="alert.save" type="error" />
-                </div>
-                <a-button type="primary" size="large" @click="onSaveRecord">
-                    Save
-                </a-button>
-                <a-button type="primary" size="large" href="/">
-                    Cancel
-                </a-button>
-            </a-row>
+            </a-upload>
         </div>
-        <a-modal
-            :visible="showCollections"
-            title="Select record to reference"
-            @ok="onAddReference"
-            @cancel="onCancelReference"
-        >
-            <div @scroll="onScroll" style="height: calc(50vh); overflow: auto; background-color: #ececec;">
-                <a-card
-                    :hoverable="reference.status !== 'selected'"
-                    :class="reference.status || 'available'"
-                    v-for="(reference, index) in collections"
-                    v-bind:key="index"
-                    @click="() => selectReference(reference)"
-                >
-                    <a-row style="margin-bottom: 20px">
-                        Created by {{reference!.creator.username || "Someone"}} {{formatDate(reference!.createdAt)}}
-                    </a-row>
-                    <a-row style="margin-bottom: 20px">
-                        <span>{{reference!.description}}</span>
-                    </a-row>
-                    <a-row>
-                        <Evidences
-                            class="evidence" 
-                            v-for="evidence in reference!.evidences"
-                            v-bind:key="evidence.id"
-                            :preview="true"
-                            :evidence="evidence"
-                        />
-                    </a-row>
-                </a-card>
-            </div>
-        </a-modal>                          
-    </div>
+        <div v-if="!!alert.evidences" class="alertGap">
+            <a-alert :message="alert.evidences" type="error" />
+        </div>
+    </a-row>
+    <a-row v-for="(reference, index) in references" v-bind:key="index">
+            <a-card style="width: 100%; margin-top: 10px;">
+            <a-row style="margin-bottom: 20px">
+                Created by {{reference!.creator.username || "Someone"}} {{formatDate(reference!.createdAt)}}
+            </a-row>
+            <a-row style="margin-bottom: 20px">
+                <span>{{reference!.description}}</span>
+            </a-row>
+            <a-row>
+                <Evidences :evidence="reference!.evidences"/>
+            </a-row>
+        </a-card>
+    </a-row>
+    <a-row class="titleGap">
+        <a-button type="dashed" @click="onShowCollections">
+            Select References
+        </a-button>
+    </a-row>
+    <a-row class="titleGap" type="flex" style="justify-content: space-around;">
+        <div v-if="!!alert.save" class="alertGap">
+            <a-alert :message="alert.save" type="error" />
+        </div>
+        <a-button type="primary" size="large" @click="onSaveRecord">
+            Publish
+        </a-button>
+    </a-row>
+    <a-modal
+        :visible="showCollections"
+        title="Select record to reference"
+        @ok="onAddReference"
+        @cancel="onCancelReference"
+    >
+        <div v-if="collections.length == 0">
+            No records to reference. Try to collect some first.
+        </div>
+        <div v-if="collections.length > 0" @scroll="onScroll" style="height: calc(50vh); overflow: auto; background-color: #ececec;">
+            <a-card
+                :hoverable="reference.status !== 'selected'"
+                :class="reference.status || 'available'"
+                v-for="(reference, index) in collections"
+                v-bind:key="index"
+                @click="() => selectReference(reference)"
+            >
+                <a-row style="margin-bottom: 20px">
+                    Created by {{reference!.creator.username || "Someone"}} {{formatDate(reference!.createdAt)}}
+                </a-row>
+                <a-row style="margin-bottom: 20px">
+                    <span>{{reference!.description}}</span>
+                </a-row>
+                <a-row>
+                    <Evidences
+                        class="evidence" 
+                        v-for="evidence in reference!.evidences"
+                        v-bind:key="evidence.id"
+                        :preview="true"
+                        :evidence="evidence"
+                    />
+                </a-row>
+            </a-card>
+        </div>
+    </a-modal>                     
 </template>
 
 <script lang="ts">
@@ -276,20 +261,6 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
-.formContainer {
-    display: flex;
-    justify-content: center;
-    margin-top: 10%;
-    height: 100%;
-    width: 100%;
-}
-
-.formContent {
-    min-width: 200px;
-    max-width: 800px;
-    width: 60%;
-}
-
 .titleGap {
     margin-top: 40px;
 }

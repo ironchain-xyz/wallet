@@ -1,15 +1,21 @@
 <template>
-  <Home />
+  <ContentComponent>
+    <CreatedRecords />
+  </ContentComponent>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import Home from '@/components/HomeComponent.vue'; // @ is an alias to /src
+import CreatedRecords from '@/components/record/CreatedRecordsComponent.vue';
+import ContentComponent from '@/components/ContentComponent.vue';
 
 @Options({
   components: {
-    Home,
+    ContentComponent,
+    CreatedRecords,
   },
 })
-export default class HomeView extends Vue { }
+export default class DiscoverView extends Vue { }
 </script>
+
+

@@ -39,6 +39,9 @@ export default defineComponent({
                 if (res.length > 0) {
                     query.startAt = query.startAt || res[0].createdAt;
                 }
+                if (records.value.length == 0) {
+                    errMsg.value = "No Records"
+                }
             }).catch(err => {
                 errMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
             }).finally(() => {

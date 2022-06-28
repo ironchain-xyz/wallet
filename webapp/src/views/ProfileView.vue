@@ -1,15 +1,19 @@
 <template>
-  <Profile />
+  <ContentComponent>
+    <ProfileComponent />
+  </ContentComponent>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import Profile from '@/components/ProfileComponent.vue'; // @ is an alias to /src
+import ProfileComponent from '@/components/ProfileComponent.vue'
+import ContentComponent from '@/components/ContentComponent.vue'
 
 @Options({
   components: {
-    Profile,
+    ContentComponent,
+    ProfileComponent,
   },
 })
-export default class HomeView extends Vue { }
+export default class DiscoverView extends Vue { }
 </script>
