@@ -1,6 +1,6 @@
 <template>
   <ContentComponent>
-    <RecordsContainer type="latest" />
+    <RecordsContainer type="explore" />
   </ContentComponent>
 </template>
 
@@ -15,5 +15,5 @@ import RecordsContainer from '@/components/record/RecordsContainerComponent.vue'
     ContentComponent,
   },
 })
-export default class DiscoverView extends Vue { }
+export default class ExploreView extends Vue { }
 </script>

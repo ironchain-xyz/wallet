@@ -1,25 +1,25 @@
 <template>
-    <a-row>
+    <a-row class="field">
         <a-textarea
             :rows="4"
             @change="() => alert.description = ''"
             v-model:value="description"
             placeholder="Describe the record, append tags with # at the end"
         />
+        <div v-if="!!alert.description" class="field">
+            <a-alert :message="alert.description" type="error" />
+        </div>
     </a-row>
-    <a-row v-if="!!alert.description" class="alertGap">
-        <a-alert :message="alert.description" type="error" />
-    </a-row>
-    <a-row type="flex" class="titleGap">
+    <a-row class="field">
         <div>
             <a-upload
                 name="evidence"
                 v-model:file-list="evidences"
-                accept="image/*,video/*"
+                accept="image/png,image/jpeg,image/jpeg,image/gif,video/mp4"
                 list-type="picture-card"
                 @preview="handlePreview"
                 :customRequest="uploadCustomRequest"
-                :maxCount="9"
+                :maxCount="20"
                 multiple
                 @change="() => alert.evidences = ''"
             >
@@ -33,7 +33,7 @@
             <a-alert :message="alert.evidences" type="error" />
         </div>
     </a-row>
-    <a-row v-for="(reference, index) in references" v-bind:key="index">
+    <a-row class="field" v-for="(reference, index) in references" v-bind:key="index">
             <a-card style="width: 100%; margin-top: 10px;">
             <a-row style="margin-bottom: 20px">
                 Created by {{reference!.creator.username || "Someone"}} {{formatDate(reference!.createdAt)}}
@@ -46,18 +46,18 @@
             </a-row>
         </a-card>
     </a-row>
-    <a-row class="titleGap">
+    <a-row class="field">
         <a-button type="dashed" @click="onShowCollections">
             Select References
         </a-button>
     </a-row>
-    <a-row class="titleGap" type="flex" style="justify-content: space-around;">
+    <a-row class="field">
+        <a-button type="primary" @click="onSaveRecord">
+            Publish
+        </a-button>
         <div v-if="!!alert.save" class="alertGap">
             <a-alert :message="alert.save" type="error" />
         </div>
-        <a-button type="primary" size="large" @click="onSaveRecord">
-            Publish
-        </a-button>
     </a-row>
     <a-modal
         :visible="showCollections"
@@ -265,7 +265,8 @@ export default defineComponent({
     margin-top: 40px;
 }
 
-.alertGap {
-    margin-top: 5px;
+.field {
+    width: 100%;
+    margin-top: 40px;
 }
 </style>

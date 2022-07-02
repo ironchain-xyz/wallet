@@ -120,11 +120,6 @@ export async function logout(store: Store<State>) {
 export function authenticate(store: Store<State>) {
     if (!store.state.user?.jwt) {
         store.commit("clear");
-        router.push('/login');
-        return false;
-    }
-    if (!store.state.profile?.username) {
-        router.push('init');
         return false;
     }
     return true;

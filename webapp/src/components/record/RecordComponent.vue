@@ -1,6 +1,6 @@
 <template>
     <a-row class="container">
-        <a-col :span="4">
+        <a-col>
             <a-avatar :size="50" class="avatar" shape="square">
                 {{ record.creator.username.substring(0, 1).toUpperCase() }}
             </a-avatar>
@@ -8,37 +8,36 @@
                 {{record.creator.username}}
             </a-row>
         </a-col>
-        <a-col :span="20">
+        <a-col flex="auto" style="margin-left: 20px; width: calc(100% - 75px)">
             <a-row justify="space-between">
+                <a :href='"/record/" + record.hash'>
+                    <span>{{record!.description}}</span>
+                </a>
+            </a-row>
+            <Evidences v-if="record.evidences.length > 0" :evidences="record.evidences" style="margin-top: 10px;"/>
+            <References v-if="record.references.length > 0" :references="record.references" />
+            <a-row
+                type="flex"
+                justify="space-between"
+                align="middle"
+                style="color: gray; font-size: 12px"
+            >
                 <a-col>
-                    <a :href='"/record/" + record.hash'>
-                        <span>{{record!.description}}</span>
-                    </a> 
+                    {{formatDate(record.createdAt)}}
                 </a-col>
                 <a-col>
                     <a-button type="text" @click="onToggleCollection" style="padding: 0px;">
                         <template #icon>
-                            <HeartOutlined v-if="!isCollected"/>
-                            <HeartTwoTone twoToneColor="#eb2f96" v-if="isCollected"/>
+                            <LikeOutlined v-if="!isCollected"/>
+                            <LikeTwoTone twoToneColor="blue" v-if="isCollected"/>
                         </template>
                         {{record!.collectors.length}}
                     </a-button>
                 </a-col>
             </a-row>
-            <a-row>
-                <Evidences :evidences="record.evidences"/>
-            </a-row>
-            <References :references="record.references" />
-            <a-row
-                type="flex"
-                justify="space-between"
-                align="middle"
-                style="margin-top: 10px; color: gray; font-size: 12px"
-            >
-                {{formatDate(record.createdAt)}}
-            </a-row>
         </a-col>
     </a-row>
+    <a-divider style="margin: 0px;"></a-divider>
 </template>
 
 <script lang="ts">
@@ -48,11 +47,11 @@ import { useStore } from '../../store';
 import { Record, addToCollection, removeFromCollection } from '@/services/record';
 import Evidences from '@/components/record/EvidencesComponent.vue';
 import References from '@/components/record/ReferencesComponent.vue';
-import { HeartOutlined, HeartTwoTone } from '@ant-design/icons-vue';
+import { LikeOutlined, LikeTwoTone } from '@ant-design/icons-vue';
 import { formatDate } from '@/lib/format';
 
 export default defineComponent({
-    components: {Evidences, References, HeartOutlined, HeartTwoTone},
+    components: {Evidences, References, LikeOutlined, LikeTwoTone},
     props: {
         record: Object as () => Record,
         index: Number,
@@ -94,7 +93,6 @@ export default defineComponent({
 
 <style lang="less" scoped>
 .container {
-    max-width: 800px;
     width: 100%;
 }
 

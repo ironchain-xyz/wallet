@@ -33,18 +33,8 @@ nav a.router-link-exact-active {
   margin-top: 200px;
 }
 
-.content {
-  margin-top: 20px;
-}
-
 .home {
   height: 100%;
   width: 100%;
-}
-
-.content {
-    min-width: 600px;
-    padding-bottom: 200px;
-    margin-top: 100px;
 }
 </style>

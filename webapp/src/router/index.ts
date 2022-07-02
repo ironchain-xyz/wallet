@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/HomeView.vue'
-import Discover from '../views/DiscoverView.vue'
+import CreatedRecords from '../views/CreatedRecordsView.vue'
+import Explore from '../views/DiscoverView.vue'
 import Profile from '../views/ProfileView.vue'
 import NewRecord from '../views/NewRecordView.vue'
 import Record from '../views/RecordView.vue'
@@ -9,13 +9,13 @@ import Collections from '../views/CollectionsView.vue'
 const routes = [
   {
     path: '/',
-    name: 'discover',
-    component: Discover
+    name: 'explore',
+    component: Explore
   },
   {
-    path: '/home',
-    name: 'home',
-    component: Home
+    path: '/createdRecords',
+    name: 'createdRecords',
+    component: CreatedRecords
   },
   {
     path: '/profile',

@@ -39,9 +39,8 @@ export interface NewRecordAlert {
 }
 
 export interface RecordQuery {
-    startAt?: string,
+    from?: string,
     limit: number,
-    offset: number
 }
 
 export function validateRecord(record: NewRecord, alert: NewRecordAlert): { alert?: NewRecordAlert, ok: boolean } {
@@ -67,7 +66,6 @@ export function validateRecord(record: NewRecord, alert: NewRecordAlert): { aler
 
 export async function newRecord(store: Store<State>, record: NewRecord): Promise<{hash: string}> {
     const url = API_URL + "record/new";
-    console.log(record);
     const res = await axios.post(url, {
         description: record.description,
         evidences: record.evidences.map(e => e.response),

@@ -1,6 +1,6 @@
 <template>
-    <a-row v-if="evidences.length > 0" class="evidenceWrapper" type="flex">
-        <div v-for="evidence in evidences" v-bind:key="evidence.hash">
+    <a-row class="evidenceWrapper">
+        <a-col v-for="evidence in evidences" v-bind:key="evidence.hash" style="margin-bottom: 20px; margin-right: 20px;">
             <img
                 v-if="fileType(evidence) == 'image'"
                 :src="fileUrl(evidence)"
@@ -10,7 +10,7 @@
             <video v-if="fileType(evidence) == 'video'" :class='thumbnail ? "thumbnail" : "origin"' controls>
                 <source :src="fileUrl(evidence)" type="video/mp4">
             </video>
-        </div>
+        </a-col>
     </a-row>
 </template>
 
@@ -31,9 +31,7 @@ export default defineComponent({
         }
 
         const fileType = (e: Evidence) => {
-            if (e.mimeType == "image/png" ||
-                e.mimeType == "image/jpeg" || 
-                e.mimeType == "image/jpg") {
+            if (e.mimeType.startsWith("image/")) {
                 return "image";
             } else if (e.mimeType == "video/mp4") {
                 return "video";
@@ -53,7 +51,6 @@ export default defineComponent({
 
 <style lang="less" scoped>
 .evidenceWrapper {
-    border: 1px solid #ececec;
     align-items: center;
 }
 
@@ -63,7 +60,7 @@ export default defineComponent({
 }
 
 .origin {
-    max-height: 200px;
-    max-width: 200px;
+    max-height: 150px;
+    max-width: 150px;
 }
 </style>

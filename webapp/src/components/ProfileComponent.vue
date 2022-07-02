@@ -27,11 +27,6 @@
                 </a-row>
             </div>
         </a-row>
-        <a-row justify="center" class="field">
-            <a-button type="primary" @click="onLogout">
-                Logout
-            </a-button>
-        </a-row>
     </a-col>
 </template>
 
@@ -39,7 +34,6 @@
 import { defineComponent, reactive, ref, computed, onBeforeMount } from 'vue';
 import { useStore } from '@/store';
 import { getInvitationCode, updateUsername } from '@/services/profile';
-import { logout } from '@/services/auth';
 
 interface InvitationCode {
     code: string;
@@ -75,7 +69,6 @@ export default defineComponent({
             alert,
             invitationCodes,
             onUsernameChange,
-            onLogout: () => logout(store),
         };
     },
 });
