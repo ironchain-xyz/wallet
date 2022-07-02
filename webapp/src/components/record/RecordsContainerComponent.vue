@@ -1,6 +1,5 @@
 <template>
     <a-list
-        justify="center"
         class="preview"
         :loading="initLoading"
         item-layout="vertical"
@@ -8,12 +7,9 @@
         :data-source="records"
     >
         <template #loadMore>
-            <div
-                v-if="!initLoading && !loading"
-                :style="{ textAlign: 'center', marginTop: '12px', height: '32px', lineHeight: '32px' }"
-            >
-                <a-button @click="onLoadMore">loading more</a-button>
-            </div>
+            <a-spin v-if="loadingMore" />
+            <p v-if="noMore">No more records</p>
+            <a-button v-if="!loadingMore && !noMore" @click="loadMore">loading more</a-button>
         </template>
         <template #renderItem="{ item }">
             <RecordComponent :record="item" :type="type" @toggleCollection="toggleCollection" />
@@ -65,14 +61,14 @@ export default defineComponent({
         const store = useStore();
 
         const initLoading = ref(true);
-        const loading = ref(false);
-        let records = ref<Record[]>([]);
-        let errMsg = ref<string>("");
+        const loadingMore = ref(false);
+        const noMore = ref(false);
+        const records = ref<Record[]>([]);
+        const errMsg = ref<string>("");
         const query = reactive<RecordQuery>({offset: 0, limit: 4});
-
-        onMounted(() => {
-            records.value = [];
-            loading.value = true;
+        
+        const loadMore = (init = false) => {
+            loadingMore.value = true;
             fetchRecords(props.type, store, query).then(res => {
                 let index = records.value.length;
                 res.forEach(record => {
@@ -83,14 +79,21 @@ export default defineComponent({
                     query.startAt = query.startAt || res[0].collectedAt || res[0].createdAt;
                 }
                 query.offset += res.length;
-                if (records.value.length == 0) {
-                    errMsg.value = "No Records"
+                if (res.length < query.limit) {
+                    noMore.value = true;
                 }
             }).catch(err => {
                 errMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
             }).finally(() => {
-                initLoading.value = false;
+                loadingMore.value = false;
+                if (init) {
+                    initLoading.value = false;
+                }
             });
+        };
+
+        onMounted(() => {
+            loadMore(true);
         });
 
         const toggleCollection = (params: {action: "enable" | "disable" | "remove", index: number}) => {
@@ -111,7 +114,9 @@ export default defineComponent({
 
         return {
             initLoading,
-            loading,
+            loadMore,
+            loadingMore,
+            noMore,
             errMsg,
             records,
             toggleCollection,
@@ -123,6 +128,5 @@ export default defineComponent({
 <style lang="less" scoped>
 .preview {
     width: 100%;
-    margin-bottom: 40px;
 }
 </style>
