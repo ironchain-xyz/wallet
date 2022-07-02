@@ -19,7 +19,8 @@ export interface Record extends RecordPreview {
     collectedAt: string;
     collectors: {userId: string}[];
     evidences: Evidence[];
-    references: RecordPreview[];
+    references: Record[];
+    index?: number;
 }
 
 export interface RecordReference extends Record {
@@ -39,7 +40,8 @@ export interface NewRecordAlert {
 }
 
 export interface RecordQuery {
-    from?: string,
+    startAt?: string,
+    offset: number,
     limit: number,
 }
 

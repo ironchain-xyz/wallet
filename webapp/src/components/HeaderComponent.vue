@@ -25,7 +25,7 @@
                     <a-row>
                         <a-button type="link" href="/collections">
                             <template #icon>
-                                <LikeOutlined />
+                                <StarOutlined />
                             </template>
                             Collections
                         </a-button>
@@ -54,10 +54,10 @@
 import { defineComponent, ref, computed } from 'vue';
 import { useStore } from '../store';
 import { authenticate, logout } from '../services/auth';
-import { UserOutlined, EditOutlined, LikeOutlined, LogoutOutlined } from '@ant-design/icons-vue';
+import { UserOutlined, EditOutlined, StarOutlined, LogoutOutlined } from '@ant-design/icons-vue';
 
 export default defineComponent({
-  components: { UserOutlined, EditOutlined, LikeOutlined, LogoutOutlined },
+  components: { UserOutlined, EditOutlined, StarOutlined, LogoutOutlined },
   setup() {
     const store = useStore();
     const action = ref<string>("");

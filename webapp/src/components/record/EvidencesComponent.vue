@@ -1,6 +1,6 @@
 <template>
-    <a-row class="evidenceWrapper">
-        <a-col v-for="evidence in evidences" v-bind:key="evidence.hash" style="margin-bottom: 20px; margin-right: 20px;">
+    <a-row align="middle" :gutter="20">
+        <a-col v-for="evidence in evidences" v-bind:key="evidence.hash" style="margin-top: 10px; margin-bottom: 10px;">
             <img
                 v-if="fileType(evidence) == 'image'"
                 :src="fileUrl(evidence)"
@@ -50,17 +50,13 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
-.evidenceWrapper {
-    align-items: center;
-}
-
 .thumbnail {
     max-height: 50px;
     max-width: 50px;
 }
 
 .origin {
-    max-height: 150px;
-    max-width: 150px;
+    max-height: 200px;
+    max-width: 200px;
 }
 </style>

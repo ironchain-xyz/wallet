@@ -1,43 +1,48 @@
 <template>
-    <a-row class="container">
-        <a-col>
-            <a-avatar :size="50" class="avatar" shape="square">
-                {{ record.creator.username.substring(0, 1).toUpperCase() }}
-            </a-avatar>
-            <a-row type="flex" justify="center">
-                {{record.creator.username}}
-            </a-row>
-        </a-col>
-        <a-col flex="auto" style="margin-left: 20px; width: calc(100% - 75px)">
-            <a-row justify="space-between">
-                <a :href='"/record/" + record.hash'>
-                    <span>{{record!.description}}</span>
-                </a>
-            </a-row>
-            <Evidences v-if="record.evidences.length > 0" :evidences="record.evidences" style="margin-top: 10px;"/>
-            <References v-if="record.references.length > 0" :references="record.references" />
-            <a-row
-                type="flex"
-                justify="space-between"
-                align="middle"
-                style="color: gray; font-size: 12px"
-            >
-                <a-col>
-                    {{formatDate(record.createdAt)}}
-                </a-col>
-                <a-col>
+    <a-list-item key="record?.hash" style="padding: 0px; margin-bottom: 20px;">
+        <a-row class="container">
+            <a-col>
+                <a-avatar :size="50" class="avatar" shape="square">
+                    {{ record!.creator.username.substring(0, 1).toUpperCase() }}
+                </a-avatar>
+            </a-col>
+            <a-col flex="auto" style="margin-left: 20px; width: calc(100% - 75px)">
+                <a-row>
+                    <a :href='"/record/" + record!.hash'>
+                        <a-typography>
+                            <a-typography-title
+                                :level="5"
+                                style="text-align: left; margin: 0px"
+                            >
+                                {{record!.creator.username}}
+                            </a-typography-title>
+                            <a-typography-paragraph
+                                type="secondary"
+                                style="font-size: 12px;"
+                            >
+                                {{formatDate(record!.createdAt)}}
+                            </a-typography-paragraph>
+                        </a-typography>
+                    </a>
+                </a-row>
+                <a-row>
+                    <a-typography-text>
+                        {{record!.description}}
+                    </a-typography-text>
+                </a-row>
+                <Evidences v-if="record!.evidences.length > 0" :evidences="record!.evidences"/>
+                <a-row>
                     <a-button type="text" @click="onToggleCollection" style="padding: 0px;">
                         <template #icon>
-                            <LikeOutlined v-if="!isCollected"/>
-                            <LikeTwoTone twoToneColor="blue" v-if="isCollected"/>
+                            <StarOutlined v-if="!isCollected"/>
+                            <StarTwoTone twoToneColor="blue" v-if="isCollected"/>
                         </template>
                         {{record!.collectors.length}}
                     </a-button>
-                </a-col>
-            </a-row>
-        </a-col>
-    </a-row>
-    <a-divider style="margin: 0px;"></a-divider>
+                </a-row>
+            </a-col>
+        </a-row>
+    </a-list-item>
 </template>
 
 <script lang="ts">
@@ -46,15 +51,13 @@ import { useStore } from '../../store';
 
 import { Record, addToCollection, removeFromCollection } from '@/services/record';
 import Evidences from '@/components/record/EvidencesComponent.vue';
-import References from '@/components/record/ReferencesComponent.vue';
-import { LikeOutlined, LikeTwoTone } from '@ant-design/icons-vue';
+import { StarOutlined, StarTwoTone } from '@ant-design/icons-vue';
 import { formatDate } from '@/lib/format';
 
 export default defineComponent({
-    components: {Evidences, References, LikeOutlined, LikeTwoTone},
+    components: {Evidences, StarOutlined, StarTwoTone},
     props: {
         record: Object as () => Record,
-        index: Number,
         type: String,
     },
     setup(props, { emit }) {
@@ -69,14 +72,14 @@ export default defineComponent({
                 removeFromCollection(store, props.record.hash).then(() => {
                     emit("toggleCollection", {
                         action: props.type == "collected" ? "remove" : "disable", 
-                        index: props.index,
+                        index: props.record.index,
                     });
                 });
             } else {
                 addToCollection(store, props.record.hash).then(() => {
                     emit("toggleCollection", {
                         action: "enable",
-                        index: props.index,
+                        index: props.record.index,
                     });
                 });
             }

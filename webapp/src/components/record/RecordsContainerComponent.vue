@@ -1,19 +1,31 @@
 <template>
-    <div @scroll="onScroll" ref="recordsContainer">
-        <a-row v-for="(record, index) in records" v-bind:key="record.hash" justify="center" class="preview">
-            <RecordComponent :record="record" :index="index" :type="type" @toggleCollection="toggleCollection" />
-        </a-row>
-        <a-row v-if="!loaded && loading">
-            <a-spin/>
-        </a-row>
-        <a-row v-if="!!errMsg" style="margin-top: 100px;">
-            <span>{{ errMsg }}</span>
-        </a-row>
-    </div>
+    <a-list
+        justify="center"
+        class="preview"
+        :loading="initLoading"
+        item-layout="vertical"
+        size="large"
+        :data-source="records"
+    >
+        <template #loadMore>
+            <div
+                v-if="!initLoading && !loading"
+                :style="{ textAlign: 'center', marginTop: '12px', height: '32px', lineHeight: '32px' }"
+            >
+                <a-button @click="onLoadMore">loading more</a-button>
+            </div>
+        </template>
+        <template #renderItem="{ item }">
+            <RecordComponent :record="item" :type="type" @toggleCollection="toggleCollection" />
+        </template>
+    </a-list>
+    <a-row v-if="!!errMsg" style="margin-top: 100px;">
+        <span>{{ errMsg }}</span>
+    </a-row>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onBeforeMount, onMounted, onUnmounted } from 'vue';
+import { defineComponent, reactive, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { parseErrorMsg } from '@/services/utils';
 import { useStore } from '@/store';
@@ -52,30 +64,32 @@ export default defineComponent({
     setup(props) {
         const store = useStore();
 
-        const recordsContainer = ref<null | {getBoundingClientRect: () => {bottom: number}}>(null);
-        let loaded = ref<boolean>(false);
-        let loading = ref<boolean>(false);
+        const initLoading = ref(true);
+        const loading = ref(false);
         let records = ref<Record[]>([]);
         let errMsg = ref<string>("");
-        const query = reactive<RecordQuery>({limit: 4});
+        const query = reactive<RecordQuery>({offset: 0, limit: 4});
 
-        onBeforeMount(() => {
+        onMounted(() => {
             records.value = [];
             loading.value = true;
             fetchRecords(props.type, store, query).then(res => {
+                let index = records.value.length;
                 res.forEach(record => {
+                    record.index = index++;
                     records.value.push(record);
                 });
                 if (res.length > 0) {
-                    query.startAt = query.startAt || res[0].createdAt;
+                    query.startAt = query.startAt || res[0].collectedAt || res[0].createdAt;
                 }
+                query.offset += res.length;
                 if (records.value.length == 0) {
                     errMsg.value = "No Records"
                 }
             }).catch(err => {
                 errMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
             }).finally(() => {
-                loading.value = false;
+                initLoading.value = false;
             });
         });
 
@@ -95,50 +109,12 @@ export default defineComponent({
             }
         };
 
-        const handleScroll = () => {
-            let element = recordsContainer.value;
-            let bottom = Math.floor(
-                element
-                ? element.getBoundingClientRect().bottom - 1
-                : window.innerHeight
-            );
-            if (!loaded.value && element && bottom < window.innerHeight) {
-                loading.value = true;
-                fetchRecords(props.type, store, query).then(res => {
-                    res.forEach(record => {
-                        records.value.push(record);
-                    });
-                    if (res.length > 0) {
-                        let lastRecord = res[res.length - 1];
-                        query.from = lastRecord.collectedAt || lastRecord.createdAt || query.from;
-                    }
-                    if (res.length == 0) {
-                        loaded.value = true;
-                    }
-                }).catch(err => {
-                    errMsg.value = "Failed to fetch more events from server, " + parseErrorMsg(err);
-                }).finally(() => {
-                    loading.value = false;
-                });
-            }
-        };
-
-        onMounted(() => {
-            window.addEventListener("scroll", handleScroll)
-        });
-
-        onUnmounted(() => {
-            window.removeEventListener("scroll", handleScroll)
-        });
-
         return {
+            initLoading,
             loading,
-            loaded,
             errMsg,
             records,
             toggleCollection,
-            handleScroll,
-            recordsContainer,
         };
     }
 });

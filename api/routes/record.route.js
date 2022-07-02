@@ -125,7 +125,7 @@ const { Op } = require('sequelize');
 router.get('/created', asyncHandler(async (req, res) => {
     const query = req.query.startAt ? {
         createdBy: req.user.id,
-        createdAt: {[Op.lt]: req.query.from}
+        createdAt: {[Op.lt]: req.query.startAt}
     } : {
         createdBy: req.user.id
     };
@@ -180,8 +180,8 @@ router.get('/created', asyncHandler(async (req, res) => {
 }));
 
 router.get('/latest', asyncHandler(async (req, res) => {
-    req.query.from = req.query.from || new Date();
-    const query = {createdAt: {[Op.lt]: req.query.from}};
+    req.query.startAt = req.query.startAt || new Date();
+    const query = {createdAt: {[Op.lt]: req.query.startAt}};
     const records = await Record.findAll({
         where: query,
         order: [["createdAt", "DESC"]],
@@ -236,7 +236,7 @@ router.get('/collections', asyncHandler(async (req, res) => {
     const query = req.query.startAt ? {
         userId: req.user.id,
         collected: true,
-        updatedAt: {[Op.lt]: req.query.from}
+        updatedAt: {[Op.lt]: req.query.startAt}
     } : {
         userId: req.user.id,
         collected: true
@@ -245,6 +245,7 @@ router.get('/collections', asyncHandler(async (req, res) => {
         where: query,
         order: [["updatedAt", "DESC"]],
         limit: req.query.limit,
+        offset: req.query.offset,
         include: {
             model: Record,
             include: [

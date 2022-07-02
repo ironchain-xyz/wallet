@@ -16,7 +16,7 @@
                 <Header class="header"></Header>
             </a-row>
             <a-divider style="width: 100%; margin: 0px"></a-divider>
-            <a-row justify="center" align="middle" style="margin-left: 10px; margin-top: 20px">
+            <a-row justify="center" style="margin-left: 10px; margin-top: 20px">
                 <a-col class="content">
                     <slot></slot>
                 </a-col>
