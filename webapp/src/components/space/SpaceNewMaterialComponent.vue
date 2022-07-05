@@ -1,7 +1,7 @@
 <template>
     <SpaceBase>
         <template v-slot="{ space }">
-            <SpaceRecords :space="space"></SpaceRecords>
+            <NewRecord :space="space"></NewRecord>
         </template>
     </SpaceBase>
 </template>
@@ -10,10 +10,10 @@
 import { defineComponent } from 'vue';
 import { Space } from '@/services/space';
 import SpaceBase from '@/components/space/SpaceBaseComponent.vue';
-import SpaceRecords from '@/components/space/content/SpaceRecordsContentComponent.vue';
+import NewRecord from '@/components/space/content/NewRecordComponent.vue';
 
 export default defineComponent({
-    components: { SpaceRecords, SpaceBase },
+    components: { NewRecord, SpaceBase },
     props: {
         space: Object as () => Space,
     },

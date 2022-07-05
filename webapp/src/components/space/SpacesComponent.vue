@@ -28,7 +28,7 @@ import { defineComponent, reactive, ref, onMounted } from 'vue';
 import { parseErrorMsg } from '@/services/utils';
 import { useStore } from '@/store';
 import { Space, SpaceQuery, fetchSpaces } from '@/services/space';
-import SpaceOverview from '@/components/space/SpaceOverviewComponent.vue';
+import SpaceOverview from '@/components/space/content/SpaceOverviewComponent.vue';
 
 export default defineComponent({
     components: { SpaceOverview },

@@ -15,7 +15,7 @@
                 <a-button
                     shape="round"
                     style="font-weight: bold;"
-                    @click="onClick"
+                    href="/"
                 >
                     Edit Profile
                 </a-button>
@@ -25,7 +25,7 @@
                     class="menuItem"
                     type="text"
                     style="font-weight: bold;"
-                    @click="selected = 'records'"
+                    href="/profile"
                 >
                     Materials
                 </a-button>
@@ -35,42 +35,30 @@
                     class="menuItem"
                     type="text"
                     style="font-weight: bold;"
-                    @click="selected = 'about'"
+                    href="/profile/about"
                 >
                     About
                 </a-button>
             </a-row>
         </a-col>
         <a-col flex="auto" style="margin-left: 20px;">
-            <EditProfile v-if="selected == 'edit'"></EditProfile>
-            <RecordsContainer v-if="selected == 'records'" :fetchRecords="fetchCreatedRecords"/>
-            <ProfileAbout v-if="selected == 'about'"></ProfileAbout>
+            <slot></slot>
         </a-col>
     </a-row>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent } from 'vue';
 import { useStore } from '@/store';
 import { fetchCreatedRecords } from '@/services/record';
-import RecordsContainer from '@/components/record/RecordsContainerComponent.vue';
-import ProfileAbout from '@/components/profile/ProfileAboutComponent.vue';
-import EditProfile from '@/components/profile/EditProfileComponent.vue';
 
 export default defineComponent({
-    components: { EditProfile, RecordsContainer, ProfileAbout },
+    components: { },
     setup() {
         const store = useStore();
-        const selected = ref<string>("records");
         const profile = store.state.profile;
-        const onClick = () => {
-            selected.value = "edit";
-        };
-
         return {
             profile,
-            onClick,
-            selected,
             fetchCreatedRecords,
         };
     }

@@ -1,19 +1,19 @@
 <template>
   <ContentComponent>
-    <SpaceRecords />
+    <SpaceNewMaterial />
   </ContentComponent>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import ContentComponent from '@/components/ContentComponent.vue';
-import SpaceRecords from '@/components/space/SpaceRecordsComponent.vue';
+import SpaceNewMaterial from '@/components/space/SpaceNewMaterialComponent.vue';
 
 @Options({
   components: {
-    SpaceRecords,
+    SpaceNewMaterial,
     ContentComponent,
   },
 })
-export default class SpacesView extends Vue { }
+export default class SpaceNewMaterialView extends Vue { }
 </script>

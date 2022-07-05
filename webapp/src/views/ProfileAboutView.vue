@@ -1,19 +1,19 @@
 <template>
   <ContentComponent>
-    <ProfileMaterialsComponent />
+    <ProfileAboutComponent />
   </ContentComponent>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import ProfileMaterialsComponent from '@/components/profile/ProfileMaterialsComponent.vue'
+import ProfileAboutComponent from '@/components/profile/ProfileAboutComponent.vue'
 import ContentComponent from '@/components/ContentComponent.vue'
 
 @Options({
   components: {
     ContentComponent,
-    ProfileMaterialsComponent,
+    ProfileAboutComponent,
   },
 })
-export default class ProfileView extends Vue { }
+export default class ProfileAboutView extends Vue { }
 </script>

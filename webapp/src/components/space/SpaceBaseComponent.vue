@@ -33,7 +33,7 @@
                     class="menuItem"
                     type="text"
                     style="font-weight: bold;"
-                    @click="selected = 'records'"
+                    :href="'/space/' + space.id"
                 >
                     Materials
                 </a-button>
@@ -43,7 +43,7 @@
                     class="menuItem"
                     type="text"
                     style="font-weight: bold;"
-                    @click="selected = 'new'"
+                    :href="'/space/' + space.id + '/newMaterial'"
                 >
                     New Material
                 </a-button>
@@ -53,16 +53,14 @@
                     class="menuItem"
                     type="text"
                     style="font-weight: bold;"
-                    @click="selected = 'about'"
+                    :href="'/space/' + space.id + '/about'"
                 >
                     About
                 </a-button>
             </a-row>
         </a-col>
         <a-col flex="auto" style="margin-left: 20px;">
-            <SpaceRecords v-if="selected == 'records'" :space="space"></SpaceRecords>
-            <NewRecord v-if="selected == 'new'" :space="space"></NewRecord>
-            <SpaceAbout v-if="selected == 'about'" :space="space"></SpaceAbout>
+            <slot :space="space"></slot>
         </a-col>
     </a-row>
 </template>
@@ -72,17 +70,13 @@ import { defineComponent, ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { Space, fetchSpace, joinSpace, leaveSpace } from '@/services/space';
 import { useStore } from '@/store';
-import NewRecord from '@/components/record/NewRecordComponent.vue';
-import SpaceRecords from '@/components/space/SpaceRecordsComponent.vue';
-import SpaceAbout from '@/components/space/SpaceAboutComponent.vue';
 
 export default defineComponent({
-    components: { SpaceRecords, SpaceAbout, NewRecord },
+    components: { },
     setup() {
         const store = useStore();
         const route = useRoute();
 
-        const selected = ref<string>("records");
         const space = ref<Space>({
             name: '',
             description: '',
@@ -115,10 +109,7 @@ export default defineComponent({
         });
 
         const actionType = computed(() => {
-            if (space.value.isMember && mouseOver.value) {
-                return "danger";
-            }
-            return "";
+            return space.value.isMember && mouseOver.value ? "danger" : "";
         });
 
         const formatNumber = (n: number) => {
@@ -154,7 +145,6 @@ export default defineComponent({
             space,
             onClick,
             formatNumber,
-            selected,
         };
     }
 });

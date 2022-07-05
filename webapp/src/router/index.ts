@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Records from '..//views/RecordsView.vue'
 import Profile from '../views/ProfileView.vue'
+import ProfileAbout from '../views/ProfileAboutView.vue'
 import Spaces from '../views/SpacesView.vue'
 import Space from '../views/SpaceView.vue'
+import SpaceNewMaterial from '../views/SpaceNewMaterialView.vue'
+import SpaceAbout from '../views/SpaceAboutView.vue'
 import NewRecord from '../views/NewRecordView.vue'
 import Record from '../views/RecordView.vue'
 
@@ -18,6 +21,16 @@ const routes = [
     component: Space
   },
   {
+    path: '/space/:id/newMaterial',
+    name: 'newMaterial',
+    component: SpaceNewMaterial
+  },
+  {
+    path: '/space/:id/about',
+    name: 'spaceAbout',
+    component: SpaceAbout
+  },
+  {
     path: '/records',
     name: 'records',
     component: Records
@@ -31,6 +44,11 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: Profile
+  },
+  {
+    path: '/profile/about',
+    name: 'profileAbout',
+    component: ProfileAbout
   },
   {
     path: '/init',
