@@ -43,6 +43,16 @@
                     class="menuItem"
                     type="text"
                     style="font-weight: bold;"
+                    @click="selected = 'new'"
+                >
+                    New Material
+                </a-button>
+            </a-row>
+            <a-row>
+                <a-button
+                    class="menuItem"
+                    type="text"
+                    style="font-weight: bold;"
                     @click="selected = 'about'"
                 >
                     About
@@ -51,6 +61,7 @@
         </a-col>
         <a-col flex="auto" style="margin-left: 20px;">
             <SpaceRecords v-if="selected == 'records'" :space="space"></SpaceRecords>
+            <NewRecord v-if="selected == 'new'" :space="space"></NewRecord>
             <SpaceAbout v-if="selected == 'about'" :space="space"></SpaceAbout>
         </a-col>
     </a-row>
@@ -61,11 +72,12 @@ import { defineComponent, ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { Space, fetchSpace, joinSpace, leaveSpace } from '@/services/space';
 import { useStore } from '@/store';
-import SpaceRecords from '@/components/space/SpaceRecords.vue';
-import SpaceAbout from '@/components/space/SpaceAbout.vue';
+import NewRecord from '@/components/record/NewRecordComponent.vue';
+import SpaceRecords from '@/components/space/SpaceRecordsComponent.vue';
+import SpaceAbout from '@/components/space/SpaceAboutComponent.vue';
 
 export default defineComponent({
-    components: { SpaceRecords, SpaceAbout },
+    components: { SpaceRecords, SpaceAbout, NewRecord },
     setup() {
         const store = useStore();
         const route = useRoute();

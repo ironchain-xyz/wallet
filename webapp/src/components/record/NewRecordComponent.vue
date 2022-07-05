@@ -47,53 +47,13 @@
         </a-card>
     </a-row>
     <a-row class="field">
-        <a-button type="dashed" @click="onShowCollections">
-            Select References
-        </a-button>
-    </a-row>
-    <a-row class="field">
         <a-button type="primary" @click="onSaveRecord">
             Publish
         </a-button>
         <div v-if="!!alert.save" class="alertGap">
             <a-alert :message="alert.save" type="error" />
         </div>
-    </a-row>
-    <a-modal
-        :visible="showCollections"
-        title="Select record to reference"
-        @ok="onAddReference"
-        @cancel="onCancelReference"
-    >
-        <div v-if="collections.length == 0">
-            No records to reference. Try to collect some first.
-        </div>
-        <div v-if="collections.length > 0" @scroll="onScroll" style="height: calc(50vh); overflow: auto; background-color: #ececec;">
-            <a-card
-                :hoverable="reference.status !== 'selected'"
-                :class="reference.status || 'available'"
-                v-for="(reference, index) in collections"
-                v-bind:key="index"
-                @click="() => selectReference(reference)"
-            >
-                <a-row style="margin-bottom: 20px">
-                    Created by {{reference!.creator.username || "Someone"}} {{formatDate(reference!.createdAt)}}
-                </a-row>
-                <a-row style="margin-bottom: 20px">
-                    <span>{{reference!.description}}</span>
-                </a-row>
-                <a-row>
-                    <Evidences
-                        class="evidence" 
-                        v-for="evidence in reference!.evidences"
-                        v-bind:key="evidence.id"
-                        :preview="true"
-                        :evidence="evidence"
-                    />
-                </a-row>
-            </a-card>
-        </div>
-    </a-modal>                     
+    </a-row>                    
 </template>
 
 <script lang="ts">
@@ -104,7 +64,7 @@ import { useStore } from '@/store';
 import { authenticate } from '@/services/auth';
 import { formatDate } from '@/lib/format';
 import {
-    RecordReference,
+    Record,
     NewRecordAlert,
     validateRecord,
     newRecord,
@@ -128,34 +88,10 @@ export default defineComponent({
 
         const alert = reactive<NewRecordAlert>({});
         const description = ref<string>("");
-        const references = ref<RecordReference[]>([]);
         const evidences = ref<RawFile[]>([]);
 
-        const collections = reactive<RecordReference[]>([]);
+        const collections = reactive<Record[]>([]);
         const showCollections = ref<boolean>(false);
-        const selectReference = (reference: RecordReference) => {
-            if (reference.status == "selected") {
-                reference.status = "available";
-            } else {
-                reference.status = "selected";
-            }
-        };
-        const onAddReference = () => {
-            showCollections.value = false;
-            collections.forEach(ref => {
-                if (ref.status == "selected") {
-                    references.value.push(ref);
-                    ref.status = "added";
-                }
-            });
-        };
-        const deleteReference = (reference: RecordReference, index: number) => {
-            reference.status = "available";
-            references.value.splice(index, 1);
-        };
-        const onCancelReference = () => {
-            showCollections.value = false;
-        };
 
         const handlePreview = async (file: any) => {
             window.open(file.url);
@@ -165,7 +101,6 @@ export default defineComponent({
             const record = {
                 description: description.value,
                 evidences: evidences.value,
-                references: references.value
             };
             const res = validateRecord(record, alert);
             if (res.ok) {
@@ -241,14 +176,9 @@ export default defineComponent({
         return {
             description,
             evidences,
-            references,
             alert,
             collections,
             uploadCustomRequest,
-            selectReference,
-            onAddReference,
-            onCancelReference,
-            deleteReference,
             onSaveRecord,
             handlePreview,
             onShowCollections,

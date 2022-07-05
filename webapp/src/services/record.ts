@@ -11,7 +11,6 @@ export interface RecordPreview {
     creator: {username: string};
     createdAt: string;
     evidencesHashes: string[];
-    referenceHashes: string[];
     tags: string[];
 }
 
@@ -19,18 +18,12 @@ export interface Record extends RecordPreview {
     collectedAt: string;
     collectors: {userId: string}[];
     evidences: Evidence[];
-    references: Record[];
     index?: number;
-}
-
-export interface RecordReference extends Record {
-    status?: "available" | "selected" | "added";
 }
 
 export interface NewRecord {
     description: string;
     evidences: RawFile[];
-    references: RecordPreview[];
 }
 
 export interface NewRecordAlert {
@@ -71,7 +64,6 @@ export async function newRecord(store: Store<State>, record: NewRecord): Promise
     const res = await axios.post(url, {
         description: record.description,
         evidences: record.evidences.map(e => e.response),
-        references: record.references.map(f => ({hash: f.hash}))
     }, { headers: authHeader(store) });
     return res.data;
 }

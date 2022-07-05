@@ -23,11 +23,6 @@ const routes = [
     component: Records
   },
   {
-    path: '/record/new',
-    name: "newRecord",
-    component: NewRecord,
-  },
-  {
     path: '/record/:hash',
     name: "record",
     component: Record,
