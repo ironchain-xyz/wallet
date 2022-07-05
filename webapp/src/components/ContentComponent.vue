@@ -12,11 +12,11 @@
             />
         </a-col>
         <a-col flex="auto" style="width: calc(100% - 60px)">
-            <a-row justify="center" align="middle" style="min-height: 50px; margin: 0px 30px;">
+            <a-row justify="center" align="middle" style="min-height: 50px; margin: 0px 20px;">
                 <Header class="header"></Header>
             </a-row>
             <a-divider style="width: 100%; margin: 0px"></a-divider>
-            <a-row justify="center" style="margin-left: 10px; margin-top: 20px">
+            <a-row justify="center">
                 <a-col class="content">
                     <slot></slot>
                 </a-col>
@@ -61,7 +61,7 @@ export default defineComponent({
 }
 
 .content {
-    margin-top: 20px;
+    margin-top: 10px;
     width: 100%;
     max-width: 700px
 }

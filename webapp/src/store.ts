@@ -16,12 +16,11 @@ export interface User {
   id: string,
   email: string;
   otp: OTP;
-  username?: string;
   jwt?: JWT
 }
 
 export interface Profile {
-  username?: string;
+  username: string;
 }
 
 export interface State {

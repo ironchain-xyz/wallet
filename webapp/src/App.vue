@@ -37,4 +37,16 @@ nav a.router-link-exact-active {
   height: 100%;
   width: 100%;
 }
+
+.border {
+    border-style: solid;
+    border-radius: 10px;
+    border-color: #edebeb;
+    padding: 15px;
+}
+
+.avatar {
+    font-weight: bold;
+    background-color: #209645;
+}
 </style>

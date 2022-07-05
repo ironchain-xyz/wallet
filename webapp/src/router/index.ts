@@ -1,21 +1,36 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import CreatedRecords from '../views/CreatedRecordsView.vue'
-import Explore from '../views/DiscoverView.vue'
+import Records from '..//views/RecordsView.vue'
 import Profile from '../views/ProfileView.vue'
+import Spaces from '../views/SpacesView.vue'
+import Space from '../views/SpaceView.vue'
 import NewRecord from '../views/NewRecordView.vue'
 import Record from '../views/RecordView.vue'
-import Collections from '../views/CollectionsView.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'explore',
-    component: Explore
+    name: 'spaces',
+    component: Spaces
   },
   {
-    path: '/createdRecords',
-    name: 'createdRecords',
-    component: CreatedRecords
+    path: '/space/:id',
+    name: 'space',
+    component: Space
+  },
+  {
+    path: '/records',
+    name: 'records',
+    component: Records
+  },
+  {
+    path: '/record/new',
+    name: "newRecord",
+    component: NewRecord,
+  },
+  {
+    path: '/record/:hash',
+    name: "record",
+    component: Record,
   },
   {
     path: '/profile',
@@ -41,21 +56,6 @@ const routes = [
     path: '/verify',
     name: 'verify',
     component: () => import('../views/VerifyView.vue')
-  },
-  {
-    path: '/record/new',
-    name: "newRecord",
-    component: NewRecord,
-  },
-  {
-    path: '/record/:hash',
-    name: "record",
-    component: Record,
-  },
-  {
-    path: '/collections',
-    name: "Collections",
-    component: Collections,
   },
 ]
 

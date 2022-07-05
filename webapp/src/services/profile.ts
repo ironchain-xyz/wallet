@@ -62,12 +62,8 @@ export async function updateUsername(store: Store<State>, username: string): Pro
 
 export async function getInvitationCode(
     store: Store<State>
-): Promise<{ codes?: [], message?: string }> {
+): Promise<{ codes: [] }> {
     const url = API_URL + "invitationCode";
-    try {
-        const res = await axios.post(url, {}, { headers: authHeader(store) });
-        return res.data;
-    } catch (err: any) {
-        return { message: parseErrorMsg(err) };
-    }
+    const res = await axios.post(url, {}, { headers: authHeader(store) });
+    return res.data;
 }

@@ -1,19 +1,34 @@
 <template>
   <ContentComponent>
-    <RecordsContainer type="single" />
+    <RecordComponent type="single" />
   </ContentComponent>
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { defineComponent, ref, onMounted } from 'vue';
 import ContentComponent from '@/components/ContentComponent.vue';
-import RecordsContainer from '@/components/record/RecordsContainerComponent.vue';
+import RecordComponent from '@/components/record/RecordComponent.vue';
+import { Record, fetchRecord } from '@/services/record';
+import { useStore } from '@/store';
+import { useRoute } from 'vue-router';
 
-@Options({
-  components: {
-    RecordsContainer,
-    ContentComponent,
+export default defineComponent({
+  components: { RecordComponent, ContentComponent },
+  setup() {
+      const store = useStore();
+      const route = useRoute();
+      const record = ref<Record>();
+
+      onMounted(() => {
+          const hash = route.params.hash as string;
+          fetchRecord(store, hash).then(res => {
+              record.value = res;
+          });
+      });
+
+      return {
+          record
+      };
   },
 })
-export default class DiscoverView extends Vue { }
 </script>

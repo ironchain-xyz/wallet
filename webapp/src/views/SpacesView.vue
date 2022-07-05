@@ -1,19 +1,19 @@
 <template>
   <ContentComponent>
-    <RecordsContainer type="collected" />
+    <Spaces />
   </ContentComponent>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import ContentComponent from '@/components/ContentComponent.vue';
-import RecordsContainer from '@/components/record/RecordsContainerComponent.vue';
+import Spaces from '@/components/space/SpacesComponent.vue';
 
 @Options({
   components: {
-    RecordsContainer,
+    Spaces,
     ContentComponent,
   },
 })
-export default class DiscoverView extends Vue { }
+export default class SpacesView extends Vue { }
 </script>

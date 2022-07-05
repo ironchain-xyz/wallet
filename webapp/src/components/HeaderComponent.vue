@@ -7,7 +7,7 @@
             <a-popover trigger="click">
                 <template #content>
                     <a-row>
-                        <a-button type="link" href="/profile">  
+                        <a-button type="text" href="/profile">  
                             <template #icon>
                                 <UserOutlined />
                             </template>
@@ -15,23 +15,7 @@
                         </a-button>
                     </a-row>
                     <a-row>
-                        <a-button type="link" href="/createdRecords">  
-                            <template #icon>
-                                <EditOutlined />
-                            </template>
-                            Created Records
-                        </a-button>
-                    </a-row>
-                    <a-row>
-                        <a-button type="link" href="/collections">
-                            <template #icon>
-                                <StarOutlined />
-                            </template>
-                            Collections
-                        </a-button>
-                    </a-row>
-                    <a-row>
-                        <a-button type="link" @click="onLogout">
+                        <a-button type="text" @click="onLogout">
                             <template #icon>
                                 <LogoutOutlined />
                             </template>
@@ -54,10 +38,10 @@
 import { defineComponent, ref, computed } from 'vue';
 import { useStore } from '../store';
 import { authenticate, logout } from '../services/auth';
-import { UserOutlined, EditOutlined, StarOutlined, LogoutOutlined } from '@ant-design/icons-vue';
+import { UserOutlined, LogoutOutlined } from '@ant-design/icons-vue';
 
 export default defineComponent({
-  components: { UserOutlined, EditOutlined, StarOutlined, LogoutOutlined },
+  components: { UserOutlined, LogoutOutlined },
   setup() {
     const store = useStore();
     const action = ref<string>("");

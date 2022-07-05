@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import ProfileComponent from '@/components/ProfileComponent.vue'
+import ProfileComponent from '@/components/profile/ProfileComponent.vue'
 import ContentComponent from '@/components/ContentComponent.vue'
 
 @Options({

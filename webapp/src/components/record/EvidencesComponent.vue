@@ -1,15 +1,17 @@
 <template>
     <a-row align="middle" :gutter="20">
-        <a-col v-for="evidence in evidences" v-bind:key="evidence.hash" style="margin-top: 10px; margin-bottom: 10px;">
-            <img
-                v-if="fileType(evidence) == 'image'"
-                :src="fileUrl(evidence)"
-                :alt="evidence.hash"
-                :class='thumbnail ? "thumbnail" : "origin"'
-            />
-            <video v-if="fileType(evidence) == 'video'" :class='thumbnail ? "thumbnail" : "origin"' controls>
-                <source :src="fileUrl(evidence)" type="video/mp4">
-            </video>
+        <a-col v-for="evidence in evidences" v-bind:key="evidence.hash">
+            <div class="imgContainer">
+                <img
+                    v-if="fileType(evidence) == 'image'"
+                    :src="fileUrl(evidence)"
+                    :alt="evidence.hash"
+                    class="inside"
+                />
+                <video v-if="fileType(evidence) == 'video'" class="inside" controls>
+                    <source :src="fileUrl(evidence)" type="video/mp4">
+                </video>
+            </div>
         </a-col>
     </a-row>
 </template>
@@ -23,7 +25,6 @@ import { formatFileSize } from '@/lib/format';
 export default defineComponent({
     props: {
         evidences: Object as () => Evidence[],
-        thumbnail: Boolean,
     },
     setup() {
         const fileUrl = (e: Evidence) => {
@@ -50,13 +51,17 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
-.thumbnail {
-    max-height: 50px;
-    max-width: 50px;
+.imgContainer {
+    width: 180px;
+    height: 180px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.origin {
-    max-height: 200px;
-    max-width: 200px;
+.inside {
+    max-width: 100%;
+    max-height: 100%;
 }
 </style>
