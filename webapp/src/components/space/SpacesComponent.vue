@@ -47,8 +47,8 @@ export default defineComponent({
         const loadMore = (init = false) => {
             loadingMore.value = true;
             fetchSpaces(store, query).then(res => {
-                res.forEach(record => {
-                    spaces.value.push(record);
+                res.forEach(s => {
+                    spaces.value.push(s);
                 });
                 query.offset += res.length;
                 if (res.length < query.limit) {

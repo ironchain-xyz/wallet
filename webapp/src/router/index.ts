@@ -1,13 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Records from '..//views/RecordsView.vue'
+import Materials from '../views/MaterialsView.vue'
 import Profile from '../views/ProfileView.vue'
 import ProfileAbout from '../views/ProfileAboutView.vue'
 import Spaces from '../views/SpacesView.vue'
 import Space from '../views/SpaceView.vue'
 import SpaceNewMaterial from '../views/SpaceNewMaterialView.vue'
 import SpaceAbout from '../views/SpaceAboutView.vue'
-import NewRecord from '../views/NewRecordView.vue'
-import Record from '../views/RecordView.vue'
+import Material from '../views/MaterialView.vue'
 
 const routes = [
   {
@@ -31,14 +30,14 @@ const routes = [
     component: SpaceAbout
   },
   {
-    path: '/records',
-    name: 'records',
-    component: Records
+    path: '/materials',
+    name: 'materials',
+    component: Materials
   },
   {
-    path: '/record/:hash',
-    name: "record",
-    component: Record,
+    path: '/material/:hash',
+    name: "material",
+    component: Material,
   },
   {
     path: '/profile',

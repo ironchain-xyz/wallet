@@ -1,22 +1,18 @@
 <template>
     <SpaceBase>
         <template v-slot="{ space }">
-            <SpaceRecords :space="space"></SpaceRecords>
+            <SpaceMaterials :data="space"></SpaceMaterials>
         </template>
     </SpaceBase>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { Space } from '@/services/space';
 import SpaceBase from '@/components/space/SpaceBaseComponent.vue';
-import SpaceRecords from '@/components/space/content/SpaceRecordsContentComponent.vue';
+import SpaceMaterials from '@/components/space/content/SpaceMaterialsContentComponent.vue';
 
 export default defineComponent({
-    components: { SpaceRecords, SpaceBase },
-    props: {
-        space: Object as () => Space,
-    },
+    components: { SpaceMaterials, SpaceBase },
     setup() {
         return { };
     }

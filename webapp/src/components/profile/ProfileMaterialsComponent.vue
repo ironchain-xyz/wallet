@@ -1,24 +1,24 @@
 <template>
     <ProfileBase>
-        <RecordsContainer :fetchRecords="fetchCreatedRecords"/>
+        <Materials :loadData="fetchCreatedMaterials"/>
     </ProfileBase>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from '@/store';
-import { fetchCreatedRecords } from '@/services/record';
-import RecordsContainer from '@/components/record/RecordsContainerComponent.vue';
+import { fetchCreatedMaterials } from '@/services/material';
+import Materials from '@/components/material/MaterialsComponent.vue';
 import ProfileBase from '@/components/profile/ProfileBaseComponent.vue';
 
 export default defineComponent({
-    components: { RecordsContainer, ProfileBase },
+    components: { Materials, ProfileBase },
     setup() {
         const store = useStore();
         const profile = store.state.profile;
         return {
             profile,
-            fetchCreatedRecords,
+            fetchCreatedMaterials,
         };
     }
 });

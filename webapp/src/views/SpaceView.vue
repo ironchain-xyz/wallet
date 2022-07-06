@@ -1,17 +1,17 @@
 <template>
   <ContentComponent>
-    <SpaceRecords />
+    <SpaceMaterials />
   </ContentComponent>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import ContentComponent from '@/components/ContentComponent.vue';
-import SpaceRecords from '@/components/space/SpaceRecordsComponent.vue';
+import SpaceMaterials from '@/components/space/SpaceMaterialsComponent.vue';
 
 @Options({
   components: {
-    SpaceRecords,
+    SpaceMaterials,
     ContentComponent,
   },
 })

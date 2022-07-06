@@ -50,7 +50,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from '@/store';
-import { fetchCreatedRecords } from '@/services/record';
+import { fetchCreatedMaterials } from '@/services/material';
 
 export default defineComponent({
     components: { },
@@ -59,7 +59,7 @@ export default defineComponent({
         const profile = store.state.profile;
         return {
             profile,
-            fetchCreatedRecords,
+            fetchCreatedMaterials,
         };
     }
 });

@@ -1,33 +1,33 @@
 <template>
   <ContentComponent>
-    <RecordComponent type="single" />
+    <MaterialComponent />
   </ContentComponent>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import ContentComponent from '@/components/ContentComponent.vue';
-import RecordComponent from '@/components/record/RecordComponent.vue';
-import { Record, fetchRecord } from '@/services/record';
+import MaterialComponent from '@/components/material/MaterialComponent.vue';
+import { Material, fetchMaterial } from '@/services/material';
 import { useStore } from '@/store';
 import { useRoute } from 'vue-router';
 
 export default defineComponent({
-  components: { RecordComponent, ContentComponent },
+  components: { MaterialComponent, ContentComponent },
   setup() {
       const store = useStore();
       const route = useRoute();
-      const record = ref<Record>();
+      const material = ref<Material>();
 
       onMounted(() => {
           const hash = route.params.hash as string;
-          fetchRecord(store, hash).then(res => {
-              record.value = res;
+          fetchMaterial(store, hash).then(res => {
+              material.value = res;
           });
       });
 
       return {
-          record
+          material
       };
   },
 })

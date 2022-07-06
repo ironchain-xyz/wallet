@@ -4,26 +4,26 @@
             Materials
         </a-typography-title>
     </a-row>
-    <RecordsContainer :fetchRecords="fetchCreatedRecords"></RecordsContainer>
+    <Materials :loadData="fetchCreatedMaterials"></Materials>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import RecordsContainer from '@/components/record/RecordsContainerComponent.vue';
-import { fetchCreatedRecords } from '@/services/record';
+import Materials from '@/components/material/MaterialsComponent.vue';
+import { fetchCreatedMaterials } from '@/services/material';
 
 export default defineComponent({
-    components: { RecordsContainer },
+    components: { Materials },
     setup() {
         return {
-            fetchCreatedRecords
+            fetchCreatedMaterials
         };
     }
 });
 </script>
 
 <style lang="less" scoped>
-.records {
+.materials {
     padding: 20px 10px;
 }
 </style>

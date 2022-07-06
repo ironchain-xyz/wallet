@@ -39,7 +39,9 @@ export default defineComponent({
     const alert = ref<string>("");
     let username = ref<string>('');
     const onSave = () => {
-      initProfile(store, { username: username.value }).then(msg => alert.value = msg);
+        initProfile(store, { username: username.value }).then(
+            msg => alert.value = msg
+        );
     };
     return { username, alert, onSave };
   },

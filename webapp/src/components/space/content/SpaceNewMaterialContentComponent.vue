@@ -4,7 +4,7 @@
             :rows="4"
             @change="() => alert.description = ''"
             v-model:value="description"
-            placeholder="Describe the record, append tags with # at the end"
+            placeholder="Describe the material, append tags with # at the end"
         />
         <div v-if="!!alert.description" class="field">
             <a-alert :message="alert.description" type="error" />
@@ -47,7 +47,7 @@
         </a-card>
     </a-row>
     <a-row class="field">
-        <a-button type="primary" @click="onSaveRecord">
+        <a-button type="primary" @click="onSaveMaterial">
             Publish
         </a-button>
         <div v-if="!!alert.save" class="alertGap">
@@ -64,20 +64,24 @@ import { useStore } from '@/store';
 import { authenticate } from '@/services/auth';
 import { formatDate } from '@/lib/format';
 import {
-    Record,
-    NewRecordAlert,
-    validateRecord,
-    newRecord,
-    fetchCollectedRecords,
-} from '@/services/record';
+    Material,
+    NewMaterialAlert,
+    validateMaterial,
+    newMaterial,
+    fetchCollectedMaterials,
+} from '@/services/material';
 import { RawFile, uploadEvidence, getRawFile} from '@/services/evidence';
 import { genHash, parseErrorMsg } from '@/services/utils';
-import Evidences from '@/components/record/EvidencesComponent.vue'
+import { Space } from '@/services/space';
+import Evidences from '@/components/material/EvidencesComponent.vue'
 
 export default defineComponent({
     components: {
         UploadOutlined,
         Evidences
+    },
+    props: {
+        data: Object as () => Space,
     },
     setup() {
         const store = useStore();
@@ -86,27 +90,27 @@ export default defineComponent({
             router.push('init');
         }
 
-        const alert = reactive<NewRecordAlert>({});
+        const alert = reactive<NewMaterialAlert>({});
         const description = ref<string>("");
         const evidences = ref<RawFile[]>([]);
 
-        const collections = reactive<Record[]>([]);
+        const collections = reactive<Material[]>([]);
         const showCollections = ref<boolean>(false);
 
         const handlePreview = async (file: any) => {
             window.open(file.url);
         };
 
-        const onSaveRecord = async () => {
-            const record = {
+        const onSaveMaterial = async () => {
+            const material = {
                 description: description.value,
                 evidences: evidences.value,
             };
-            const res = validateRecord(record, alert);
+            const res = validateMaterial(material, alert);
             if (res.ok) {
                 try {
-                    const res = await newRecord(store, record);
-                    router.push("/record/" + res.hash);
+                    const res = await newMaterial(store, material);
+                    router.push("/material/" + res.hash);
                 } catch (err) {
                     alert.save = parseErrorMsg(err);
                 }
@@ -118,14 +122,14 @@ export default defineComponent({
             limit: number,
         }>({offset: 0, limit: 20,});
         const loadMoreCollections = () => {
-            fetchCollectedRecords(store, query).then(res => {
+            fetchCollectedMaterials(store, query).then(res => {
                 if (res.length > 0) {
                     if (!query.startAt) {
                         query.startAt = res[0].collectedAt;
                     }
                     query.offset += res.length;
                 }
-                res.forEach(record => collections.push(record));
+                res.forEach(material => collections.push(material));
             });
         };
         const onShowCollections = () => {
@@ -179,7 +183,7 @@ export default defineComponent({
             alert,
             collections,
             uploadCustomRequest,
-            onSaveRecord,
+            onSaveMaterial,
             handlePreview,
             onShowCollections,
             showCollections,

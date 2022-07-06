@@ -3,14 +3,14 @@
         :loading="initLoading"
         item-layout="vertical"
         size="large"
-        :data-source="records"
+        :data-source="materials"
     >
         <template #loadMore>
             <a-spin v-if="loadingMore" />
             <a-button v-if="!loadingMore && !noMore" @click="loadMore">loading more</a-button>
         </template>
         <template #renderItem="{ item }">
-            <RecordComponent :record="item" style="padding: 20px;"/>
+            <MaterialComponent :data="item" style="padding: 20px;"/>
         </template>
     </a-list>
     <a-row v-if="!!errMsg" style="margin-top: 100px;">
@@ -22,13 +22,13 @@
 import { defineComponent, reactive, ref, onMounted } from 'vue';
 import { parseErrorMsg } from '@/services/utils';
 import { useStore } from '@/store';
-import RecordComponent from '@/components/record/RecordComponent.vue';
-import { Record, RecordQuery } from '@/services/record';
+import MaterialComponent from '@/components/material/MaterialComponent.vue';
+import { Material, MaterialQuery } from '@/services/material';
 
 export default defineComponent({
-    components: { RecordComponent },
+    components: { MaterialComponent },
     props: {
-        fetchRecords: Function,
+        loadData: Function,
     },
     setup(props) {
         const store = useStore();
@@ -36,18 +36,18 @@ export default defineComponent({
         const initLoading = ref(true);
         const loadingMore = ref(false);
         const noMore = ref(false);
-        const records = ref<Record[]>([]);
+        const materials = ref<Material[]>([]);
         const errMsg = ref<string>("");
-        const query = reactive<RecordQuery>({offset: 0, limit: 50});
+        const query = reactive<MaterialQuery>({offset: 0, limit: 50});
 
         const loadMore = (init = false) => {
             loadingMore.value = true;
-            props.fetchRecords(store, query).then(res => {
+            props.loadData(store, query).then(res => {
                 console.log(res);
-                let index = records.value.length;
-                res.forEach(record => {
-                    record.index = index++;
-                    records.value.push(record);
+                let index = materials.value.length;
+                res.forEach(material => {
+                    material.index = index++;
+                    materials.value.push(material);
                 });
                 if (res.length > 0) {
                     query.startAt = query.startAt || res[0].collectedAt || res[0].createdAt;
@@ -76,7 +76,7 @@ export default defineComponent({
             loadingMore,
             noMore,
             errMsg,
-            records,
+            materials,
         };
     }
 });

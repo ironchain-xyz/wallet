@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent } from 'vue';
 import Navigation from '@/components/NavigationComponent.vue';
 import Header from '@/components/HeaderComponent.vue';
 import { useStore } from '../store';
@@ -36,16 +36,11 @@ export default defineComponent({
   components: { Navigation, Header },
   setup() {
     const store = useStore();
-    const authenticated = ref<boolean>(false);
     if (!authenticate(store)) {
         return;
-    } else {
-        authenticated.value = true;
     }
 
-    return {
-        authenticated,
-    };
+    return { };
   },
 })
 </script>

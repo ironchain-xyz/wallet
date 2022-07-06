@@ -1,7 +1,7 @@
 <template>
     <SpaceBase>
         <template v-slot="{ space }">
-            <SpaceAbout :space="space"></SpaceAbout>
+            <SpaceAbout :data="space"></SpaceAbout>
         </template>
     </SpaceBase>
 </template>

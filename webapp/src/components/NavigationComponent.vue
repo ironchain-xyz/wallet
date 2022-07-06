@@ -15,7 +15,7 @@
     </a-row>
     <a-row class="menu">
         <a-tooltip placement="right" title="Materials">
-            <a-button shape="circle" href="/records">
+            <a-button shape="circle" href="/materials">
                 <template #icon>
                     <CloudOutlined />
                 </template>

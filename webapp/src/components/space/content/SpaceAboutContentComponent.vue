@@ -6,7 +6,7 @@
     </a-row>
     <a-row class="border">
         <a-typography-text>
-            {{space?.description}}
+            {{data?.description}}
         </a-typography-text>
     </a-row>
 </template>
@@ -17,7 +17,7 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
     props: {
-        space: Object as () => Space,
+        data: Object as () => Space,
     },
     setup() {
         return { };

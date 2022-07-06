@@ -1,4 +1,3 @@
-
 <template>
     <a-row class="border" style="padding: 0px;">
         <a-typography-title strong :level="5" style="padding: 10px 15px; margin: 0px;">
@@ -7,16 +6,19 @@
         <a-divider style="margin: 0px;"></a-divider>
         <a-row gutter="16" style="padding: 15px; width: 100%;">
             <a-col v-for="space in spaces" v-bind:key="space.name">
-                <a-row justify="center">
-                    <a-avatar :size="55" class="avatar" shape="square">
-                        {{ space.name.substring(0, 1).toUpperCase() }}
-                    </a-avatar>
-                </a-row>
-                <a-row justify="center" style="margin-top: 5px;">
-                    <a-typography-text strong>
-                        {{ space.name }}
-                    </a-typography-text>
-                </a-row>   
+                <a :href='"/space/" + space.id'>
+                    <a-row justify="center">
+                        <a-avatar :size="55" class="avatar" shape="square">
+                            {{ space.name.substring(0, 1).toUpperCase() }}
+                        </a-avatar>
+                    </a-row>
+                    <a-row justify="center" style="margin-top: 5px;">
+                        <a-typography-text strong>
+                            {{ space.name }}
+                        </a-typography-text>
+                    </a-row>   
+                </a>
+
             </a-col>
         </a-row>
     </a-row>
@@ -70,7 +72,9 @@ export default defineComponent({
     setup() {
         const store = useStore();
         const invitationCodes = reactive<InvitationCode[]>([]);
-        const spaces = ref<{name: string}[]>([{name: "Space1"}, {name: "Space2"}]);
+        const spaces = ref<{name: string, id: string}[]>([
+            {name: "Space1", id: "1"},{name: "Space2", id: "2"}
+        ]);
 
         onBeforeMount(() => {
             getInvitationCode(store).then((res) => {

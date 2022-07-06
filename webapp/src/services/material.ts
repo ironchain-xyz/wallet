@@ -5,7 +5,7 @@ import { authHeader, parseErrorMsg } from './utils';
 import { API_URL } from '../lib/constants';
 import { Evidence, RawFile } from './evidence';
 
-export interface RecordPreview {
+export interface MaterialPreview {
     hash: string;
     description: string;
     creator: {username: string};
@@ -14,39 +14,39 @@ export interface RecordPreview {
     tags: string[];
 }
 
-export interface Record extends RecordPreview {
+export interface Material extends MaterialPreview {
     collectedAt: string;
     collectors: {userId: string}[];
     evidences: Evidence[];
     index?: number;
 }
 
-export interface NewRecord {
+export interface NewMaterial {
     description: string;
     evidences: RawFile[];
 }
 
-export interface NewRecordAlert {
+export interface NewMaterialAlert {
     description?: string;
     evidences?: string;
     save?: string;
 }
 
-export interface RecordQuery {
+export interface MaterialQuery {
     startAt?: string,
     offset: number,
     limit: number,
 }
 
-export function validateRecord(record: NewRecord, alert: NewRecordAlert): { alert?: NewRecordAlert, ok: boolean } {
+export function validateMaterial(material: NewMaterial, alert: NewMaterialAlert): { alert?: NewMaterialAlert, ok: boolean } {
     let ok = true;
-    if (!record.description) {
+    if (!material.description) {
         alert.description = "Description cannot be empty";
         ok = false;
     }
 
-    for (const index in record.evidences || []) {
-        const e = record.evidences[index];
+    for (const index in material.evidences || []) {
+        const e = material.evidences[index];
         if (e.status == "error") {
             alert.evidences = "Please remove invalid files"
             ok = false;
@@ -59,29 +59,29 @@ export function validateRecord(record: NewRecord, alert: NewRecordAlert): { aler
     return { ok, alert };
 }
 
-export async function newRecord(store: Store<State>, record: NewRecord): Promise<{hash: string}> {
+export async function newMaterial(store: Store<State>, material: NewMaterial): Promise<{hash: string}> {
     const url = API_URL + "record/new";
     const res = await axios.post(url, {
-        description: record.description,
-        evidences: record.evidences.map(e => e.response),
+        description: material.description,
+        evidences: material.evidences.map(e => e.response),
     }, { headers: authHeader(store) });
     return res.data;
 }
 
-export async function fetchRecord(
+export async function fetchMaterial(
     store: Store<State>,
     hash: string
-) : Promise<Record> {
+) : Promise<Material> {
     const url = API_URL + "record/";
     const res = await axios.get(url, {headers: authHeader(store), params: {hash}});
     res.data.references = res.data.reference;
     return res.data;
 }
 
-export async function fetchLatestRecords(
+export async function fetchLatestMaterials(
     store: Store<State>,
-    params: RecordQuery
-) : Promise<Record[]> {
+    params: MaterialQuery
+) : Promise<Material[]> {
     const url = API_URL + "record/latest";
     const res = await axios.get(url, {headers: authHeader(store), params});
     return res.data.records.map(r => ({
@@ -90,10 +90,10 @@ export async function fetchLatestRecords(
     }));
 }
 
-export async function fetchCreatedRecords(
+export async function fetchCreatedMaterials(
     store: Store<State>,
-    params: RecordQuery
-) : Promise<Record[]> {
+    params: MaterialQuery
+) : Promise<Material[]> {
     const url = API_URL + "record/created";
     const res = await axios.get(url, {headers: authHeader(store), params});
     return res.data.records.map(r => ({
@@ -102,10 +102,10 @@ export async function fetchCreatedRecords(
     }));
 }
 
-export async function fetchCollectedRecords(
+export async function fetchCollectedMaterials(
     store: Store<State>,
-    params: RecordQuery
-) : Promise<Record[]> {
+    params: MaterialQuery
+) : Promise<Material[]> {
     const url = API_URL + "record/collections";
     const res = await axios.get(url, {headers: authHeader(store), params});
     return res.data.records.map(r => ({
@@ -115,13 +115,13 @@ export async function fetchCollectedRecords(
     }));
 }
 
-export async function addToCollection(store: Store<State>, hash: string) : Promise<Record[]> {
+export async function addToCollection(store: Store<State>, hash: string) : Promise<Material[]> {
     const url = API_URL + "record/addToCollection";
     const res = await axios.post(url, {hash}, {headers: authHeader(store)});
     return res.data;
 }
 
-export async function removeFromCollection(store: Store<State>, hash: string) : Promise<Record[]> {
+export async function removeFromCollection(store: Store<State>, hash: string) : Promise<Material[]> {
     const url = API_URL + "record/removeFromCollection";
     const res = await axios.post(url, {hash}, {headers: authHeader(store)});
     return res.data;
