@@ -1,11 +1,11 @@
 <template>
   <ContentComponent>
-    <MaterialComponent />
+    <MaterialComponent :data="material" />
   </ContentComponent>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, onBeforeMount } from 'vue';
 import ContentComponent from '@/components/ContentComponent.vue';
 import MaterialComponent from '@/components/material/MaterialComponent.vue';
 import { Material, fetchMaterial } from '@/services/material';
@@ -16,11 +16,12 @@ export default defineComponent({
   components: { MaterialComponent, ContentComponent },
   setup() {
       const store = useStore();
-      const route = useRoute();
       const material = ref<Material>();
 
-      onMounted(() => {
-          const hash = route.params.hash as string;
+      const route = useRoute();
+      const hash = route.params.hash as string;
+
+      onBeforeMount(() => {
           fetchMaterial(store, hash).then(res => {
               material.value = res;
           });

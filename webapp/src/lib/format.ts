@@ -2,7 +2,7 @@ export function formatDate(dateStr: string) {
     const date = new Date(dateStr);
     const diff = Math.abs(Date.now() - date.valueOf());
     if (diff > 1000 * 60 * 60 * 24) {
-        return "on " + date.toLocaleDateString("en-US");
+        return date.toLocaleDateString("en-US");
     } else if (diff > 1000 * 60 * 60) {
         return Math.floor(diff / (1000 * 60 * 60)).toString() + " hours ago";
     } else if (diff > 1000 * 60) {

@@ -10,7 +10,14 @@
             <a-button v-if="!loadingMore && !noMore" @click="loadMore">loading more</a-button>
         </template>
         <template #renderItem="{ item }">
-            <MaterialComponent :data="item" style="padding: 20px;"/>
+            <a-list-item
+                key="material.hash"
+                style="margin-bottom: 20px;"
+            >
+                 <a :href='"/material/" + item.hash'>
+                    <slot :data="item" style="padding: 20px;"></slot>
+                 </a>
+            </a-list-item>
         </template>
     </a-list>
     <a-row v-if="!!errMsg" style="margin-top: 100px;">
@@ -22,11 +29,9 @@
 import { defineComponent, reactive, ref, onMounted } from 'vue';
 import { parseErrorMsg } from '@/services/utils';
 import { useStore } from '@/store';
-import MaterialComponent from '@/components/material/MaterialComponent.vue';
 import { Material, MaterialQuery } from '@/services/material';
 
 export default defineComponent({
-    components: { MaterialComponent },
     props: {
         loadData: Function,
     },

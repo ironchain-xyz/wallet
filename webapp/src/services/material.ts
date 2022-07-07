@@ -12,6 +12,7 @@ export interface MaterialPreview {
     createdAt: string;
     evidencesHashes: string[];
     tags: string[];
+    space?: string;
 }
 
 export interface Material extends MaterialPreview {
@@ -74,7 +75,6 @@ export async function fetchMaterial(
 ) : Promise<Material> {
     const url = API_URL + "record/";
     const res = await axios.get(url, {headers: authHeader(store), params: {hash}});
-    res.data.references = res.data.reference;
     return res.data;
 }
 

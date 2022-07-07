@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Materials from '../views/MaterialsView.vue'
-import Profile from '../views/ProfileView.vue'
+import ProfileMaterials from '../views/ProfileMaterialsView.vue'
 import ProfileAbout from '../views/ProfileAboutView.vue'
 import Spaces from '../views/SpacesView.vue'
 import Space from '../views/SpaceView.vue'
@@ -30,11 +29,6 @@ const routes = [
     component: SpaceAbout
   },
   {
-    path: '/materials',
-    name: 'materials',
-    component: Materials
-  },
-  {
     path: '/material/:hash',
     name: "material",
     component: Material,
@@ -42,7 +36,7 @@ const routes = [
   {
     path: '/profile',
     name: 'profile',
-    component: Profile
+    component: ProfileMaterials
   },
   {
     path: '/profile/about',

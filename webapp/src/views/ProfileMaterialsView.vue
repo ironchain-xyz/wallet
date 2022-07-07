@@ -15,5 +15,5 @@ import ContentComponent from '@/components/ContentComponent.vue'
     ProfileMaterialsComponent,
   },
 })
-export default class ProfileView extends Vue { }
+export default class ProfileMaterialsView extends Vue { }
 </script>

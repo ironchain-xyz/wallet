@@ -1,47 +1,43 @@
 <template>
-    <a-list-item class="border" key="material?.hash" style="padding: 0px; margin-bottom: 20px;">
-        <a-row :wrap="false">
-            <a-col flex="50px">
-                <a-avatar :size="50" class="avatar" shape="square">
-                    {{ data!.creator.username.substring(0, 1).toUpperCase() }}
-                </a-avatar>
-            </a-col>
-            <a-col flex="auto" style="margin-left: 20px;">
-                <a-row>
-                    <a :href='"/material/" + data!.hash'>
-                        <a-typography>
-                            <a-typography-title
-                                :level="5"
-                                style="text-align: left; margin: 0px"
-                            >
-                                {{data!.creator.username}}
-                            </a-typography-title>
-                            <a-typography-paragraph
-                                type="secondary"
-                                style="font-size: 12px;"
-                            >
-                                {{formatDate(data!.createdAt)}}
-                            </a-typography-paragraph>
-                        </a-typography>
-                    </a>
-                </a-row>
-                <a-row>
-                    <a-typography-text>
-                        {{data!.description}}
-                    </a-typography-text>
-                </a-row>
-                <Evidences v-if="data!.evidences.length > 0" :evidences="data!.evidences"/>
-                <a-row>
-                    <a-button type="text" disabled style="padding: 0px;">
-                        <template #icon>
-                            <StarOutlined />
-                        </template>
-                        {{data!.collectors.length}}
-                    </a-button>
-                </a-row>
-            </a-col>
-        </a-row>
-    </a-list-item>
+    <a-row class="border" v-if="data" :wrap="false" style="padding: 15px;">
+        <a-col flex="50px">
+            <a-avatar :size="50" class="avatar" shape="square">
+                {{ data.creator.username.substring(0, 1).toUpperCase() }}
+            </a-avatar>
+        </a-col>
+        <a-col flex="auto" style="margin-left: 20px;">
+            <a-row>
+                <a-typography>
+                    <a-typography-title
+                        :level="5"
+                        style="text-align: left; margin: 0px"
+                    >
+                        {{data.creator.username}}
+                    </a-typography-title>
+                    <a-typography-paragraph
+                        type="secondary"
+                        style="font-size: 12px; text-align: left;"
+                    >
+                        {{formatDate(data.createdAt)}}
+                    </a-typography-paragraph>
+                </a-typography>
+            </a-row>
+            <a-row>
+                <a-typography-text>
+                    {{data.description}}
+                </a-typography-text>
+            </a-row>
+            <Evidences v-if="data.evidences.length > 0" :evidences="data.evidences"/>
+            <a-row>
+                <a-button type="text" disabled style="padding: 0px;">
+                    <template #icon>
+                        <StarOutlined />
+                    </template>
+                    {{data.collectors.length}}
+                </a-button>
+            </a-row>
+        </a-col>
+    </a-row>
 </template>
 
 <script lang="ts">
@@ -56,7 +52,6 @@ export default defineComponent({
     components: {Evidences, StarOutlined},
     props: {
         data: Object as () => Material,
-        type: String,
     },
     setup() {
         return {

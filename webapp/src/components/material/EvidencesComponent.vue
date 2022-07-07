@@ -52,16 +52,17 @@ export default defineComponent({
 
 <style lang="less" scoped>
 .imgContainer {
-    width: 180px;
-    height: 180px;
-    padding: 10px;
+    width: 100px;
+    height: 100px;
+    margin: 10px 0px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .inside {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 </style>
