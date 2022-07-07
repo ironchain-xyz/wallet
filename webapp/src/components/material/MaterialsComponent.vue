@@ -12,6 +12,7 @@
         <template #renderItem="{ item }">
             <a-list-item
                 key="material.hash"
+                class="border"
                 style="margin-bottom: 20px;"
             >
                  <a :href='"/material/" + item.hash'>
@@ -48,7 +49,6 @@ export default defineComponent({
         const loadMore = (init = false) => {
             loadingMore.value = true;
             props.loadData(store, query).then(res => {
-                console.log(res);
                 let index = materials.value.length;
                 res.forEach(material => {
                     material.index = index++;

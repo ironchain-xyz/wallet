@@ -12,7 +12,7 @@ export interface MaterialPreview {
     createdAt: string;
     evidencesHashes: string[];
     tags: string[];
-    space?: string;
+    space: string;
 }
 
 export interface Material extends MaterialPreview {

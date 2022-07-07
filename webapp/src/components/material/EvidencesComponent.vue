@@ -52,8 +52,8 @@ export default defineComponent({
 
 <style lang="less" scoped>
 .imgContainer {
-    width: 100px;
-    height: 100px;
+    width: 130px;
+    height: 130px;
     margin: 10px 0px;
     display: flex;
     justify-content: center;
