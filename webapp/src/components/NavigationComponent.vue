@@ -15,11 +15,13 @@
     </a-row>
     <a-row class="menu">
         <a-tooltip placement="right" title="New Space">
-            <a-button shape="circle" href="/space/new">
-                <template #icon>
-                    <PlusOutlined />
-                </template>
-            </a-button>   
+            <a href="/space/new">
+                <a-button shape="circle">
+                    <template #icon>
+                        <PlusOutlined />
+                    </template>
+                </a-button>     
+            </a>
         </a-tooltip>
     </a-row>
 </template>

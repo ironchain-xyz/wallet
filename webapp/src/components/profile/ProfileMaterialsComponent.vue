@@ -21,7 +21,7 @@ export default defineComponent({
     components: { Materials, Material, ProfileBase },
     setup() {
         const store = useStore();
-        const profile = store.state.profile;
+        const profile = store.state.user?.profile;
         return {
             profile,
             fetchCreatedMaterials,

@@ -12,9 +12,9 @@
               <span style="font-weight: bold; color: gray;">Back</span>
             </a-button>
         </a-row>
-        <a-row class="border">
+        <div class="border">
             <MaterialComponent v-if="material" :data="material" />
-        </a-row>
+        </div>
     </ContentComponent>
 </template>
 

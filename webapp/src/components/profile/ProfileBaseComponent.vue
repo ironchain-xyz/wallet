@@ -1,14 +1,14 @@
 <template>
-    <a-row :wrap="false" align="top">
+    <a-row v-if="profile" :wrap="false" align="top">
         <a-col class="border" flex="180px" style="height: auto;">
             <a-row justify="center">
                 <a-avatar :size="55" class="avatar" shape="square">
-                    {{ profile!.username.substring(0, 1).toUpperCase() }}
+                    {{ profile.username.substring(0, 1).toUpperCase() }}
                 </a-avatar>
             </a-row>
             <a-row justify="center" style="margin-top: 10px;">
                 <a-typography-title strong :level="4">
-                    {{ profile!.username }}
+                    {{ profile.username }}
                 </a-typography-title>
             </a-row>
             <a-row justify="center" style="margin-top: 5px;">
@@ -48,19 +48,27 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
 import { useStore } from '@/store';
+import { authenticate } from '@/services/auth';
 import { fetchCreatedMaterials } from '@/services/material';
+import router from '@/router';
 
 export default defineComponent({
-    components: { },
     setup() {
         const store = useStore();
-        const profile = store.state.profile;
-        return {
-            profile,
-            fetchCreatedMaterials,
-        };
+        if (!authenticate(store)) {
+            router.push("/");
+            return {
+                profile: null,
+                fetchCreatedMaterials
+            }
+        } else {
+            return {
+                profile: computed(() => store.state.user?.profile),
+                fetchCreatedMaterials,
+            };
+        }        
     }
 });
 </script>

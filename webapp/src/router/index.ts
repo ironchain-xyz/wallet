@@ -43,26 +43,6 @@ const routes = [
     name: 'profileAbout',
     component: ProfileAbout
   },
-  {
-    path: '/init',
-    name: 'initProfile',
-    component: () => import('../views/InitProfileView.vue')
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: () => import('../views/RegisterView.vue')
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: () => import('../views/LoginView.vue')
-  },
-  {
-    path: '/verify',
-    name: 'verify',
-    component: () => import('../views/VerifyView.vue')
-  },
 ]
 
 const router = createRouter({

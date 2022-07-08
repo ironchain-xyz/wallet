@@ -61,7 +61,6 @@ import { defineComponent, reactive, ref } from 'vue';
 import { UploadOutlined } from '@ant-design/icons-vue';
 import router from '@/router';
 import { useStore } from '@/store';
-import { authenticate } from '@/services/auth';
 import { formatDate } from '@/lib/format';
 import {
     Material,
@@ -85,11 +84,6 @@ export default defineComponent({
     },
     setup() {
         const store = useStore();
-        if (!authenticate(store)) return;
-        if (!store.state.profile?.username) {
-            router.push('init');
-        }
-
         const alert = reactive<NewMaterialAlert>({});
         const description = ref<string>("");
         const evidences = ref<RawFile[]>([]);

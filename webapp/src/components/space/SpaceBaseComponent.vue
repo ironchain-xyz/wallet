@@ -1,5 +1,5 @@
 <template>
-    <a-row :wrap="false" align="top">
+    <a-row v-if="space" :wrap="false" align="top">
         <a-col class="border" flex="180px" style="height: auto;">
             <a-row justify="center">
                 <a-avatar :size="55" class="avatar" shape="square">
@@ -38,7 +38,7 @@
                     Materials
                 </a-button>
             </a-row>
-            <a-row>
+            <a-row v-if="authenticated">
                 <a-button
                     class="menuItem"
                     type="text"
@@ -70,11 +70,12 @@ import { defineComponent, ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { Space, fetchSpace, joinSpace, leaveSpace } from '@/services/space';
 import { useStore } from '@/store';
+import { authenticate } from '@/services/auth';
 
 export default defineComponent({
-    components: { },
     setup() {
         const store = useStore();
+        const authenticated = computed(() => authenticate(store));
         const route = useRoute();
 
         const space = ref<Space>({
@@ -145,6 +146,7 @@ export default defineComponent({
             space,
             onClick,
             formatNumber,
+            authenticated,
         };
     }
 });

@@ -11,31 +11,21 @@ function validateUsername(username: string): boolean {
     return /^(?!\d)(?!.*-.*-)(?!.*-$)(?!-)[a-zA-Z0-9-]{3,20}$/.test(username);
 }
 
-export async function initProfile(store: Store<State>, profile: { username: string }): Promise<string> {
+export async function initProfile(
+    store: Store<State>,
+    profile: { username: string }
+): Promise<void> {
     if (!validateUsername(profile.username)) {
-        return "please input a valid username";
+        throw new Error("Invalid username");
     }
-
-    const key = "initProfile";
-    const hide = message.loading({ content: 'saving...', key });
     const url = API_URL + "profile/init";
-    let msg = "";
     try {
         const res = await axios.post(url, profile, { headers: authHeader(store) });
         store.commit('setProfile', profile);
-        const hide2 = message.success({
-            content: 'saved, redirecting to home...',
-            key,
-        });
-        setTimeout(() => {
-            hide2();
-            router.push('/');
-        }, 1000);
     } catch (err: any) {
-        hide();
-        msg = parseErrorMsg(err);
+        console.log("failed to init profile with err " + err);
+        throw new Error("Server Error");
     }
-    return msg;
 }
 
 export async function updateUsername(store: Store<State>, username: string): Promise<boolean> {

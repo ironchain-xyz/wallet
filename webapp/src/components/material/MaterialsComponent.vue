@@ -7,7 +7,8 @@
     >
         <template #loadMore>
             <a-spin v-if="loadingMore" />
-            <a-button v-if="!loadingMore && !noMore" @click="loadMore">loading more</a-button>
+            <a-button v-if="!loadingMore && !noMore && !errMsg" @click="loadMore">loading more</a-button>
+            <span v-if="!!errMsg">{{ errMsg }}</span>
         </template>
         <template #renderItem="{ item }">
             <a-list-item
@@ -21,9 +22,6 @@
             </a-list-item>
         </template>
     </a-list>
-    <a-row v-if="!!errMsg" style="margin-top: 100px;">
-        <span>{{ errMsg }}</span>
-    </a-row>
 </template>
 
 <script lang="ts">

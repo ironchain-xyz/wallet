@@ -9,7 +9,7 @@ export function authHeader(store: Store<State>): Record<string, string> {
 }
 
 export function parseErrorMsg(err: any, defaultMsg?: string) {
-    return err.response?.data?.message || err.response?.message || defaultMsg || "unknown error";
+    return err.response?.data?.message || err.response?.message || defaultMsg || "server error";
 }
 
 export async function genHash(file) : Promise<string> {

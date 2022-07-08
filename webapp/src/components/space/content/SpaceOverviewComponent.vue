@@ -1,5 +1,6 @@
 <template>
     <a-card
+        v-if="space"
         class="space"
         @click="onClickSpace"
         @mouseover="mouseOver = true"
@@ -7,10 +8,10 @@
         :class="{hover: mouseOver}"
     >
         <a-avatar :size="45" class="avatar" shape="square">
-            {{ space!.name.substring(0, 1).toUpperCase() }}
+            {{ space.name.substring(0, 1).toUpperCase() }}
         </a-avatar>
-        <h3>{{space!.name}}</h3>
-        <p style="font-size: 12px;">{{ formatNumber(space!.totalMembers) }} members</p>
+        <h3>{{space.name}}</h3>
+        <p style="font-size: 12px;">{{ formatNumber(space.totalMembers) }} members</p>
         <a-button
             shape="round"
             :type="actionType"

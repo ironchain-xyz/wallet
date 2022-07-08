@@ -12,20 +12,20 @@ export type OTP = {
   existing?: boolean;
 }
 
-export interface User {
-  id: string,
-  email: string;
-  otp: OTP;
-  jwt?: JWT
-}
-
 export interface Profile {
   username: string;
 }
 
+export interface User {
+  id: string,
+  email: string;
+  otp: OTP;
+  jwt?: JWT;
+  profile: Profile;
+}
+
 export interface State {
   user?: User;
-  profile?: Profile;
 }
 
 export const key: InjectionKey<Store<State>> = Symbol()
@@ -41,16 +41,15 @@ export const store = createStore<State>({
   mutations: {
     clear(state: State) {
       state.user = undefined;
-      state.profile = undefined;
     },
     setUser(state: State, user: User) {
       state.user = user;
     },
     setProfile(state: State, profile: Profile) {
-      state.profile = profile;
+      state.user!.profile = profile;
     },
     updateProfile(state: State, profileUpdate: Profile) {
-      Object.assign(state.profile!, profileUpdate);
+      Object.assign(state.user!.profile!, profileUpdate);
     }
   },
   plugins: [vuexLocal.plugin]

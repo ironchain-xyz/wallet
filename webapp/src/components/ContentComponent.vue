@@ -5,15 +5,13 @@
                 <Navigation />
             </a-affix>
         </a-col>
-        <a-col>
-            <a-divider
-                type="vertical"
-                style="height: 100%; margin: 0px"
-            />
-        </a-col>
+        <a-divider
+            type="vertical"
+            style="height: 100%; margin: 0px"
+        />
         <a-col flex="auto" style="width: calc(100% - 60px)">
             <a-row justify="center" align="middle" style="min-height: 50px; margin: 0px 20px;">
-                <Header class="header"></Header>
+                <Header></Header>
             </a-row>
             <a-divider style="width: 100%; margin: 0px"></a-divider>
             <a-row justify="center">
@@ -29,17 +27,10 @@
 import { defineComponent } from 'vue';
 import Navigation from '@/components/NavigationComponent.vue';
 import Header from '@/components/HeaderComponent.vue';
-import { useStore } from '../store';
-import { authenticate } from '../services/auth';
 
 export default defineComponent({
   components: { Navigation, Header },
   setup() {
-    const store = useStore();
-    if (!authenticate(store)) {
-        return;
-    }
-
     return { };
   },
 })
@@ -48,11 +39,6 @@ export default defineComponent({
 <style lang="less" scoped>
 .wrapper {
     width: 100%;
-}
-
-.header {
-    width: 100%;
-    max-width: 700px
 }
 
 .content {
