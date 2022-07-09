@@ -4,15 +4,12 @@ const router = require("express").Router();
 const validator = require('validator');
 const asyncHandler = require('express-async-handler')
 
+const { validateProfileUpdate } = require("../lib/validator.js");
 const { nanoid } = require('nanoid');
 const db = require("../models");
 const User = db.users;
 const Invitations = db.invitations;
 const INVITATION_CODE_PER_USER = 3;
-
-function isValidUserName(username) {
-    return validator.matches(username, "^(?!\d)(?!.*-.*-)(?!.*-$)(?!-)[a-zA-Z0-9-]{3,20}$");
-}
 
 async function genInvitationCode(createdBy) {
     const code = await nanoid();
@@ -33,33 +30,14 @@ async function genInvitationCode(createdBy) {
     }
 }
 
-router.post('/profile/setusername', asyncHandler(async (req, res) => {
-    const username = req.body.username;
-    if (!isValidUserName(username)) {
-        res.status(400).send({
-            message: "Invalid username!"
-        });
-    } else {
+router.post('/profile', asyncHandler(async (req, res) => {
+    const res = validateProfileUpdate(req.body);
+    if (res.ok) {
         const user = await User.findByPk(req.user.id);
-        await user.update({username});
+        await user.update(res.update);
         res.send({ok: true});
-    }
-}));
-
-router.post('/profile/init', asyncHandler(async (req, res) => {
-    const username = req.body.username;
-    if (!isValidUserName(username)) {
-        res.status(400).send({
-            message: "Invalid username!"
-        });
-    } else if (await User.findOne({where: {username}})) {
-        res.status(400).send({
-            message: "Username already used!"
-        });
     } else {
-        const user = await User.findByPk(req.user.id);
-        await user.update({username});
-        res.send({ok: true});
+        return res.status(400).send({message: res.msg});
     }
 }));
 

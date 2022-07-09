@@ -7,11 +7,6 @@ export type JWT = {
   accessToken: string;
 };
 
-export type OTP = {
-  sentAt?: number;
-  existing?: boolean;
-}
-
 export interface Profile {
   username: string;
 }
@@ -19,7 +14,6 @@ export interface Profile {
 export interface User {
   id: string,
   email: string;
-  otp: OTP;
   jwt?: JWT;
   profile: Profile;
 }

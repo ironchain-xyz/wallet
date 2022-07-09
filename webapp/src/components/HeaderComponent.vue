@@ -74,6 +74,8 @@ export default defineComponent({
         logout(store).then(() => {
             if (route.path.startsWith("/profile/")) {
                 router.push("/")
+            } else {
+                router.go(0);
             }
         });
     }

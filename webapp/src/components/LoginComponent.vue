@@ -1,28 +1,27 @@
 <template>
   <div>
-    <a-modal :closable="false" :visible="visible">
-      <a-alert
-        v-if="!!alert.msg"
-        :message="alert.msg"
-        :type="alert.type"
-        style="margin-bottom: 10px;"
-      ></a-alert>
-      <a-col class="form" v-if="step === 'email'">
-        <a-input
-          v-model:value="email"
-          style="margin-bottom: 20px;"
-          placeholder="please input your email"
-        >
-          <template #prefix>
-            <MailOutlined class="site-form-item-icon" />
+    <a-modal style="max-width: 400px;" :closable="false" :visible="visible">
+      <a-row justify="end">
+        <a-button type="text" @click="onCancel">
+          <template #icon>
+            <CloseOutlined class="site-form-item-icon" />
           </template>
-        </a-input>
-      </a-col>
-      <a-col class="form" v-if="step === 'register'">
+        </a-button>
+      </a-row>
+      <a-col class="form" v-if="step === 'email'">
         <a-row justify="center" style="margin-bottom: 20px;">
           <a-typography-title :level="5">
-            Create Account
+            Login
           </a-typography-title>
+        </a-row>
+        <a-typography-text :level="5">
+          Email
+        </a-typography-text>
+        <a-input v-model:value="email" /> 
+      </a-col>
+      <a-col class="form" v-if="step === 'register'">
+        <a-row style="margin-bottom: 20px;">
+          <a-alert type="warning" message="Email is not registered, please sign up" />
         </a-row>
         <a-input
           v-model:value="username"
@@ -39,7 +38,7 @@
         />
         <a-input
           v-model:value="invitationCode"
-          placeholder="an invitation code is required"
+          placeholder="invitation code is required"
           style="margin-top: 20px;"
         >
           <template #prefix>
@@ -57,12 +56,19 @@
           Resend the authentication code
         </a-button>
       </a-col>
+      <a-alert
+        v-if="!!alert.msg"
+        :message="alert.msg"
+        :type="alert.type"
+        style="margin-top: 10px;"
+      ></a-alert>
       <template #footer>
-        <a-button @click="onCancel">Cancel</a-button>
-        <a-button v-if="step !== 'email'" @click="onPrev">Prev</a-button>
-        <a-button v-if="step === 'email'" @click="onInputEmail">Next</a-button>
-        <a-button v-if="step === 'register'" @click="onRegister">Next</a-button>
-        <a-button v-if="step === 'otp'" @click="onVerifyOTP">Login</a-button>
+        <a-row justify="center">
+          <a-button v-if="step !== 'email'" @click="onPrev">Prev</a-button>
+          <a-button v-if="step === 'email'" @click="onInputEmail">Next</a-button>
+          <a-button v-if="step === 'register'" @click="onRegister">Next</a-button>
+          <a-button v-if="step === 'otp'" @click="onVerifyOTP">Login</a-button>
+        </a-row>
       </template>
     </a-modal>
   </div>
@@ -70,9 +76,11 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { MailOutlined, UserOutlined, KeyOutlined, LockOutlined } from '@ant-design/icons-vue';
+import { UserOutlined, KeyOutlined, LockOutlined, CloseOutlined } from '@ant-design/icons-vue';
 import { useStore } from '@/store';
 import { isRegistered, register, sendOTP, verifyOTP, warnExistingOTP } from '@/services/auth';
+import { parseErrorMsg } from '@/services/utils';
+
 
 interface Alert {
   msg: string,
@@ -92,7 +100,7 @@ function warning(msg: string) : Alert {
 }
 
 export default defineComponent({
-  components: { MailOutlined, UserOutlined, KeyOutlined, LockOutlined },
+  components: { UserOutlined, KeyOutlined, LockOutlined, CloseOutlined },
   props: {
       visible: Boolean,
   },
@@ -128,51 +136,43 @@ export default defineComponent({
         } else {
           nextStep("register");
         }
-      }).catch(err => alert.value = error(err.message))
+      }).catch(err => alert.value = error(parseErrorMsg(err)));
     };
 
     const onRegister = (): void => {
-      register(store, email.value, username.value, invitationCode.value).then(() => {
-        nextStep("otp", info("Check your email for authentication code"));
-      }).catch(err => {
-        alert.value = error(err.message)
-      })
+      register(store, email.value, username.value, invitationCode.value)
+        .then(() => nextStep("otp", info("Check your email for authentication code")))
+        .catch(err => alert.value = error(parseErrorMsg(err)));
     };
 
     const onResendOTP = () => {
-      if (store.state.user!.otp!.existing) {
-        alert.value = warning(warnExistingOTP(store.state.user!.otp!.sentAt!));
-      } else {
-        sendOTP(store, store.state.user!.email)
-          .then(res => {
-            if (res.data.existingOTP) {
-              alert.value = warning(warnExistingOTP(res.data.sentAt));
-            }
-          })
-          .catch(err => {
-            console.log(err);
-            alert.value = error(err.message)
-          });
-      }
+      sendOTP(store, email.value)
+        .then(res => {
+          if (res.data.existingOTP) {
+            alert.value = warning(warnExistingOTP(res.data.sentAt));
+          }
+        })
+        .catch(err => alert.value = error(parseErrorMsg(err)));
     };
 
     const onVerifyOTP = () => {
-      verifyOTP(store, otp.value).then(() => {
-        if (store.state.user?.profile?.username) {
+      verifyOTP(store, email.value, otp.value)
+        .then(() => {
           emit("loggedIn");
-        }
-      }).catch(err => alert.value = error(err.message));
+        })
+        .catch(err => alert.value = error(parseErrorMsg(err)));
     };
 
     const onPrev = () => {
-      if (step.value === 'register' || step.value === 'otp') {
-        step.value = 'email';
+      if (step.value == 'otp') {
+        otp.value = '';
+      } else if (step.value == 'register') {
+        invitationCode.value = '';
+        username.value = '';
       }
+      step.value = 'email';
+      alert.value.msg = '';
     }
-
-    const onCancel = () => {
-      emit("cancel");
-    };
 
     return {
       alert,
@@ -185,8 +185,8 @@ export default defineComponent({
       onRegister,
       onResendOTP,
       onVerifyOTP,
-      onCancel,
       onPrev,
+      onCancel: () => emit("cancel"),
     };
   },
 });
@@ -195,5 +195,9 @@ export default defineComponent({
 <style lang="less" scoped>
 .form {
   margin-top: 20px;
+}
+
+.login-modal {
+  max-width: 200px;
 }
 </style>

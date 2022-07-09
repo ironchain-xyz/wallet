@@ -61,7 +61,7 @@
 <script lang="ts">
 import { defineComponent, reactive, ref, computed, onBeforeMount } from 'vue';
 import { useStore } from '@/store';
-import { getInvitationCode, updateUsername } from '@/services/profile';
+import { getInvitationCode } from '@/services/profile';
 
 interface InvitationCode {
     code: string;
@@ -91,16 +91,11 @@ export default defineComponent({
             return store.state.user!.email
         });
 
-        const onUsernameChange = () => {
-            updateUsername(store, username.value);
-        };
-
         return {
             email,
             username,
             spaces,
             invitationCodes,
-            onUsernameChange,
         };
     },
 });

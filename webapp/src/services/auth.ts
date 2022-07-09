@@ -2,16 +2,12 @@ import { Store } from 'vuex';
 import axios, { AxiosResponse } from 'axios';
 import { message } from 'ant-design-vue';
 import { JWT, State } from "../store";
-import { authHeader, parseErrorMsg } from './utils';
+import { authHeader } from './utils';
 import { API_URL } from '../lib/constants';
 import router from '../router';
 
 function validateEmail(email: string): boolean {
     return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
-}
-
-function validatePasscode(passcode: string): boolean {
-    return /^[0-9A-Za-z]{6}$/.test(passcode);
 }
 
 function epoch(): number {
@@ -34,7 +30,9 @@ export async function isRegistered(
     if (!validateEmail(email)) {
         throw new Error("Invalid Email");
     }
-    return false;
+    const url = API_URL + "auth/isRegistered";
+    const res = await axios.get(url, {params: {email}});
+    return res.data.result;
 }
 
 export async function register(
@@ -46,14 +44,12 @@ export async function register(
     if (!validateUsername(username)) {
         throw new Error("Invalid username");
     }
-    const url = API_URL + "auth/register";
-    try {
-        await axios.post(url, { email, username, invitationCode });
-        store.commit("setUser", { email });
-    } catch (err: any) {
-        console.log("register error: " + err);
-        throw new Error("Server Error");
+    if (invitationCode.length == 0) {
+        throw new Error("Invalid invitation code");
     }
+    const url = API_URL + "auth/register";
+    await axios.post(url, { email, username, invitationCode });
+    store.commit("setUser", { email });
 }
 
 export async function sendOTP(
@@ -61,36 +57,20 @@ export async function sendOTP(
     email: string
 ): Promise<{data: {existingOTP: string, sentAt: number}}> {
     const url = API_URL + "auth/passcode";
-    try {
-        const res = await axios.post(url, { email });
-        store.commit("setUser", {
-            email,
-            otp: {
-                sentAt: res.data.sentAt,
-                existing: res.data.existingOTP
-            }
-        });
-        return res;
-    } catch (err: any) {
-        console.log("failed to send otp with error: " + err);
-        throw new Error("Server Error");
-    }
+    const res = await axios.post(url, { email });
+    store.commit("setUser", {email});
+    return res;
 }
 
-export async function verifyOTP(store: Store<State>, passcode: string): Promise<void> {
+export async function verifyOTP(store: Store<State>, email: string, passcode: string): Promise<void> {
     const url = API_URL + "auth/verify";
-    try {
-        const res = await axios.post(url, { email: store.state.user!.email, passcode });
-        store.commit('setUser', {
-            id: res.data.id,
-            email: res.data.email,
-            jwt: res.data.jwt,
-            profile: {username: res.data.username}
-        });
-    } catch (err: any) {
-        console.log("failed to send otp with error: " + err);
-        throw new Error("Server Error");
-    }
+    const res = await axios.post(url, { email, passcode });
+    store.commit('setUser', {
+        id: res.data.id,
+        email: res.data.email,
+        jwt: res.data.jwt,
+        profile: {username: res.data.username}
+    });
 }
 
 export async function logout(store: Store<State>) {

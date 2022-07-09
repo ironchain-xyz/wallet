@@ -1,7 +1,5 @@
 import { Store } from 'vuex';
-import { message } from 'ant-design-vue';
 import { State } from "../store";
-import { useStore } from '../store';
 import CryptoJS from 'crypto-js';
 
 export function authHeader(store: Store<State>): Record<string, string> {
@@ -9,7 +7,7 @@ export function authHeader(store: Store<State>): Record<string, string> {
 }
 
 export function parseErrorMsg(err: any, defaultMsg?: string) {
-    return err.response?.data?.message || err.response?.message || defaultMsg || "server error";
+    return err.response?.data?.message || err.response?.message || err.message || defaultMsg || "unknown server error";
 }
 
 export async function genHash(file) : Promise<string> {

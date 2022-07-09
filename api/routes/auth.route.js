@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const time = require("../lib/time.js");
 const { randomCode } = require("../lib/util.js");
+const { isValidUsername } = require("../lib/validator.js");
 
 const OTP_LEN = 6;
 const db = require("../models");
@@ -59,6 +60,14 @@ function validateEmail(req, res, next) {
     next();
 }
 
+function validateUsername(req, res, next) {
+    const username = req.body.username;
+    if (!isValidUserName(username)) {
+        return res.status(400).send({message: "Invalid email!"});
+    }
+    next();
+}
+
 function validateAccessToken(req, res, next) {
     const accessToken = req.headers["x-access-token"];
     if (!accessToken) {
@@ -81,11 +90,21 @@ function validateAccessToken(req, res, next) {
     };
 }
 
-router.post("/register", validateEmail, asyncHandler(async (req, res) => {
+router.get("/isRegistered", asyncHandler(async (req, res) => {
+    let user = await User.findOne({where: {email: req.query.email}});
+    res.send({result: user !== null});
+}));
+
+router.post("/register", validateEmail, validateUsername, asyncHandler(async (req, res) => {
     const email = req.body.email;
     let user = await User.findOne({where: {email}});
     if (user) {
         return res.status(400).send({message: 'user already registerd'});
+    }
+
+    const username = req.body.username;
+    if (await User.findOne({where: {username}})) {
+        return res.status(400).send({message: "Username already used!"});
     }
 
     const invitationCode = req.body.invitationCode;
@@ -96,7 +115,7 @@ router.post("/register", validateEmail, asyncHandler(async (req, res) => {
         return res.status(400).send({message: 'invitation code has been used'});
     }
 
-    user = await User.create({email});
+    user = await User.create({email, username});
     await invitation.update({
         usedBy: user.id
     }, {
