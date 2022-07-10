@@ -46,6 +46,13 @@
         </a-col>
     </a-row>
     <a-modal :visible="showEdit" :closable="false" style="max-width: 300px;">
+        <a-row justify="end">
+            <a-button type="text" @click="onCancel">
+                <template #icon>
+                    <CloseOutlined class="site-form-item-icon" />
+                </template>
+            </a-button>
+        </a-row>
         <a-col>
             <a-row justify="center" style="margin-bottom: 20px;">
                 <a-typography-title :level="5">
@@ -79,7 +86,7 @@
 </template>
 
 <script lang="ts">
-import { UserOutlined } from '@ant-design/icons-vue';
+import { UserOutlined, CloseOutlined } from '@ant-design/icons-vue';
 import { defineComponent, computed, ref } from 'vue';
 import { useStore } from '@/store';
 import { authenticate } from '@/services/auth';
@@ -89,7 +96,7 @@ import { updateProfile } from '@/services/profile';
 import { parseErrorMsg } from '@/services/utils';
 
 export default defineComponent({
-    components: { UserOutlined },
+    components: { UserOutlined, CloseOutlined },
     setup() {
         const store = useStore();
         if (!authenticate(store)) {
@@ -115,11 +122,17 @@ export default defineComponent({
             }
         }
 
+        const onCancel = () => {
+            username.value = store.state.user!.profile.username!;
+            showEdit.value = false;
+        }
+
         return {
             username,
             alert,
             showEdit,
             onSaveEdit,
+            onCancel,
             profile: computed(() => store.state.user?.profile),
             fetchCreatedMaterials,
         };    

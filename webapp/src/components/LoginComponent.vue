@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-modal style="max-width: 400px;" :closable="false" :visible="visible">
+    <a-modal style="max-width: 300px;" :closable="false" :visible="visible">
       <a-row justify="end">
         <a-button type="text" @click="onCancel">
           <template #icon>
