@@ -7,8 +7,11 @@ import router from '../router';
 import { authHeader, parseErrorMsg } from './utils';
 import { API_URL } from '../lib/constants';
 
-export async function updateProfile(store: Store<State>, update: {}): Promise<boolean> {
-    const url = API_URL + "profile/setusername";
+export async function updateProfile(
+    store: Store<State>,
+    update: {username: string}
+): Promise<boolean> {
+    const url = API_URL + "profile/update";
     const res = await axios.post(url, update, { headers: authHeader(store) });
     store.commit('updateProfile', update);
     return true;

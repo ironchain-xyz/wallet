@@ -4,10 +4,9 @@ const router = require("express").Router();
 
 const asyncHandler = require('express-async-handler')
 const jwt = require('jsonwebtoken');
-const validator = require('validator');
 const time = require("../lib/time.js");
 const { randomCode } = require("../lib/util.js");
-const { isValidUsername } = require("../lib/validator.js");
+const { isValidUsername, isValidEmail } = require("../lib/validator.js");
 
 const OTP_LEN = 6;
 const db = require("../models");
@@ -54,7 +53,7 @@ function parseOTP(user) {
 
 function validateEmail(req, res, next) {
     const email = req.body.email;
-    if (!email || !validator.isEmail(email)) {
+    if (!email || !isValidEmail(email)) {
         return res.status(400).send({message: "Invalid email!"});
     }
     next();
@@ -62,7 +61,7 @@ function validateEmail(req, res, next) {
 
 function validateUsername(req, res, next) {
     const username = req.body.username;
-    if (!isValidUserName(username)) {
+    if (!isValidUsername(username)) {
         return res.status(400).send({message: "Invalid email!"});
     }
     next();

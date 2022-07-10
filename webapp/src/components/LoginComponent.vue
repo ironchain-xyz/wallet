@@ -132,11 +132,11 @@ export default defineComponent({
                 nextStep("otp", info("Check your email for authentication code"))
               }
             })
-            .catch(err => alert.value = error(err.message))
+            .catch(err => alert.value = error(parseErrorMsg(err)))
         } else {
           nextStep("register");
         }
-      }).catch(err => alert.value = error(parseErrorMsg(err)));
+      }).catch(err => alert.value = error(parseErrorMsg(err)))
     };
 
     const onRegister = (): void => {

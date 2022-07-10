@@ -15,7 +15,7 @@
                 <a-button
                     shape="round"
                     style="font-weight: bold;"
-                    href="/"
+                    @click="showEdit = true"
                 >
                     Edit Profile
                 </a-button>
@@ -45,16 +45,51 @@
             <slot></slot>
         </a-col>
     </a-row>
+    <a-modal :visible="showEdit" :closable="false" style="max-width: 300px;">
+        <a-col>
+            <a-row justify="center" style="margin-bottom: 20px;">
+                <a-typography-title :level="5">
+                    Update Profile
+                </a-typography-title>
+            </a-row>
+            <a-typography-text>Username</a-typography-text>
+            <a-input v-model:value="username">
+                <template #prefix>
+                    <UserOutlined />
+                </template>
+            </a-input>
+            <a-alert
+                message="Rule: Only alphanumeric and dash are allowed, 3-20 characters"
+                type="info"
+                style="font-size: 10px; padding: 5px; margin-top: 5px;"
+            />
+            <a-alert
+                v-if="!!alert"
+                :message="alert"
+                type="error"
+                style="margin-top: 20px;"
+            />
+        </a-col>
+        <template #footer>
+            <a-row justify="center">
+                <a-button @click="onSaveEdit">Save</a-button>
+            </a-row>
+        </template>
+    </a-modal>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import { UserOutlined } from '@ant-design/icons-vue';
+import { defineComponent, computed, ref } from 'vue';
 import { useStore } from '@/store';
 import { authenticate } from '@/services/auth';
 import { fetchCreatedMaterials } from '@/services/material';
 import router from '@/router';
+import { updateProfile } from '@/services/profile';
+import { parseErrorMsg } from '@/services/utils';
 
 export default defineComponent({
+    components: { UserOutlined },
     setup() {
         const store = useStore();
         if (!authenticate(store)) {
@@ -63,12 +98,31 @@ export default defineComponent({
                 profile: null,
                 fetchCreatedMaterials
             }
-        } else {
-            return {
-                profile: computed(() => store.state.user?.profile),
-                fetchCreatedMaterials,
-            };
-        }        
+        }
+
+        const showEdit = ref<boolean>(false);
+        const username = ref<string>(store.state.user!.profile.username!);
+        const alert = ref<string>("");
+
+        const onSaveEdit = () => {
+            alert.value = "";
+            if (username.value != store.state.user!.profile.username!) {
+                updateProfile(store, {username: username.value})
+                    .then(() => showEdit.value = false)
+                    .catch(err => alert.value = parseErrorMsg(err))
+            } else {
+                showEdit.value = false
+            }
+        }
+
+        return {
+            username,
+            alert,
+            showEdit,
+            onSaveEdit,
+            profile: computed(() => store.state.user?.profile),
+            fetchCreatedMaterials,
+        };    
     }
 });
 </script>
