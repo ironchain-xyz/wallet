@@ -60,14 +60,14 @@ export async function fetchSpaces(
     return Array(20).fill([mockSpace, {...mockSpace, isMember: false}]).flat();
 }
 
-export async function joinSpace(
+export async function subscribe(
     store: Store<State>,
     id: string,
 ) : Promise<null> {
     return null;
 }
 
-export async function leaveSpace(
+export async function unsubscribe(
     store: Store<State>,
     id: string,
 ) : Promise<null> {

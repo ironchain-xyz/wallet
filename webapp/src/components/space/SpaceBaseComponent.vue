@@ -17,16 +17,7 @@
                 </span>
             </a-row>
             <a-row justify="center">
-                <a-button
-                    shape="round"
-                    :type="actionType"
-                    style="font-weight: bold;"
-                    @mouseover="mouseOver = true"
-                    @mouseleave="mouseOver = false"
-                    @click="onClick"
-                >
-                    {{ action }}
-                </a-button>
+                <SpaceSubscribe :id="space.id"/>
             </a-row>
             <a-row style="margin-top: 30px;">
                 <a-button
@@ -68,11 +59,13 @@
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { Space, fetchSpace, joinSpace, leaveSpace } from '@/services/space';
 import { useStore } from '@/store';
 import { authenticate } from '@/services/auth';
+import { Space, fetchSpace } from '@/services/space';
+import SpaceSubscribe from '@/components/space/content/SpaceSubscribeButtonComponent.vue';
 
 export default defineComponent({
+    components: { SpaceSubscribe },
     setup() {
         const store = useStore();
         const authenticated = computed(() => authenticate(store));
@@ -98,21 +91,6 @@ export default defineComponent({
             }
         });
 
-        const mouseOver = ref<boolean>(false);
-        const action = computed(() => {
-            if (!space.value.isMember) {
-                return "Join";
-            } else if (mouseOver.value) {
-                return "Leave";
-            } else {
-                return "Joined";
-            }
-        });
-
-        const actionType = computed(() => {
-            return space.value.isMember && mouseOver.value ? "danger" : "";
-        });
-
         const formatNumber = (n: number) => {
             if (n < 1000) {
                 return n;
@@ -123,28 +101,8 @@ export default defineComponent({
             }
         };
 
-        const onClick = () => {
-            if (!space.value.isMember) {
-                joinSpace(store, space.value.id).then(() => {
-                    space.value.isMember = true;
-                }).catch(err => {
-                    console.log(err);
-                });
-            } else {
-                leaveSpace(store, space.value.id).then(() => {
-                    space.value.isMember = false;
-                }).catch(err => {
-                    console.log(err);
-                });
-            }
-        };
-
         return {
-            mouseOver,
-            action,
-            actionType,
             space,
-            onClick,
             formatNumber,
             authenticated,
         };

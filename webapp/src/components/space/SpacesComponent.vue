@@ -15,7 +15,7 @@
             <a-button v-if="!loadingMore && !noMore" @click="loadMore">loading more</a-button>
         </template>
         <template #renderItem="{ item }">
-            <SpaceOverview class="space" :space="item" @onJoin="onJoin" @onLeave="onLeave" />
+            <SpaceOverview class="space" :space="item" />
         </template>
     </a-list>
     <a-row v-if="!!errMsg" style="margin-top: 100px;">
@@ -68,22 +68,6 @@ export default defineComponent({
             loadMore(true);
         });
 
-        const onJoin = (params: {id: string}) => {
-            spaces.value.forEach(space => {
-                if (space.id == params.id) {
-                    space.isMember = true;
-                }
-            })
-        };
-
-        const onLeave = (params: {id: string}) => {
-            spaces.value.forEach(space => {
-                if (space.id == params.id) {
-                    space.isMember = false;
-                }
-            })
-        };
-
         const formatNumber = (n: number) => {
             if (n < 1000) {
                 return n;
@@ -102,8 +86,6 @@ export default defineComponent({
             noMore,
             errMsg,
             spaces,
-            onJoin,
-            onLeave,
             formatNumber,
         };
     }

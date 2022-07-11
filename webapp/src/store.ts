@@ -20,6 +20,7 @@ export interface User {
 
 export interface State {
   user?: User;
+  subscription: {string?: boolean};
 }
 
 export const key: InjectionKey<Store<State>> = Symbol()
@@ -30,7 +31,7 @@ const vuexLocal = new VuexPersistence<State>({
 
 export const store = createStore<State>({
   state() {
-    return {}
+    return {subscription: {}}
   },
   mutations: {
     clear(state: State) {
@@ -44,7 +45,13 @@ export const store = createStore<State>({
     },
     updateProfile(state: State, profileUpdate: Profile) {
       Object.assign(state.user!.profile!, profileUpdate);
-    }
+    },
+    subscribe(state: State, spaceId: string) {
+      state.subscription[spaceId] = true;
+    },
+    unsubscribe(state: State, spaceId: string) {
+      state.subscription[spaceId] = false;
+    },
   },
   plugins: [vuexLocal.plugin]
 });

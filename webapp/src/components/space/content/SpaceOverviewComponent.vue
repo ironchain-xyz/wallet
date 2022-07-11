@@ -12,40 +12,23 @@
         </a-avatar>
         <h3>{{space.name}}</h3>
         <p style="font-size: 12px;">{{ formatNumber(space.totalMembers) }} members</p>
-        <a-button
-            shape="round"
-            :type="actionType"
-            style="font-weight: bold;"
-            @click.stop="onClick"
-        >
-            {{ action }}
-        </a-button>
+        <SpaceSubscribe :id="space.id"/>
     </a-card>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
-import { Space, joinSpace, leaveSpace } from '@/services/space';
-import { useStore } from '@/store';
+import { defineComponent, ref } from 'vue';
+import { Space } from '@/services/space';
 import router from '@/router';
+import SpaceSubscribe from '@/components/space/content/SpaceSubscribeButtonComponent.vue';
 
 export default defineComponent({
+    components: { SpaceSubscribe },
     props: {
         space: Object as () => Space,
     },
-    setup(props, { emit }) {
-        const store = useStore();
+    setup(props) {
         const mouseOver = ref<boolean>(false);
-        const action = computed(() => {
-            if (!props.space.isMember) {
-                return "Join";
-            } else if (mouseOver.value) {
-                return "Leave";
-            } else {
-                return "Joined";
-            }
-        });
-
         const formatNumber = (n: number) => {
             if (n < 1000) {
                 return n;
@@ -56,35 +39,13 @@ export default defineComponent({
             }
         };
 
-        const actionType = computed(() => {
-            if (props.space.isMember && mouseOver.value) {
-                return "danger";
-            }
-            return "";
-        });
-
-        const onClick = () => {
-            if (!props.space.isMember) {
-                joinSpace(store, props.space.id).then(() => {
-                    emit("onJoin", {id: props.space.id})
-                });
-            } else {
-                leaveSpace(store, props.space.id).then(() => {
-                    emit("onLeave", {id: props.space.id})
-                });
-            }
-        };
-
         const onClickSpace = () => {
             router.push("/space/" + props.space.id);
         };
 
         return {
             mouseOver,
-            action,
-            actionType,
             onClickSpace,
-            onClick,
             formatNumber,
         };
     }
