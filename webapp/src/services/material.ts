@@ -1,36 +1,26 @@
 import { Store } from 'vuex';
-import axios, { AxiosResponse } from 'axios';
-import { State } from "../store";
-import { authHeader, parseErrorMsg } from './utils';
-import { API_URL } from '../lib/constants';
-import { Evidence, RawFile } from './evidence';
+import axios from 'axios';
+import { State } from "@/store";
+import { authHeader } from '@/services/utils';
+import { API_URL } from '@/lib/constants';
+import { File, RawFile } from '@/services/file';
+import { validate } from '@babel/types';
 
-export interface MaterialPreview {
+export interface Material {
     hash: string;
     description: string;
     creator: {username: string};
     createdAt: string;
-    evidencesHashes: string[];
     tags: string[];
-    space: string;
-}
-
-export interface Material extends MaterialPreview {
-    collectedAt: string;
-    collectors: {userId: string}[];
-    evidences: Evidence[];
+    spaceId: string;
+    files: File[];
     index?: number;
 }
 
 export interface NewMaterial {
+    spaceId: string;
     description: string;
-    evidences: RawFile[];
-}
-
-export interface NewMaterialAlert {
-    description?: string;
-    evidences?: string;
-    save?: string;
+    files: RawFile[];
 }
 
 export interface MaterialQuery {
@@ -39,32 +29,28 @@ export interface MaterialQuery {
     limit: number,
 }
 
-export function validateMaterial(material: NewMaterial, alert: NewMaterialAlert): { alert?: NewMaterialAlert, ok: boolean } {
-    let ok = true;
+export function validateMaterial(material: NewMaterial) {
     if (!material.description) {
-        alert.description = "Description cannot be empty";
-        ok = false;
+        throw new Error("description cannot be empty");
     }
 
-    for (const index in material.evidences || []) {
-        const e = material.evidences[index];
+    for (const index in material.files || []) {
+        const e = material.files[index];
         if (e.status == "error") {
-            alert.evidences = "Please remove invalid files"
-            ok = false;
+            throw new Error("Please remove invalid files");
         }
         if (e.status == "uploading") {
-            alert.evidences = "Please wait util all files uploaded"
-            ok = false;
+            throw new Error("Please remove invalid files");
         }
     }
-    return { ok, alert };
 }
 
 export async function newMaterial(store: Store<State>, material: NewMaterial): Promise<{hash: string}> {
-    const url = API_URL + "record/new";
+    validateMaterial(material);
+    const url = API_URL + "material/new";
     const res = await axios.post(url, {
         description: material.description,
-        evidences: material.evidences.map(e => e.response),
+        files: material.files.map(e => e.response),
     }, { headers: authHeader(store) });
     return res.data;
 }
@@ -73,56 +59,19 @@ export async function fetchMaterial(
     store: Store<State>,
     hash: string
 ) : Promise<Material> {
-    const url = API_URL + "record/";
+    const url = API_URL + "material/";
     const res = await axios.get(url, {headers: authHeader(store), params: {hash}});
     return res.data;
-}
-
-export async function fetchLatestMaterials(
-    store: Store<State>,
-    params: MaterialQuery
-) : Promise<Material[]> {
-    const url = API_URL + "record/latest";
-    const res = await axios.get(url, {headers: authHeader(store), params});
-    return res.data.records.map(r => ({
-        ...r,
-        references: r.reference,
-    }));
 }
 
 export async function fetchCreatedMaterials(
     store: Store<State>,
     params: MaterialQuery
 ) : Promise<Material[]> {
-    const url = API_URL + "record/created";
+    const url = API_URL + "material/created";
     const res = await axios.get(url, {headers: authHeader(store), params});
-    return res.data.records.map(r => ({
+    return res.data.materials.map(r => ({
         ...r,
         references: r.reference,
     }));
-}
-
-export async function fetchCollectedMaterials(
-    store: Store<State>,
-    params: MaterialQuery
-) : Promise<Material[]> {
-    const url = API_URL + "record/collections";
-    const res = await axios.get(url, {headers: authHeader(store), params});
-    return res.data.records.map(r => ({
-        ...r.record,
-        references: r.record.reference,
-        collectedAt: r.updatedAt,
-    }));
-}
-
-export async function addToCollection(store: Store<State>, hash: string) : Promise<Material[]> {
-    const url = API_URL + "record/addToCollection";
-    const res = await axios.post(url, {hash}, {headers: authHeader(store)});
-    return res.data;
-}
-
-export async function removeFromCollection(store: Store<State>, hash: string) : Promise<Material[]> {
-    const url = API_URL + "record/removeFromCollection";
-    const res = await axios.post(url, {hash}, {headers: authHeader(store)});
-    return res.data;
 }

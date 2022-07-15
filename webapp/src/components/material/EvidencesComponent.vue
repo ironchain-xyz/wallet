@@ -1,15 +1,15 @@
 <template>
     <a-row align="middle" :gutter="20">
-        <a-col v-for="evidence in evidences" v-bind:key="evidence.hash">
+        <a-col v-for="file in files" v-bind:key="file.hash">
             <div class="imgContainer">
                 <img
-                    v-if="fileType(evidence) == 'image'"
-                    :src="fileUrl(evidence)"
-                    :alt="evidence.hash"
+                    v-if="fileType(file) == 'image'"
+                    :src="fileUrl(file)"
+                    :alt="file.hash"
                     class="inside"
                 />
-                <video v-if="fileType(evidence) == 'video'" class="inside" controls>
-                    <source :src="fileUrl(evidence)" type="video/mp4">
+                <video v-if="fileType(file) == 'video'" class="inside" controls>
+                    <source :src="fileUrl(file)" type="video/mp4">
                 </video>
             </div>
         </a-col>
@@ -19,19 +19,19 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { BASE_URL } from '@/lib/constants';
-import { Evidence } from '@/services/evidence';
+import { File } from '@/services/file';
 import { formatFileSize } from '@/lib/format';
 
 export default defineComponent({
     props: {
-        evidences: Object as () => Evidence[],
+        files: Object as () => File[],
     },
     setup() {
-        const fileUrl = (e: Evidence) => {
-            return BASE_URL + "static/evidences/" + e.rawFile.hash;
+        const fileUrl = (e: File) => {
+            return BASE_URL + "static/upload/" + e.rawFile.hash;
         }
 
-        const fileType = (e: Evidence) => {
+        const fileType = (e: File) => {
             if (e.mimeType.startsWith("image/")) {
                 return "image";
             } else if (e.mimeType == "video/mp4") {

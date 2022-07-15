@@ -43,10 +43,7 @@ if (process.env.NODE_ENV == 'production') {
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler')
 const secret = process.env.TOKEN_SECRET;
-app.use(asyncHandler(async (req, res, next) => {
-    if (req.path.startsWith("/static")) {
-        return next();
-    }
+app.post(asyncHandler(async (req, res, next) => {
     if (req.path.startsWith("/auth")) {
         return next();
     }
@@ -72,14 +69,17 @@ app.use(asyncHandler(async (req, res, next) => {
 const auth = require('./routes/auth.route');
 app.use('/auth/', auth);
 
-const upload = require('./routes/upload.route');
-app.use('/evidence/', upload);
+const material = require('./routes/material.route');
+app.use('/material/', material);
 
-const record = require('./routes/record.route');
-app.use('/record/', record);
+const space = require('./routes/space.route');
+app.use('/space/', space);
 
-const main = require('./routes/main.route');
-app.use('/', main);
+const file = require('./routes/file.route');
+app.use('/file/', file);
+
+const user = require('./routes/user.route');
+app.use('/user', user);
 
 app.use('/static/evidences', express.static(__dirname + '/files/evidences'));
 

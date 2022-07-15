@@ -1,4 +1,7 @@
 <template>
+    <a-row>
+        <Login></Login>
+    </a-row>
     <a-row class="wrapper">
         <a-col>
             <a-affix :offset-top="top">
@@ -27,9 +30,10 @@
 import { defineComponent } from 'vue';
 import Navigation from '@/components/NavigationComponent.vue';
 import Header from '@/components/HeaderComponent.vue';
+import Login from '@/components/LoginComponent.vue';
 
 export default defineComponent({
-  components: { Navigation, Header },
+  components: { Navigation, Header, Login },
   setup() {
     return { };
   },

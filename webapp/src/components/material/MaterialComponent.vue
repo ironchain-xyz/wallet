@@ -31,7 +31,7 @@
                     <template #icon>
                         <StarOutlined />
                     </template>
-                    {{data.collectors.length}}
+                    0
                 </a-button>
             </a-col>
         </a-row>
@@ -42,7 +42,7 @@
                         {{data.description}}
                     </a-typography-text>
                 </a-row>
-                <Evidences v-if="data.evidences.length > 0" :evidences="data.evidences"/>
+                <Evidences v-if="data.evidences.length > 0" :files="data.files"/>
             </a-col>
         </a-row>
     </a-col>

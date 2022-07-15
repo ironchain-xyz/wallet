@@ -13,7 +13,7 @@
             </a-row>
             <a-row justify="center" style="margin-bottom: 15px;">
                 <span style="color: gray; font-size: 13px; font-weight: bold;">
-                    {{ formatNumber(space.totalMembers) }} members
+                    {{ formatNumber(space.totalSubscribers) }} subscribers
                 </span>
             </a-row>
             <a-row justify="center">
@@ -29,12 +29,12 @@
                     Materials
                 </a-button>
             </a-row>
-            <a-row v-if="authenticated">
+            <a-row>
                 <a-button
                     class="menuItem"
                     type="text"
                     style="font-weight: bold;"
-                    :href="'/space/' + space.id + '/newMaterial'"
+                    @click="onNewMaterial"
                 >
                     New Material
                 </a-button>
@@ -60,15 +60,16 @@
 import { defineComponent, ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from '@/store';
-import { authenticate } from '@/services/auth';
+import { authenticated } from '@/services/auth';
 import { Space, fetchSpace } from '@/services/space';
+import router from '@/router';
 import SpaceSubscribe from '@/components/space/content/SpaceSubscribeButtonComponent.vue';
 
 export default defineComponent({
     components: { SpaceSubscribe },
     setup() {
         const store = useStore();
-        const authenticated = computed(() => authenticate(store));
+        const auth = computed(() => authenticated(store));
         const route = useRoute();
 
         const space = ref<Space>({
@@ -76,8 +77,8 @@ export default defineComponent({
             description: '',
             id: '',
             createdAt: '',
-            totalMembers: 0,
-            isMember: false,
+            totalSubscribers: 0,
+            isSubscriber: false,
         });
         const errMsg = ref<string>('');
 
@@ -101,10 +102,19 @@ export default defineComponent({
             }
         };
 
+        const onNewMaterial = () => {
+            const url = '/space/' + space.value.id + '/newMaterial';
+            if (auth.value) {
+                router.push(url)
+            } else {
+                store.commit("startLogin", url);
+            }
+        }
+
         return {
             space,
+            onNewMaterial,
             formatNumber,
-            authenticated,
         };
     }
 });

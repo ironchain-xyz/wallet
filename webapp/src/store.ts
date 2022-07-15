@@ -18,9 +18,15 @@ export interface User {
   profile: Profile;
 }
 
+export interface Login {
+  loggingIn: boolean;
+  destination: string;
+}
+
 export interface State {
   user?: User;
   subscription: {string?: boolean};
+  login: Login
 }
 
 export const key: InjectionKey<Store<State>> = Symbol()
@@ -31,10 +37,25 @@ const vuexLocal = new VuexPersistence<State>({
 
 export const store = createStore<State>({
   state() {
-    return {subscription: {}}
+    return {
+      subscription: {},
+      login: {
+        loggingIn: false,
+        destination: "/",
+      }
+    }
   },
   mutations: {
-    clear(state: State) {
+    startLogin(state: State, destination: string) {
+      state.login = {
+        loggingIn: true,
+        destination
+      };
+    },
+    endLogin(state: State) {
+      state.login.loggingIn = false;
+    },
+    unsetUser(state: State) {
       state.user = undefined;
     },
     setUser(state: State, user: User) {

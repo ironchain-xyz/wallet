@@ -1,10 +1,8 @@
 import { Store } from 'vuex';
-import axios, { AxiosResponse } from 'axios';
-import { message } from 'ant-design-vue';
-import { JWT, State } from "../store";
+import axios from 'axios';
+import { State, store } from "../store";
 import { authHeader } from './utils';
 import { API_URL } from '../lib/constants';
-import router from '../router';
 
 function validateEmail(email: string): boolean {
     return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
@@ -84,9 +82,9 @@ export async function logout(store: Store<State>) {
     }
 }
 
-export function authenticate(store: Store<State>) {
+export function authenticated(store: Store<State>) {
     if (!store.state.user?.jwt) {
-        store.commit("clear");
+        store.commit("unsetUser");
         return false;
     }
     return true;

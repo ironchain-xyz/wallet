@@ -5,7 +5,7 @@ import { State } from "../store";
 import { authHeader } from './utils';
 import { API_URL } from '../lib/constants';
 
-export interface Evidence {
+export interface File {
     id: number;
     hash: string;
     mimeType: string;
@@ -32,7 +32,7 @@ export async function getRawFile(
     hash: string
 ):  Promise<{exists: boolean}>{
     const res = await axios.get(
-        API_URL + "evidence/raw",
+        API_URL + "file/raw",
         {
             params: {hash},
             headers: authHeader(store)
@@ -41,10 +41,10 @@ export async function getRawFile(
     return res.data;
 }
 
-export async function uploadEvidence(
+export async function upload(
     store: Store<State>,
     file: string | Blob
-):  Promise<Evidence | {error: string}>{
+):  Promise<File | {error: string}>{
     const data = new FormData();
     data.append('evidences', file);
     const headers = authHeader(store);
@@ -54,6 +54,6 @@ export async function uploadEvidence(
             ...headers
         }
     }
-    const res = await axios.post(API_URL + "evidence/upload", data, config);
+    const res = await axios.post(API_URL + "file/upload", data, config);
     return res.data.uploaded[0];
 }

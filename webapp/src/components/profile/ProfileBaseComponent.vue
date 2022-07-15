@@ -88,10 +88,10 @@
 <script lang="ts">
 import { UserOutlined, CloseOutlined } from '@ant-design/icons-vue';
 import { defineComponent, computed, ref } from 'vue';
+import router from "@/router";
 import { useStore } from '@/store';
-import { authenticate } from '@/services/auth';
+import { authenticated } from '@/services/auth';
 import { fetchCreatedMaterials } from '@/services/material';
-import router from '@/router';
 import { updateProfile } from '@/services/profile';
 import { parseErrorMsg } from '@/services/utils';
 
@@ -99,12 +99,9 @@ export default defineComponent({
     components: { UserOutlined, CloseOutlined },
     setup() {
         const store = useStore();
-        if (!authenticate(store)) {
+        if (!authenticated(store)) {
             router.push("/");
-            return {
-                profile: null,
-                fetchCreatedMaterials
-            }
+            return {};
         }
 
         const showEdit = ref<boolean>(false);

@@ -11,7 +11,7 @@ export async function updateProfile(
     store: Store<State>,
     update: {username: string}
 ): Promise<boolean> {
-    const url = API_URL + "profile/update";
+    const url = API_URL + "user/update";
     const res = await axios.post(url, update, { headers: authHeader(store) });
     store.commit('updateProfile', update);
     return true;
@@ -21,7 +21,7 @@ export async function updateProfile(
 export async function getInvitationCode(
     store: Store<State>
 ): Promise<{ codes: [] }> {
-    const url = API_URL + "invitationCode";
+    const url = API_URL + "user/invitationCode";
     const res = await axios.post(url, {}, { headers: authHeader(store) });
     return res.data;
 }

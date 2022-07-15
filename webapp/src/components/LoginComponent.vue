@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-modal style="max-width: 300px;" :closable="false" :visible="visible">
+    <a-modal style="max-width: 300px;" :closable="false" :visible="showLogin">
       <a-row justify="end">
         <a-button type="text" @click="onCancel">
           <template #icon>
@@ -75,12 +75,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
 import { UserOutlined, KeyOutlined, LockOutlined, CloseOutlined } from '@ant-design/icons-vue';
 import { useStore } from '@/store';
 import { isRegistered, register, sendOTP, verifyOTP, warnExistingOTP } from '@/services/auth';
 import { parseErrorMsg } from '@/services/utils';
-
+import router from '@/router';
 
 interface Alert {
   msg: string,
@@ -101,10 +101,7 @@ function warning(msg: string) : Alert {
 
 export default defineComponent({
   components: { UserOutlined, KeyOutlined, LockOutlined, CloseOutlined },
-  props: {
-      visible: Boolean,
-  },
-  setup(_props, { emit }) {
+  setup() {
     const store = useStore();
     const alert = ref<Alert>({msg: "", type: "error"});
     const step = ref<string>("email");
@@ -112,6 +109,8 @@ export default defineComponent({
     const invitationCode = ref<string>("");
     const otp = ref<string>("");
     const username = ref<string>("");
+
+    const showLogin = computed(() => store.state.login.loggingIn);
 
     const nextStep = (next: string, alertObj=error("")) => {
       step.value = next;
@@ -158,7 +157,8 @@ export default defineComponent({
     const onVerifyOTP = () => {
       verifyOTP(store, email.value, otp.value)
         .then(() => {
-          emit("loggedIn");
+          store.commit("endLogin");
+          router.push(store.state.login.destination);
         })
         .catch(err => alert.value = error(parseErrorMsg(err)));
     };
@@ -174,6 +174,11 @@ export default defineComponent({
       alert.value.msg = '';
     }
 
+    const onCancel = () => {
+      store.commit("endLogin");
+      router.push("/");
+    }
+
     return {
       alert,
       step,
@@ -181,12 +186,13 @@ export default defineComponent({
       otp,
       username,
       invitationCode,
+      showLogin,
       onInputEmail,
       onRegister,
       onResendOTP,
       onVerifyOTP,
       onPrev,
-      onCancel: () => emit("cancel"),
+      onCancel,
     };
   },
 });

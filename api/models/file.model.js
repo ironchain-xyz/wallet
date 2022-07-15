@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize, RawFile) => {
-    const Evidence = sequelize.define("evidences", {
+    const File = sequelize.define("evidences", {
         hash: {
             type: DataTypes.STRING,
         },
@@ -13,7 +13,7 @@ module.exports = (sequelize, RawFile) => {
         },
     });
 
-    RawFile.hasMany(Evidence, {foreignKey: "raw"});
-    Evidence.belongsTo(RawFile, {foreignKey: "raw"});
-    return Evidence;
+    RawFile.hasMany(File, {foreignKey: "raw"});
+    File.belongsTo(RawFile, {foreignKey: "raw"});
+    return File;
 }

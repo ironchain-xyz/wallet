@@ -5,13 +5,21 @@ import Spaces from '../views/SpacesView.vue'
 import Space from '../views/SpaceView.vue'
 import SpaceNewMaterial from '../views/SpaceNewMaterialView.vue'
 import SpaceAbout from '../views/SpaceAboutView.vue'
+import NewSpace from '../views/NewSpaceView.vue'
 import Material from '../views/MaterialView.vue'
+import { authenticated } from '@/services/auth'
+import { useStore } from '@/store';
 
 const routes = [
   {
     path: '/',
     name: 'spaces',
     component: Spaces
+  },
+  {
+    path: '/space/new',
+    name: 'newSpace',
+    component: NewSpace,
   },
   {
     path: '/space/:id',
@@ -21,7 +29,7 @@ const routes = [
   {
     path: '/space/:id/newMaterial',
     name: 'newMaterial',
-    component: SpaceNewMaterial
+    component: SpaceNewMaterial,
   },
   {
     path: '/space/:id/about',
@@ -36,12 +44,12 @@ const routes = [
   {
     path: '/profile',
     name: 'profile',
-    component: ProfileMaterials
+    component: ProfileMaterials,
   },
   {
     path: '/profile/about',
     name: 'profileAbout',
-    component: ProfileAbout
+    component: ProfileAbout,
   },
 ]
 

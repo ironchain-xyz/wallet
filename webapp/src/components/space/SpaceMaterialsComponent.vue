@@ -14,7 +14,7 @@ import SpaceMaterials from '@/components/space/content/SpaceMaterialsContentComp
 export default defineComponent({
     components: { SpaceMaterials, SpaceBase },
     setup() {
-        return { };
+        return {};
     }
 });
 </script>

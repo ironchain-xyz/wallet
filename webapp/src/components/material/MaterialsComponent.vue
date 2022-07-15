@@ -53,7 +53,7 @@ export default defineComponent({
                     materials.value.push(material);
                 });
                 if (res.length > 0) {
-                    query.startAt = query.startAt || res[0].collectedAt || res[0].createdAt;
+                    query.startAt = query.startAt || res[0].createdAt;
                 }
                 query.offset += res.length;
                 if (res.length < query.limit) {

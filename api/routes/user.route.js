@@ -30,7 +30,7 @@ async function genInvitationCode(createdBy) {
     }
 }
 
-router.post('/profile/update', asyncHandler(async (req, res) => {
+router.post('/update', asyncHandler(async (req, res) => {
     const validate = await validateProfileUpdate(req.body);
     if (validate.ok) {
         const user = await User.findByPk(req.user.id);

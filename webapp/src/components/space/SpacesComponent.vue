@@ -18,8 +18,8 @@
             <SpaceOverview class="space" :space="item" />
         </template>
     </a-list>
-    <a-row v-if="!!errMsg" style="margin-top: 100px;">
-        <span>{{ errMsg }}</span>
+    <a-row v-if="!!alert" justify="center">
+        <a-alert :message="alert" type="error"></a-alert>
     </a-row>
 </template>
 
@@ -36,12 +36,11 @@ export default defineComponent({
         const store = useStore();
 
         const totalSpaces = ref<number>(0);
-
         const initLoading = ref(true);
         const loadingMore = ref(false);
         const noMore = ref(false);
         const spaces = ref<Space[]>([]);
-        const errMsg = ref<string>("");
+        const alert = ref<string>("");
         const query = reactive<SpaceQuery>({offset: 0, limit: 50});
 
         const loadMore = (init = false) => {
@@ -55,7 +54,8 @@ export default defineComponent({
                     noMore.value = true;
                 }
             }).catch(err => {
-                errMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
+                alert.value = "Failed to fetch events from server, " + parseErrorMsg(err);
+                noMore.value = true;
             }).finally(() => {
                 loadingMore.value = false;
                 if (init) {
@@ -84,7 +84,7 @@ export default defineComponent({
             loadMore,
             loadingMore,
             noMore,
-            errMsg,
+            alert,
             spaces,
             formatNumber,
         };

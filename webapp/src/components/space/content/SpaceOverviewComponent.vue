@@ -11,7 +11,7 @@
             {{ space.name.substring(0, 1).toUpperCase() }}
         </a-avatar>
         <h3>{{space.name}}</h3>
-        <p style="font-size: 12px;">{{ formatNumber(space.totalMembers) }} members</p>
+        <p style="font-size: 12px;">{{ formatNumber(space.totalSubscribers) }} subscribers</p>
         <SpaceSubscribe :id="space.id"/>
     </a-card>
 </template>

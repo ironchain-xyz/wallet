@@ -8,8 +8,8 @@ const fs = require('fs');
 const asyncHandler = require('express-async-handler')
 
 const busboy = require('busboy');
-const TMP_PATH = path.join(__dirname, "../files/tmp");
-const EVIDENCE_PATH = path.join(__dirname, "../files/evidences");
+const TMP_PATH = path.join(__dirname, "../upload/tmp");
+const FILE_PATH = path.join(__dirname, "../upload/files");
 
 const db = require("../models");
 const RawFile = db.rawFiles;
@@ -62,7 +62,7 @@ router.get('/raw', asyncHandler(async (req, res) => {
 
 router.get('/raw/download', asyncHandler(async (req, res) => {
     var options = {
-        root: EVIDENCE_PATH,
+        root: FILE_PATH,
         dotfiles: 'deny',
         headers: {
           'x-timestamp': Date.now(),
