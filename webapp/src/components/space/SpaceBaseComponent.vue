@@ -11,13 +11,8 @@
                     {{ space.name }}
                 </a-typography-title>
             </a-row>
-            <a-row justify="center" style="margin-bottom: 15px;">
-                <span style="color: gray; font-size: 13px; font-weight: bold;">
-                    {{ formatNumber(space.totalSubscribers || 0) }} subscribers
-                </span>
-            </a-row>
             <a-row justify="center">
-                <SpaceSubscribe :id="space.id"/>
+                <SpaceSubscribe :space="space"/>
             </a-row>
             <a-row style="margin-top: 30px;">
                 <a-button
@@ -91,16 +86,6 @@ export default defineComponent({
             }
         });
 
-        const formatNumber = (n: number) => {
-            if (n < 1000) {
-                return n;
-            } else if (n < 1000000) {
-                return Math.floor(n / 1000) + "K";
-            } else if (n < 1000000000) {
-                return Math.floor(n / 1000000) + "M";
-            }
-        };
-
         const onNewMaterial = () => {
             const url = '/space/' + space.value.id + '/newMaterial';
             if (authenticated(store)) {
@@ -113,7 +98,6 @@ export default defineComponent({
         return {
             space,
             onNewMaterial,
-            formatNumber,
         };
     }
 });

@@ -14,24 +14,41 @@ const sequelize = require('sequelize');
 router.get('/all', asyncHandler(async (req, res) => {
     const query = {
         order: [["id", "ASC"]],
-        limit: QUERY_LIMIT,
+        limit: QUERY_LIMIT
     }
     if (req.query.startId) {
         query["where"] = { id: { [sequelize.Op.gt]: req.query.startId } }
     }
-    const spaces = await Space.findAll(query, {
+    const spaces = await Space.findAll({
+        ...query,
+        subQuery: false,
+        attributes: {
+            include: [
+                [
+                    sequelize.fn('COUNT', sequelize.col('subscriptions.userId')),
+                    'totalSubscribers'
+                ]
+            ]
+        },
         include: [
             {
-                model: User,
-                as: "spaceCreator"
+                model: Subscription,
+                attributes: [],
             },
             {
-                model: Material,
-                required: false,
-            },
-        ]
+                model: User,
+                as: "spaceCreator",
+                attributes: ["username"]
+            }
+        ],
+        group: ["spaces.id", "spaceCreator.id"]
     });
     res.send({spaces, limit: QUERY_LIMIT});
+}));
+
+router.get('/count', asyncHandler(async (_req, res) => {
+    const count = await Space.count();
+    res.send({count});
 }));
 
 router.get('/:id/materials', asyncHandler(async (req, res) => {
@@ -55,7 +72,28 @@ router.get('/:id/materials', asyncHandler(async (req, res) => {
     res.send({materials, limit: QUERY_LIMIT});
 }));
 
+router.get('/:id/subscribers', asyncHandler(async (req, res) => {
+    const query = {spaceId: req.params.id};
+    if (req.query.startId) {
+        query["id"] = { [sequelize.Op.gt]: req.query.startId };
+    }
+    const subscribers = await Subscription.findAll({
+        where: query,
+        order: [["id", "ASC"]],
+        limit: QUERY_LIMIT,
+    }, {
+        include: [
+            {
+                model: User,
+                attributes: ["username"]
+            },
+        ]
+    });
+    res.send({subscribers, limit: QUERY_LIMIT});
+}));
+
 router.get('/:id', asyncHandler(async (req, res) => {
+    try {
     const space = await Space.findByPk(
         req.params.id,
         {
@@ -70,9 +108,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
             include: [
                 {
                     model: Subscription,
-                    where: {subscribed: true, spaceId: req.params.id},
                     attributes: [],
-                    required: false
                 },
                 {
                     model: User,
@@ -84,6 +120,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
         }
     );
     res.send({space});
+    } catch (err) {console.log(err)}
 }));
 
 router.post('/new', asyncHandler(async (req, res) => {
@@ -106,40 +143,23 @@ router.post('/new', asyncHandler(async (req, res) => {
 }));
 
 router.post('/subscribe', asyncHandler(async (req, res) => {
-    const subscription = await Subscription.findOne({
+    await Subscription.findOrCreate({
         where: {
-            spaceId: req.body.spaceId,
-            userId: req.body.userId,
+            spaceId: req.body.id,
+            userId: req.user.id,
         }
     });
-    if (!subscription) {
-        await Subscription.create({
-            spaceId: req.body.spaceId,
-            userId: req.body.userId,
-            subscribed: true
-        });
-        res.send({success: true});
-    } else if (subscription.subscribed) {
-        res.send({success: true, message: "Already subscribed"});
-    } else {
-        await Subscription.update({subscription: true});
-        res.send({success: true});
-    }
+    res.send({success: true});
 }));
 
 router.post('/unsubscribe', asyncHandler(async (req, res) => {
-    const subscription = await Subscription.findOne({
+    await Subscription.destroy({
         where: {
-            spaceId: req.body.spaceId,
-            userId: req.body.userId,
+            spaceId: req.body.id,
+            userId: req.user.id,
         }
     });
-    if (!subscription || !subscription.subscribed) {
-        res.send({success: true, message: "not subscribed"});
-    } else {
-        await Subscription.update({subscription: false});
-        res.send({success: true});
-    }
+    res.send({success: true});
 }));
 
 module.exports = router

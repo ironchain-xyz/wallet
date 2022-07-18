@@ -1,7 +1,7 @@
 <template>
     <a-row class="space">
         <a-typography-text>
-            {{ formatNumber(totalSpaces) }} space(s)
+            {{ formatNumber(total) }} space(s)
         </a-typography-text>
     </a-row>
     <a-list
@@ -26,13 +26,13 @@
 <script lang="ts">
 import { defineComponent, reactive, ref, onMounted } from 'vue';
 import { parseErrorMsg } from '@/services/utils';
-import { Space, SpaceQuery, fetchSpaces } from '@/services/space';
+import { Space, SpaceQuery, totalSpaces, fetchSpaces } from '@/services/space';
 import SpaceOverview from '@/components/space/content/SpaceOverviewComponent.vue';
 
 export default defineComponent({
     components: { SpaceOverview },
     setup() {
-        const totalSpaces = ref<number>(0);
+        const total = ref<number>(0);
         const initLoading = ref(true);
         const loadingMore = ref(false);
         const noMore = ref(false);
@@ -65,6 +65,7 @@ export default defineComponent({
         };
 
         onMounted(() => {
+            totalSpaces().then(res => total.value = res);
             loadMore(true);
         });
 
@@ -80,7 +81,7 @@ export default defineComponent({
 
         return {
             initLoading,
-            totalSpaces,
+            total,
             loadMore,
             loadingMore,
             noMore,

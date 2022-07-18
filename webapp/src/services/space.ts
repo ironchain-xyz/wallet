@@ -26,6 +26,12 @@ export async function fetchSpace(id: string) : Promise<Space> {
     return res.data.space;
 }
 
+export async function totalSpaces() : Promise<number> {
+    const url = API_URL + "space/count";
+    const res = await axios.get(url);
+    return res.data.count;
+}
+
 export async function fetchSpaces(
     query: SpaceQuery
 ) : Promise<{spaces: Space[], limit: number}> {

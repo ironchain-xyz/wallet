@@ -11,8 +11,7 @@
             {{ space.name.substring(0, 1).toUpperCase() }}
         </a-avatar>
         <h3>{{space.name}}</h3>
-        <p style="font-size: 12px;">{{ formatNumber(space.totalSubscribers) }} subscribers</p>
-        <SpaceSubscribe :id="space.id"/>
+        <SpaceSubscribe :space="space"/>
     </a-card>
 </template>
 
@@ -29,16 +28,6 @@ export default defineComponent({
     },
     setup(props) {
         const mouseOver = ref<boolean>(false);
-        const formatNumber = (n: number) => {
-            if (n < 1000) {
-                return n;
-            } else if (n < 1000000) {
-                return Math.floor(n / 1000) + "K";
-            } else if (n < 1000000000) {
-                return Math.floor(n / 1000000) + "M";
-            }
-        };
-
         const onClickSpace = () => {
             router.push("/space/" + props.space.id);
         };
@@ -46,7 +35,6 @@ export default defineComponent({
         return {
             mouseOver,
             onClickSpace,
-            formatNumber,
         };
     }
 });

@@ -2,9 +2,11 @@ const { DataTypes } = Sequelize = require("sequelize");
 
 module.exports = (sequelize, Space, User) => {
     const Subscription = sequelize.define("subscriptions", {
-        subscribed: {
-            type: DataTypes.BOOLEAN,
-        }
+        id: {
+            type: Sequelize.INTEGER,
+            autoIncrement: true,
+            primaryKey: true
+        },
     }, {
         indexes: [
             {
