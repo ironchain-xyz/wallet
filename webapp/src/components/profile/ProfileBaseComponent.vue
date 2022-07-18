@@ -7,7 +7,7 @@
                 </a-avatar>
             </a-row>
             <a-row justify="center" style="margin-top: 10px;">
-                <a-typography-title strong :level="4">
+                <a-typography-title strong :level="4" style="inline-size: 140px; overflow-wrap: break-word;">
                     {{ username }}
                 </a-typography-title>
             </a-row>

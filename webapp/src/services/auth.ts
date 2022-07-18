@@ -69,19 +69,19 @@ export async function verifyOTP(store: Store<State>, email: string, passcode: st
 }
 
 export async function logout(store: Store<State>) {
-    const url = API_URL + "logout";
+    const url = API_URL + "user/logout";
     try {
         await axios.post(url, {}, { headers: authHeader(store) });
     } catch (err: any) {
         console.log("logout error: " + err);
     } finally {   
         store.commit('setUser', {});
-        store.commit('setSubscription', {});
+        store.commit('setSubscription', []);
     }
 }
 
 export function authenticated(store: Store<State>) {
-    if (store.state.user) {
+    if (store.state.user?.jwt) {
         return true;
     }
     store.commit("unsetUser");

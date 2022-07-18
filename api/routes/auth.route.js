@@ -137,7 +137,7 @@ router.post("/passcode", validateEmail, asyncHandler(async (req, res) => {
     let user = await User.findOne({where: {email}});
     if (!user) {
         if (USER_WHITELIST.includes(email)) {
-            user = await User.create({email, username: "test-user"});
+            user = await User.create({email, username: email});
         } else {
             return res.status(400).send({message: 'user not registerd'});
         }
