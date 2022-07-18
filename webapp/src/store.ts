@@ -18,6 +18,7 @@ export interface User {
   jwt?: JWT;
   username: string;
   invitationCodes: InvitationCode[];
+  subscription: {string?: Space};
 }
 
 export interface Login {
@@ -32,7 +33,6 @@ export interface Space {
 
 export interface State {
   user?: User;
-  subscription: {string?: Space};
   login: Login
 }
 
@@ -45,7 +45,6 @@ const vuexLocal = new VuexPersistence<State>({
 export const store = createStore<State>({
   state() {
     return {
-      subscription: {},
       login: {
         loggingIn: false,
         destination: "/",
@@ -68,21 +67,21 @@ export const store = createStore<State>({
     setUser(state: State, user: User) {
       state.user = user;
     },
-    initInvitationCodes(state: State, invitationCodes: InvitationCode[]) {
+    setInvitationCodes(state: State, invitationCodes: InvitationCode[]) {
       state.user!.invitationCodes = invitationCodes;
     },
     updateUser(state: State, update: {username: string}) {
       Object.assign(state.user!, update);
     },
     setSubscription(state: State, subscription: Space[]) {
-      state.subscription = {};
-      subscription.forEach(sub => state.subscription[sub.id] = sub);
+      state.user!.subscription = {};
+      subscription.forEach(sub => state.user!.subscription[sub.id] = sub);
     },
     subscribe(state: State, space: Space) {
-      state.subscription[space.id] = space;
+      state.user!.subscription[space.id] = space;
     },
     unsubscribe(state: State, space: Space) {
-      delete state.subscription[space.id]
+      delete state.user!.subscription[space.id]
     },
   },
   plugins: [vuexLocal.plugin]

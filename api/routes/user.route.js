@@ -11,6 +11,7 @@ const User = db.users;
 const Space = db.spaces;
 const Material = db.materials;
 const Invitations = db.invitations;
+const Subscription = db.subscriptions;
 
 const INVITATION_CODE_PER_USER = 3;
 const QUERY_LIMIT = 20;
@@ -57,6 +58,18 @@ router.get('/:id/materials', asyncHandler(async (req, res) => {
         ],
     });
     res.send({materials, limit: QUERY_LIMIT});
+}));
+
+router.get('/:id/subscription', asyncHandler(async (req,res) => {
+    const subscriptions = await Subscription.findAll({
+        where: { userId: req.params.id },
+        include: [
+            {
+                model: Space,
+            }
+        ]
+    });
+    res.send({subscriptions});
 }));
 
 router.post('/update', asyncHandler(async (req, res) => {

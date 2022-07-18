@@ -76,11 +76,15 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
+import router from '@/router';
 import { UserOutlined, KeyOutlined, LockOutlined, CloseOutlined } from '@ant-design/icons-vue';
 import { useStore } from '@/store';
 import { isRegistered, register, sendOTP, verifyOTP, warnExistingOTP } from '@/services/auth';
 import { parseErrorMsg } from '@/services/utils';
-import router from '@/router';
+import { getInvitationCode } from '@/services/user';
+import { fetchSubscribedSpaces } from '@/services/space';
+import { Store } from 'vuex';
+import { State } from "@/store";
 
 interface Alert {
   msg: string,
@@ -97,6 +101,15 @@ function error(msg: string) : Alert {
 
 function warning(msg: string) : Alert {
   return {msg, type: "warning"};
+}
+
+async function postLogin(store: Store<State>) {
+    const [invitationCodes, subscriptions] = await Promise.all([
+        getInvitationCode(store),
+        fetchSubscribedSpaces(store.state.user!.id)
+    ]);
+    store.commit("setInvitationCodes", invitationCodes.codes);
+    store.commit("setSubscription", subscriptions.map(s => s.space));
 }
 
 export default defineComponent({
@@ -158,8 +171,9 @@ export default defineComponent({
       verifyOTP(store, email.value, otp.value)
         .then(() => {
           store.commit("endLogin");
-          router.push(store.state.login.destination);
+          return postLogin(store);
         })
+        .then(() => router.push(store.state.login.destination))
         .catch(err => alert.value = error(parseErrorMsg(err)));
     };
 
@@ -176,7 +190,6 @@ export default defineComponent({
 
     const onCancel = () => {
       store.commit("endLogin");
-      router.push("/");
     }
 
     return {

@@ -20,6 +20,17 @@ export interface SpaceQuery {
     startId?: number,
 }
 
+export interface Subscription {
+    updatedAt: string,
+    space: Space,
+}
+
+export async function fetchSubscribedSpaces(userId: string): Promise<Subscription[]> {
+    const url = API_URL + 'user/' + userId + '/subscription';
+    const res = await axios.get(url);
+    return res.data.subscriptions;
+}
+
 export async function fetchSpace(id: string) : Promise<Space> {
     const url = API_URL + "space/" + id;
     const res = await axios.get(url);

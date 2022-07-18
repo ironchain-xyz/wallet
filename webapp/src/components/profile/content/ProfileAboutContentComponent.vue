@@ -64,36 +64,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, onMounted } from 'vue';
+import { defineComponent, computed } from 'vue';
 import { useStore } from '@/store';
-import { getInvitationCode, getSubscribedSpaces } from '@/services/user';
 
 export default defineComponent({
     setup() {
         const store = useStore();
         const invitationCodes = computed(() => store.state.user?.invitationCodes);
-        const subscription = computed(() => Object.values(store.state.subscription));
-
-        onMounted(() => {
-            if (!invitationCodes.value) {
-                getInvitationCode(store).then((res) => {
-                    store.commit("initInvitationCodes", res.codes)
-                });
-            }
-
-            if (!subscription.value) {
-                getSubscribedSpaces(store.state.user!.id).then(spaces => {
-                    store.commit("setSubscription", spaces)
-                });
-            }
-        });
-
-        const username = computed(() => {
-            return store.state.user!.username!
-        });
-        const email = computed(() => {
-            return store.state.user!.email
-        });
+        const subscription = computed(() => Object.values(store.state.user?.subscription || {}));
+        const username = computed(() => store.state.user!.username!);
+        const email = computed(() => store.state.user!.email);
 
         return {
             email,

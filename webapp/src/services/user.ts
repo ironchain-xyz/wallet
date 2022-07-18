@@ -1,9 +1,9 @@
 
 import { Store } from 'vuex';
 import axios from 'axios';
-import { State } from "../store";
-import { authHeader } from './utils';
-import { API_URL } from '../lib/constants';
+import { State } from "@/store";
+import { authHeader } from '@/services/utils';
+import { API_URL } from '@/lib/constants';
 
 export async function updateProfile(
     store: Store<State>,
@@ -20,11 +20,5 @@ export async function getInvitationCode(
 ): Promise<{ codes: [] }> {
     const url = API_URL + "user/invitationCode";
     const res = await axios.post(url, {}, { headers: authHeader(store) });
-    return res.data;
-}
-
-export async function getSubscribedSpaces(userId: string): Promise<{ codes: [] }> {
-    const url = API_URL + "user/subscibedSpaces";
-    const res = await axios.get(url, {params: {userId}});
     return res.data;
 }
