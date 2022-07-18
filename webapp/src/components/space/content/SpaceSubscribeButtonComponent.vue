@@ -13,12 +13,12 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
-import { subscribe, unsubscribe } from '@/services/space';
+import { Space, subscribe, unsubscribe } from '@/services/space';
 import { useStore } from '@/store';
 
 export default defineComponent({
     props: {
-        id: String,
+        space: Object as () => Space,
     },
     setup(props) {
         const store = useStore();
@@ -41,12 +41,12 @@ export default defineComponent({
 
         const onClick = () => {
             if (!subscribed.value) {
-                subscribe(store, props.id).then(() => {
-                    store.commit("subscribe", props.id);
+                subscribe(store, props.space.id).then(() => {
+                    store.commit("subscribe", props.space);
                 });
             } else {
-                unsubscribe(store, props.id).then(() => {
-                    store.commit("unsubscribe", props.id);
+                unsubscribe(store, props.space.id).then(() => {
+                    store.commit("unsubscribe", props.space);
                 });
             }
         };

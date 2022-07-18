@@ -13,7 +13,7 @@
             </a-row>
             <a-row justify="center" style="margin-bottom: 15px;">
                 <span style="color: gray; font-size: 13px; font-weight: bold;">
-                    {{ formatNumber(space.totalSubscribers) }} subscribers
+                    {{ formatNumber(space.totalSubscribers || 0) }} subscribers
                 </span>
             </a-row>
             <a-row justify="center">
@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from '@/store';
 import { authenticated } from '@/services/auth';
@@ -69,13 +69,12 @@ export default defineComponent({
     components: { SpaceSubscribe },
     setup() {
         const store = useStore();
-        const auth = computed(() => authenticated(store));
         const route = useRoute();
 
         const space = ref<Space>({
+            id: 0,
             name: '',
             description: '',
-            id: '',
             createdAt: '',
             totalSubscribers: 0,
             isSubscriber: false,
@@ -84,7 +83,7 @@ export default defineComponent({
 
         onMounted(async () => {
             const id = route.params.id as string;
-            const result = await fetchSpace(store, id);
+            const result = await fetchSpace(id);
             if (!result) {
                 errMsg.value = 'Space Not Found'
             } else {
@@ -104,7 +103,7 @@ export default defineComponent({
 
         const onNewMaterial = () => {
             const url = '/space/' + space.value.id + '/newMaterial';
-            if (auth.value) {
+            if (authenticated(store)) {
                 router.push(url)
             } else {
                 store.commit("startLogin", url);

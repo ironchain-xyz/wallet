@@ -46,8 +46,7 @@ export async function register(
         throw new Error("Invalid invitation code");
     }
     const url = API_URL + "auth/register";
-    await axios.post(url, { email, username, invitationCode });
-    store.commit("setUser", { email });
+    return await axios.post(url, { email, username, invitationCode });
 }
 
 export async function sendOTP(
@@ -55,9 +54,7 @@ export async function sendOTP(
     email: string
 ): Promise<{data: {existingOTP: string, sentAt: number}}> {
     const url = API_URL + "auth/passcode";
-    const res = await axios.post(url, { email });
-    store.commit("setUser", {email});
-    return res;
+    return await axios.post(url, { email });
 }
 
 export async function verifyOTP(store: Store<State>, email: string, passcode: string): Promise<void> {
@@ -67,7 +64,7 @@ export async function verifyOTP(store: Store<State>, email: string, passcode: st
         id: res.data.id,
         email: res.data.email,
         jwt: res.data.jwt,
-        profile: {username: res.data.username}
+        username: res.data.username,
     });
 }
 
@@ -79,13 +76,14 @@ export async function logout(store: Store<State>) {
         console.log("logout error: " + err);
     } finally {   
         store.commit('setUser', {});
+        store.commit('setSubscription', {});
     }
 }
 
 export function authenticated(store: Store<State>) {
-    if (!store.state.user?.jwt) {
-        store.commit("unsetUser");
-        return false;
+    if (store.state.user) {
+        return true;
     }
-    return true;
+    store.commit("unsetUser");
+    return false;
 }

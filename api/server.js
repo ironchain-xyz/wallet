@@ -43,7 +43,7 @@ if (process.env.NODE_ENV == 'production') {
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler')
 const secret = process.env.TOKEN_SECRET;
-app.post(asyncHandler(async (req, res, next) => {
+app.post("*", asyncHandler(async (req, res, next) => {
     if (req.path.startsWith("/auth")) {
         return next();
     }

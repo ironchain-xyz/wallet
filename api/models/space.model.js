@@ -1,7 +1,12 @@
 const { DataTypes } = Sequelize = require("sequelize");
 
-module.exports = (sequelize, User, Material) => {
-    const Space = sequelize.define("records", {
+module.exports = (sequelize, User) => {
+    const Space = sequelize.define("spaces", {
+        id: {
+            type: Sequelize.INTEGER,
+            autoIncrement: true,
+            primaryKey: true
+        },
         name: {
             type: DataTypes.STRING,
             unique: true,
@@ -12,21 +17,18 @@ module.exports = (sequelize, User, Material) => {
     });
 
     User.hasMany(Space, {
-        as: "created",
+        as: "createdSpace",
         foreignKey: {
             name: "createdBy",
             allowNull: false,
         }
     });
     Space.belongsTo(User, {
-        as: "creator",
+        as: "spaceCreator",
         foreignKey: {
             name: "createdBy",
             allowNull: false,
         }
     });
-
-    Material.belongsTo(Space);
-    Space.hasMany(Material);
     return Space;
 };

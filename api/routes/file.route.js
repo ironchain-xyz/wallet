@@ -12,55 +12,60 @@ const TMP_PATH = path.join(__dirname, "../upload/tmp");
 const FILE_PATH = path.join(__dirname, "../upload/files");
 
 const db = require("../models");
-const RawFile = db.rawFiles;
+const File = db.File;
 
-const fileSize = async (filePath) => {
-    return new Promise((resolve, reject) => {
-        fs.stats(filePath, (err, stats) => {
-            if (err) {
-                reject();
-            }
-            resolve(stats.size);
-        })
-    });
+const { ethers } = require("ethers");
+function getFilesHash(filename, mimeType, contentHash) {
+    const hash = ethers.utils.sha256(ethers.utils.defaultAbiCoder.encode(
+        ["string", "string", "string"],
+        [filename, mimeType, contentHash]
+    ));
+    return hash.substring(2);
 }
 
-const rename = (oldFile, newFile) => {
+const tryToRename = (oldFile, newFile) => {
     return new Promise((resolve, reject) => {
-        fs.rename(oldFile, newFile, (err) => {
-            if (err) {
-                fs.unlink(oldFile, (err) => {
-                    console.log(`Failed to remove ${oldFile} with error ${err}`);
+        fs.stat('foo.txt', function(err, stat) {
+            if (err == null) {
+                return resolve();
+            } else if (err.code === 'ENOENT') {
+                fs.rename(oldFile, newFile, (err) => {
+                    if (err) {
+                        fs.unlink(oldFile, (err) => {
+                            console.log(`Failed to remove ${oldFile} with error ${err}`);
+                        });
+                        return reject(err);
+                    }
+                    return resolve();
                 });
-                return reject(err);
+            } else {
+                return reject("Failed to get file info");
             }
-            return resolve();
         });
     });
 };
 
-const createRawFile = async (tmpFile, hash, size) => {
-    await rename(tmpFile, path.join(EVIDENCE_PATH, hash));
-    return await RawFile.create({hash, size});
+const createFile = async (tmpFile, contentHash, info) => {
+    await tryToRename(tmpFile, path.join(FILE_PATH, contentHash));
+    return await File.create({
+        hash: getFilesHash(info.filename, info.mimeType, contentHash),
+        mimeType: info.mimeType,
+        encoding: info.encoding,
+        name: info.filename,
+        size: info.filesize,
+        contentHash
+    })
 };
 
-router.get('/raw', asyncHandler(async (req, res) => {
-    let file = await RawFile.findByPk(req.query.hash);
-    if (file) {
-        res.send({ exists: true, file });
-    }
-
-    try {
-        const filePath = path.join(EVIDENCE_PATH, req.query.hash);
-        const size = await fileSize(filePath);
-        file = await RawFile.create({hash: req.query.hash, size});
-        res.send({exists: true, file})
-    } catch (_err) {
-        res.send({exists: false})
+router.get('/exist', asyncHandler(async (req, res) => {
+    if (await File.findOne({where: {contentHash: req.query.contentHash}})) {
+        res.send({ exist: true });
+    } else {
+        res.send({ exist: false });
     }
 }));
 
-router.get('/raw/download', asyncHandler(async (req, res) => {
+router.get('/:hash', asyncHandler(async (req, res) => {
     var options = {
         root: FILE_PATH,
         dotfiles: 'deny',
@@ -69,25 +74,25 @@ router.get('/raw/download', asyncHandler(async (req, res) => {
           'x-sent': true,
         }
     };
-    var fileName = req.query.hash;
+    const file = await File.findByPk(req.params.hash);
     res.setHeader(
-        "Content-Type", req.query.mimeType
-    ).sendFile(req.query.hash, options, function (err) {
+        "Content-Type", file.mimeType
+    ).sendFile(file.raw.hash, options, function (err) {
         if (err) {
           next(err)
         } else {
-          console.log('Sent:', fileName)
+          console.log('Sent:', FILE_PATH + file.raw.hash)
         }
     });
 }));
 
 router.post('/upload', asyncHandler(async (req, res) => {
     var files = 0, finished = false, uploaded = [];
-    const bb = busboy({ headers: req.headers, limits: { files: 5 } });
+    const bb = busboy({ headers: req.headers, limits: { files: 9 } });
     bb.on('file', (name, file, info) => {
         var hash = crypto.createHash('sha256');
         files++;
-        var size = 0;
+        var filesize = 0;
 
         const tmpFile = path.join(TMP_PATH, Date.now() + '-' + info.filename);
         var outStream = fs.createWriteStream(tmpFile)
@@ -101,11 +106,11 @@ router.post('/upload', asyncHandler(async (req, res) => {
 
         file.on('data', function (chunk) {
             hash.update(chunk);
-            size += chunk.length;
+            filesize += chunk.length;
         });
 
         outStream.on('finish', () => {
-            createRawFile(tmpFile, hash.digest('hex'), size).then((file) => {
+            createFile(tmpFile, hash.digest('hex'), {...info, filesize}).then((file) => {
                 uploaded.push(file);
                 if (uploaded.length == files && finished) {
                     res.send({ uploaded });

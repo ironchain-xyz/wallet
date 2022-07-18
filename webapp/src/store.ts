@@ -7,15 +7,17 @@ export type JWT = {
   accessToken: string;
 };
 
-export interface Profile {
-  username: string;
+export interface InvitationCode {
+  code: string;
+  used: boolean;
 }
 
 export interface User {
   id: string,
   email: string;
   jwt?: JWT;
-  profile: Profile;
+  username: string;
+  invitationCodes: InvitationCode[];
 }
 
 export interface Login {
@@ -23,9 +25,14 @@ export interface Login {
   destination: string;
 }
 
+export interface Space {
+  name: string,
+  id: number,
+}
+
 export interface State {
   user?: User;
-  subscription: {string?: boolean};
+  subscription: {string?: Space};
   login: Login
 }
 
@@ -61,17 +68,21 @@ export const store = createStore<State>({
     setUser(state: State, user: User) {
       state.user = user;
     },
-    setProfile(state: State, profile: Profile) {
-      state.user!.profile = profile;
+    initInvitationCodes(state: State, invitationCodes: InvitationCode[]) {
+      state.user!.invitationCodes = invitationCodes;
     },
-    updateProfile(state: State, profileUpdate: Profile) {
-      Object.assign(state.user!.profile!, profileUpdate);
+    updateUser(state: State, update: {username: string}) {
+      Object.assign(state.user!, update);
     },
-    subscribe(state: State, spaceId: string) {
-      state.subscription[spaceId] = true;
+    setSubscription(state: State, subscription: Space[]) {
+      state.subscription = {};
+      subscription.forEach(sub => state.subscription[sub.id] = sub);
     },
-    unsubscribe(state: State, spaceId: string) {
-      state.subscription[spaceId] = false;
+    subscribe(state: State, space: Space) {
+      state.subscription[space.id] = space;
+    },
+    unsubscribe(state: State, space: Space) {
+      delete state.subscription[space.id]
     },
   },
   plugins: [vuexLocal.plugin]

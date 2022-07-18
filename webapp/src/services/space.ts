@@ -10,37 +10,34 @@ export interface SpaceBase {
 }
 
 export interface Space extends SpaceBase {
-    id: string;
+    id: number;
     createdAt: string;
     totalSubscribers: number;
     isSubscriber: boolean;
 }
 
 export interface SpaceQuery {
-    startAt?: string,
-    offset: number,
-    limit: number,
+    startId?: number,
 }
 
-export async function fetchSpace(
-    store: Store<State>,
-    id: string
-) : Promise<Space> {
-    const url = API_URL + "space/";
-    const res = await axios.get(url, {params: {id}});
-    return res.data;
+export async function fetchSpace(id: string) : Promise<Space> {
+    const url = API_URL + "space/" + id;
+    const res = await axios.get(url);
+    return res.data.space;
 }
 
 export async function fetchSpaces(
-    store: Store<State>,
-    params: SpaceQuery
-) : Promise<Space[]> {
+    query: SpaceQuery
+) : Promise<{spaces: Space[], limit: number}> {
     const url = API_URL + "space/all";
-    const res = await axios.get(url, {params});
-    return res.data.spaces;
+    const res = await axios.get(url, {params: query});
+    return res.data;
 }
 
-export async function newSpace(store: Store<State>, space: SpaceBase): Promise<{id: number}> {
+export async function newSpace(
+    store: Store<State>,
+    space: SpaceBase
+): Promise<{id: number}> {
     if (!space.name) {
         throw new Error("name cannot be empty");
     }

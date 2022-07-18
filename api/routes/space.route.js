@@ -1,79 +1,108 @@
 require('dotenv').config();
 
 const router = require("express").Router();
-
-const { query } = require('express');
-const asyncHandler = require('express-async-handler')
+const asyncHandler = require('express-async-handler');
 
 const db = require("../models");
 const User = db.users;
-const File = db.evidences;
-const RawFile = db.rawFiles;
 const Material = db.materials;
 const Space = db.spaces;
 const Subscription = db.subscriptions;
+const QUERY_LIMIT = 20;
 
-router.get('/', asyncHandler(async (req, res) => {
+const sequelize = require('sequelize');
+router.get('/all', asyncHandler(async (req, res) => {
+    const query = {
+        order: [["id", "ASC"]],
+        limit: QUERY_LIMIT,
+    }
+    if (req.query.startId) {
+        query["where"] = { id: { [sequelize.Op.gt]: req.query.startId } }
+    }
+    const spaces = await Space.findAll(query, {
+        include: [
+            {
+                model: User,
+                as: "spaceCreator"
+            },
+            {
+                model: Material,
+                required: false,
+            },
+        ]
+    });
+    res.send({spaces, limit: QUERY_LIMIT});
+}));
+
+router.get('/:id/materials', asyncHandler(async (req, res) => {
+    const query = {spaceId: req.params.id};
+    if (req.query.startId) {
+        query["id"] = { [sequelize.Op.lt]: req.query.startId };
+    }
+    const materials = await Material.findAll({
+        where: query,
+        order: [["id", "DESC"]],
+        limit: QUERY_LIMIT,
+    }, {
+        include: [
+            {
+                model: User,
+                as: "materialCreator",
+                attributes: ["username"]
+            },
+        ]
+    });
+    res.send({materials, limit: QUERY_LIMIT});
+}));
+
+router.get('/:id', asyncHandler(async (req, res) => {
     const space = await Space.findByPk(
-        req.query.id,
+        req.params.id,
         {
+            attributes: {
+                include: [
+                    [
+                        sequelize.fn('COUNT', sequelize.col('subscriptions.userId')),
+                        'totalSubscribers'
+                    ]
+                ]
+            },
             include: [
                 {
-                    model: Material,
-                    required: false,
-                    include: {
-                        model: File,
-                        include: {
-                            model: RawFile
-                        }
-                    }
+                    model: Subscription,
+                    where: {subscribed: true, spaceId: req.params.id},
+                    attributes: [],
+                    required: false
                 },
                 {
                     model: User,
-                    as: "creator",
+                    as: "spaceCreator",
                     attributes: ["username"]
                 }
             ],
+            group: ["spaces.id", "spaceCreator.id"]
         }
     );
     res.send({space});
 }));
 
 router.post('/new', asyncHandler(async (req, res) => {
-    const space = await Space.create({
+    let space = await Space.findOne({
+        where: {name: req.body.name}
+    });
+    if (space) {
+        res.status(400).send({error: `space already exists`});
+    }
+
+    space = await Space.create({
         name: req.body.name,
         description: req.body.description,
         createdBy: req.user.id,
-    }, {
         include: [
-            { model: User, as: "creator" },
-        ]
+            { model: User, as: "spaceCreator", }
+        ],
     });
     res.send({space});
-}));
-
-router.get('/all', asyncHandler(async (req, res) => {
-    const spaces = await Space.findAll({
-        limit: req.query.limit,
-        offset: req.query.offset,
-    }, {
-        include: [
-            {
-                model: User, as: "creator"
-            },
-            {
-                model: Material,
-                required: false,
-                include: {
-                    model: File,
-                    include: {
-                        model: RawFile
-                    }
-                }
-            },
-        ]
-    });
-    res.send({spaces});
 }));
 
 router.post('/subscribe', asyncHandler(async (req, res) => {

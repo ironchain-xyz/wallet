@@ -8,8 +8,12 @@ const { validateProfileUpdate } = require("../lib/validator.js");
 const { nanoid } = require('nanoid');
 const db = require("../models");
 const User = db.users;
+const Space = db.spaces;
+const Material = db.materials;
 const Invitations = db.invitations;
+
 const INVITATION_CODE_PER_USER = 3;
+const QUERY_LIMIT = 20;
 
 async function genInvitationCode(createdBy) {
     const code = await nanoid();
@@ -29,6 +33,31 @@ async function genInvitationCode(createdBy) {
         return code;
     }
 }
+
+const { Op } = require('sequelize');
+router.get('/:id/materials', asyncHandler(async (req, res) => {
+    const query = {createdBy: req.params.id};
+    if (req.query.startId) {
+        query["id"] = { [Op.lt]: req.query.startId };
+    }
+    const materials = await Material.findAll({
+        where: query,
+        order: [["id", "DESC"]],
+        limit: QUERY_LIMIT,
+        include: [
+            {
+                model: User,
+                as: "materialCreator",
+                attributes: ["username"]
+            },
+            {
+                model: Space,
+                attributes: ["id", "name"]
+            }
+        ],
+    });
+    res.send({materials, limit: QUERY_LIMIT});
+}));
 
 router.post('/update', asyncHandler(async (req, res) => {
     const validate = await validateProfileUpdate(req.body);

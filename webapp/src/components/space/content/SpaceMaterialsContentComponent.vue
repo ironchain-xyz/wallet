@@ -1,5 +1,5 @@
 <template>
-    <Materials :loadData="fetchCreatedMaterials">
+    <Materials :loadData="fetchSpaceMaterials(data.id)">
         <template v-slot="{ data }">
             <Material :data="data" />
         </template>
@@ -10,13 +10,17 @@
 import { defineComponent } from 'vue';
 import Material from '@/components/material/MaterialComponent.vue';
 import Materials from '@/components/material/MaterialsComponent.vue';
-import { fetchCreatedMaterials } from '@/services/material';
+import { Space } from '@/services/space';
+import { fetchSpaceMaterials } from '@/services/material';
 
 export default defineComponent({
     components: { Material, Materials },
+    props: {
+        data: Object as () => Space,
+    },
     setup() {
         return {
-            fetchCreatedMaterials
+            fetchSpaceMaterials
         };
     }
 });

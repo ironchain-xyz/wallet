@@ -1,14 +1,14 @@
 <template>
-    <a-row v-if="profile" :wrap="false" align="top">
+    <a-row v-if="username" :wrap="false" align="top">
         <a-col class="border" flex="180px" style="height: auto;">
             <a-row justify="center">
                 <a-avatar :size="55" class="avatar" shape="square">
-                    {{ profile.username.substring(0, 1).toUpperCase() }}
+                    {{ username.substring(0, 1).toUpperCase() }}
                 </a-avatar>
             </a-row>
             <a-row justify="center" style="margin-top: 10px;">
                 <a-typography-title strong :level="4">
-                    {{ profile.username }}
+                    {{ username }}
                 </a-typography-title>
             </a-row>
             <a-row justify="center" style="margin-top: 5px;">
@@ -60,7 +60,7 @@
                 </a-typography-title>
             </a-row>
             <a-typography-text>Username</a-typography-text>
-            <a-input v-model:value="username">
+            <a-input v-model:value="newUsername">
                 <template #prefix>
                     <UserOutlined />
                 </template>
@@ -91,8 +91,7 @@ import { defineComponent, computed, ref } from 'vue';
 import router from "@/router";
 import { useStore } from '@/store';
 import { authenticated } from '@/services/auth';
-import { fetchCreatedMaterials } from '@/services/material';
-import { updateProfile } from '@/services/profile';
+import { updateProfile } from '@/services/user';
 import { parseErrorMsg } from '@/services/utils';
 
 export default defineComponent({
@@ -105,13 +104,14 @@ export default defineComponent({
         }
 
         const showEdit = ref<boolean>(false);
-        const username = ref<string>(store.state.user!.profile.username!);
+        const username = computed(() => store.state.user!.username);
+        const newUsername = ref<string>(store.state.user!.username!);
         const alert = ref<string>("");
 
         const onSaveEdit = () => {
             alert.value = "";
-            if (username.value != store.state.user!.profile.username!) {
-                updateProfile(store, {username: username.value})
+            if (newUsername.value != username.value) {
+                updateProfile(store, {username: newUsername.value})
                     .then(() => showEdit.value = false)
                     .catch(err => alert.value = parseErrorMsg(err))
             } else {
@@ -120,18 +120,17 @@ export default defineComponent({
         }
 
         const onCancel = () => {
-            username.value = store.state.user!.profile.username!;
+            newUsername.value = store.state.user!.username;
             showEdit.value = false;
         }
 
         return {
             username,
+            newUsername,
             alert,
             showEdit,
             onSaveEdit,
             onCancel,
-            profile: computed(() => store.state.user?.profile),
-            fetchCreatedMaterials,
         };    
     }
 });

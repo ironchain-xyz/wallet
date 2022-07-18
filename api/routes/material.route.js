@@ -5,48 +5,25 @@ const asyncHandler = require('express-async-handler')
 
 const db = require("../models");
 const User = db.users;
-const Evidence = db.evidences;
-const RawFile = db.rawFiles;
 const Material = db.materials;
 
-const { ethers } = require("ethers");
-function genEvidenceHash(filename, mimeType, contentHash) {
-    const hash = ethers.utils.sha256(ethers.utils.defaultAbiCoder.encode(
-        ["string", "string", "string"],
-        [filename, mimeType, contentHash]
-    ));
-    return hash.substring(2);
-}
-
 function genMaterialHash(data) {
-    const evidences = data.evidences.map(e => e.hash);
-    evidences.sort();
-    const references = data.references.map(r => r.hash);
-    references.sort();
-
+    data.content.sort();
     const hash = ethers.utils.sha256(ethers.utils.defaultAbiCoder.encode(
-        ["string", "string[]", "string[]"],
-        [data.description, evidences, references]
+        ["string", "string[]"],
+        [data.description, data.content]
     ));
     return hash.substring(2);
 }
 
-router.get('/', asyncHandler(async (req, res) => {
+router.get('/:hash', asyncHandler(async (req, res) => {
     const material = await Material.findByPk(
-        req.query.hash,
+        req.params.hash,
         {
             include: [
                 {
-                    model: Evidence,
-                    as: "evidences",
-                    required: false,
-                    include: {
-                        model: RawFile,
-                    }
-                },
-                {
                     model: User,
-                    as: "creator",
+                    as: "materialCreator",
                     attributes: ["username"]
                 }
             ],
@@ -56,9 +33,6 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 router.post('/new', asyncHandler(async (req, res) => {
-    for (const e of req.body.evidences) {
-        e.hash = genEvidenceHash(e.name, e.mimeType, e.raw);
-    }
     const hash = genMaterialHash(req.body);
     let material = await Material.findByPk(hash);
     if (material) {
@@ -69,55 +43,16 @@ router.post('/new', asyncHandler(async (req, res) => {
         hash,
         spaceId: req.body.spaceId,
         description: req.body.description,
-        evidences: req.body.evidences,
+        type: req.body.type,
+        content: req.body.content,
         createdBy: req.user.id,
     }, {
         include: [
-            { model: User, as: "creator" },
+            { model: User, as: "materialCreator" },
             { model: Space },
-            {
-                model: Evidence,
-                as: "evidences",
-            },
-            {
-                model: Reference,
-                as: "references"
-            }
         ]
     });
     res.send({hash});
-}));
-
-const { Op } = require('sequelize');
-router.get('/created', asyncHandler(async (req, res) => {
-    const query = req.query.startAt ? {
-        createdBy: req.user.id,
-        createdAt: {[Op.lte]: req.query.startAt}
-    } : {
-        createdBy: req.user.id
-    };
-    const materials = await Material.findAll({
-        where: query,
-        order: [["createdAt", "DESC"]],
-        limit: req.query.limit,
-        offset: req.query.offset,
-        include: [
-            {
-                model: File,
-                as: "files",
-                required: false,
-                include: {
-                    model: RawFile,
-                }
-            },
-            {
-                model: User,
-                as: "creator",
-                attributes: ["username"]
-            }
-        ],
-    });
-    res.send({materials});
 }));
 
 module.exports = router

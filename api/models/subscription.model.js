@@ -1,13 +1,23 @@
 const { DataTypes } = Sequelize = require("sequelize");
 
 module.exports = (sequelize, Space, User) => {
-    const Subscription = sequelize.define("subscription", {
+    const Subscription = sequelize.define("subscriptions", {
         subscribed: {
             type: DataTypes.BOOLEAN,
         }
+    }, {
+        indexes: [
+            {
+                unique: true,
+                fields: ['userId', 'spaceId']
+            }
+        ]
     });
 
-    Space.hasMany(User, {through: Subscription});
-    User.belongsToMany(Space, {through: Subscription});
+    User.hasMany(Subscription);
+    Subscription.belongsTo(User);
+
+    Space.hasMany(Subscription);
+    Subscription.belongsTo(Space);
     return Subscription;
 };

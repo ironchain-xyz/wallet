@@ -7,8 +7,7 @@
     >
         <template #loadMore>
             <a-spin v-if="loadingMore" />
-            <a-button v-if="!loadingMore && !noMore && !errMsg" @click="loadMore">loading more</a-button>
-            <span v-if="!!errMsg">{{ errMsg }}</span>
+            <a-button v-if="!loadingMore && !noMore" @click="loadMore">loading more</a-button>
         </template>
         <template #renderItem="{ item }">
             <a-list-item
@@ -22,12 +21,14 @@
             </a-list-item>
         </template>
     </a-list>
+    <a-row v-if="!!alert" justify="center">
+        <a-alert :message="alert" type="error"></a-alert>
+    </a-row>
 </template>
 
 <script lang="ts">
 import { defineComponent, reactive, ref, onMounted } from 'vue';
 import { parseErrorMsg } from '@/services/utils';
-import { useStore } from '@/store';
 import { Material, MaterialQuery } from '@/services/material';
 
 export default defineComponent({
@@ -35,32 +36,29 @@ export default defineComponent({
         loadData: Function,
     },
     setup(props) {
-        const store = useStore();
-
         const initLoading = ref(true);
         const loadingMore = ref(false);
         const noMore = ref(false);
+
         const materials = ref<Material[]>([]);
-        const errMsg = ref<string>("");
-        const query = reactive<MaterialQuery>({offset: 0, limit: 50});
+        const alert = ref<string>("");
+        const query = reactive<MaterialQuery>({});
 
         const loadMore = (init = false) => {
+            alert.value = "",
             loadingMore.value = true;
-            props.loadData(store, query).then(res => {
-                let index = materials.value.length;
-                res.forEach(material => {
-                    material.index = index++;
-                    materials.value.push(material);
-                });
-                if (res.length > 0) {
-                    query.startAt = query.startAt || res[0].createdAt;
+            props.loadData(query).then(res => {
+                const totalFetched = res.materials.length;
+                if (totalFetched > 0) {
+                    query.startId = res.materials[totalFetched - 1].id;
                 }
-                query.offset += res.length;
-                if (res.length < query.limit) {
+                materials.value.push(...res.materials);
+                if (totalFetched < res.limit) {
                     noMore.value = true;
                 }
             }).catch(err => {
-                errMsg.value = "Failed to fetch events from server, " + parseErrorMsg(err);
+                alert.value = "Failed to fetch events from server, " + parseErrorMsg(err);
+                noMore.value = true;
             }).finally(() => {
                 loadingMore.value = false;
                 if (init) {
@@ -78,7 +76,7 @@ export default defineComponent({
             loadMore,
             loadingMore,
             noMore,
-            errMsg,
+            alert,
             materials,
         };
     }

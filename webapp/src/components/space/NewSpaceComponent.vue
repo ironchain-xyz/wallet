@@ -45,7 +45,7 @@ export default defineComponent({
 
         const onSave = () => {
             newSpace(store, space.value).then(res => {
-                router.push("/space/" + res.id);
+                router.push("/space/" + res.space.id);
             }).catch(err => alert.value = parseErrorMsg(err));
         };
 

@@ -26,34 +26,34 @@
 <script lang="ts">
 import { defineComponent, reactive, ref, onMounted } from 'vue';
 import { parseErrorMsg } from '@/services/utils';
-import { useStore } from '@/store';
 import { Space, SpaceQuery, fetchSpaces } from '@/services/space';
 import SpaceOverview from '@/components/space/content/SpaceOverviewComponent.vue';
 
 export default defineComponent({
     components: { SpaceOverview },
     setup() {
-        const store = useStore();
-
         const totalSpaces = ref<number>(0);
         const initLoading = ref(true);
         const loadingMore = ref(false);
         const noMore = ref(false);
         const spaces = ref<Space[]>([]);
         const alert = ref<string>("");
-        const query = reactive<SpaceQuery>({offset: 0, limit: 50});
+        const query = reactive<SpaceQuery>({});
 
         const loadMore = (init = false) => {
+            alert.value = "";
             loadingMore.value = true;
-            fetchSpaces(store, query).then(res => {
-                res.forEach(s => {
-                    spaces.value.push(s);
-                });
-                query.offset += res.length;
-                if (res.length < query.limit) {
+            fetchSpaces(query).then(res => {
+                const totalFetched = res.spaces.length;
+                if (totalFetched > 0) {
+                    query.startId = res.spaces[totalFetched - 1].id;
+                }
+                spaces.value.push(...res.spaces);
+                if (totalFetched < res.limit) {
                     noMore.value = true;
                 }
             }).catch(err => {
+                console.log(err);
                 alert.value = "Failed to fetch events from server, " + parseErrorMsg(err);
                 noMore.value = true;
             }).finally(() => {

@@ -5,7 +5,7 @@
         </a-typography-title>
         <a-divider style="margin: 0px;"></a-divider>
         <a-row style="padding: 15px; width: 100%;">
-           {{ data.description }}
+           <a-typography-text>{{ data.description }}</a-typography-text>
         </a-row>
     </a-row>
 </template>

@@ -18,7 +18,8 @@ const ACCESS_TOKEN_LIFETIME = parseInt(process.env.ACCESS_TOKEN_LIFETIME);
 
 const USER_WHITELIST = ['dongs2011@gmail.com', 'ironchaindao@gmail.com'];
 
-const sgMail = require('@sendgrid/mail')
+const sgMail = require('@sendgrid/mail');
+const { send } = require('process');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 async function genOTP(email) {
@@ -91,7 +92,11 @@ function validateAccessToken(req, res, next) {
 
 router.get("/isRegistered", asyncHandler(async (req, res) => {
     let user = await User.findOne({where: {email: req.query.email}});
-    res.send({result: user !== null});
+    if (user) {
+        res.send({result: true});
+    } else {
+        res.send({result: USER_WHITELIST.includes(req.query.email)});
+    }
 }));
 
 router.post("/register", validateEmail, validateUsername, asyncHandler(async (req, res) => {
@@ -132,7 +137,7 @@ router.post("/passcode", validateEmail, asyncHandler(async (req, res) => {
     let user = await User.findOne({where: {email}});
     if (!user) {
         if (USER_WHITELIST.includes(email)) {
-            user = await User.create({email});
+            user = await User.create({email, username: "test-user"});
         } else {
             return res.status(400).send({message: 'user not registerd'});
         }

@@ -1,11 +1,11 @@
 <template>
     <a-row class="border" style="padding: 0px;">
         <a-typography-title strong :level="5" style="padding: 10px 15px; margin: 0px;">
-            Joined Spaces
+            Subscribed Spaces
         </a-typography-title>
         <a-divider style="margin: 0px;"></a-divider>
         <a-row gutter="16" style="padding: 15px; width: 100%;">
-            <a-col v-for="space in spaces" v-bind:key="space.name">
+            <a-col v-for="space in subscription" v-bind:key="space.name">
                 <a :href='"/space/" + space.id'>
                     <a-row justify="center">
                         <a-avatar :size="55" class="avatar" shape="square">
@@ -18,8 +18,13 @@
                         </a-typography-text>
                     </a-row>   
                 </a>
-
             </a-col>
+            <a-typography-text
+                v-if="subscription.length == 0"
+                style="padding: 0px 10px;"
+            >
+                No Space
+            </a-typography-text>
         </a-row>
     </a-row>
     <a-row class="border" style="padding: 0px; margin-top: 30px;">
@@ -59,33 +64,32 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, computed, onBeforeMount } from 'vue';
+import { defineComponent, computed, onMounted } from 'vue';
 import { useStore } from '@/store';
-import { getInvitationCode } from '@/services/profile';
-
-interface InvitationCode {
-    code: string;
-    used: boolean;
-}
+import { getInvitationCode, getSubscribedSpaces } from '@/services/user';
 
 export default defineComponent({
     setup() {
         const store = useStore();
-        const invitationCodes = reactive<InvitationCode[]>([]);
-        const spaces = ref<{name: string, id: string}[]>([
-            {name: "Space1", id: "1"},{name: "Space2", id: "2"}
-        ]);
+        const invitationCodes = computed(() => store.state.user?.invitationCodes);
+        const subscription = computed(() => Object.values(store.state.subscription));
 
-        onBeforeMount(() => {
-            getInvitationCode(store).then((res) => {
-                res.codes.forEach(code => {
-                    invitationCodes.push(code)
+        onMounted(() => {
+            if (!invitationCodes.value) {
+                getInvitationCode(store).then((res) => {
+                    store.commit("initInvitationCodes", res.codes)
                 });
-            })
+            }
+
+            if (!subscription.value) {
+                getSubscribedSpaces(store.state.user!.id).then(spaces => {
+                    store.commit("setSubscription", spaces)
+                });
+            }
         });
 
         const username = computed(() => {
-            return store.state.user!.profile!.username!
+            return store.state.user!.username!
         });
         const email = computed(() => {
             return store.state.user!.email
@@ -94,7 +98,7 @@ export default defineComponent({
         return {
             email,
             username,
-            spaces,
+            subscription,
             invitationCodes,
         };
     },

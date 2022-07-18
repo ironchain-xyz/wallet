@@ -23,10 +23,9 @@ db.sequelize = sequelize;
 db.users = require("./user.model.js")(sequelize);
 db.invitations = require("./invitation.model.js")(sequelize, db.users);
 
-db.rawFiles = require("./rawFile.model.js")(sequelize);
-db.evidences = require("./evidence.model.js")(sequelize, db.rawFiles);
-db.materials = require("./material.model.js")(sequelize, db.users, db.evidences);
-db.spaces = require("./space.model.js")(sequelize, db.users, db.materials);
+db.files = require("./file.model.js")(sequelize);
+db.spaces = require("./space.model.js")(sequelize, db.users);
+db.materials = require("./material.model.js")(sequelize, db.users, db.spaces);
 db.subscriptions = require("./subscription.model.js")(sequelize, db.spaces, db.users);
 
 module.exports = db;

@@ -1,12 +1,12 @@
 import { Store } from 'vuex';
 import axios from 'axios';
-import { State } from "@/store";
+import { State, User } from "@/store";
 import { authHeader } from '@/services/utils';
 import { API_URL } from '@/lib/constants';
 import { File, RawFile } from '@/services/file';
-import { validate } from '@babel/types';
 
 export interface Material {
+    id: number,
     hash: string;
     description: string;
     creator: {username: string};
@@ -24,9 +24,7 @@ export interface NewMaterial {
 }
 
 export interface MaterialQuery {
-    startAt?: string,
-    offset: number,
-    limit: number,
+    startId?: number
 }
 
 export function validateMaterial(material: NewMaterial) {
@@ -56,22 +54,34 @@ export async function newMaterial(store: Store<State>, material: NewMaterial): P
 }
 
 export async function fetchMaterial(
-    store: Store<State>,
     hash: string
 ) : Promise<Material> {
-    const url = API_URL + "material/";
-    const res = await axios.get(url, {headers: authHeader(store), params: {hash}});
+    const url = API_URL + "material/" + hash;
+    const res = await axios.get(url);
     return res.data;
 }
 
-export async function fetchCreatedMaterials(
-    store: Store<State>,
-    params: MaterialQuery
-) : Promise<Material[]> {
-    const url = API_URL + "material/created";
-    const res = await axios.get(url, {headers: authHeader(store), params});
-    return res.data.materials.map(r => ({
-        ...r,
-        references: r.reference,
-    }));
+export interface FetchMaterailsResponse {
+    materials: Material[],
+    limit: number,
+}
+
+const fetchMaterials = (url: string) => 
+    async (query: MaterialQuery) : Promise<FetchMaterailsResponse> => {
+        const res = await axios.get(url, {params: query});
+        return res.data;
+    };
+
+export function fetchUserMaterials(
+    userId: string,
+) : (query: MaterialQuery) => Promise<FetchMaterailsResponse> {
+    const url = API_URL + "user/" + userId + "/materials";
+    return fetchMaterials(url);
+}
+
+export function fetchSpaceMaterials(
+    spaceId: string,
+) : (query: MaterialQuery) => Promise<FetchMaterailsResponse> {
+    const url = API_URL + "space/" + spaceId + "/materials";
+    return fetchMaterials(url);
 }

@@ -50,7 +50,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const route = useRoute();
-    const username = computed(() => store.state.user?.profile?.username);
+    const username = computed(() => store.state.user?.username);
 
     const onLogin = () => {
         store.commit("startLogin", route.path);
