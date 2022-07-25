@@ -25,14 +25,26 @@
                 </a-button>
             </a-row>
             <a-row>
-                <a-button
-                    class="menuItem"
-                    type="text"
-                    style="font-weight: bold;"
-                    @click="onNewMaterial"
-                >
-                    New Material
-                </a-button>
+                <a-dropdown placement="bottomLeft" trigger="click">
+                    <a-button type="text" class="menuItem" @click.prevent>
+                        Add Material
+                    </a-button>
+                    <template #overlay>
+                        <a-menu>
+                            <a-menu-item @click="onAddImages">
+                                Add Images
+                            </a-menu-item>
+                            <a-menu-divider />
+                            <a-menu-item @click="onAddVideos">
+                                Add Videos
+                            </a-menu-item>
+                            <a-menu-divider />
+                            <a-menu-item @click="onAddLinks">
+                                Add Links
+                            </a-menu-item>
+                        </a-menu>
+                    </template>
+                </a-dropdown>
             </a-row>
             <a-row>
                 <a-button
@@ -49,6 +61,12 @@
             <slot :space="space"></slot>
         </a-col>
     </a-row>
+    <SpaceAddMaterial
+        :data="space"
+        :type="materialType"
+        :visible="!!materialType"
+        @close="materialType = ''"
+    />
 </template>
 
 <script lang="ts">
@@ -57,11 +75,11 @@ import { useRoute } from 'vue-router';
 import { useStore } from '@/store';
 import { authenticated } from '@/services/auth';
 import { Space, fetchSpace } from '@/services/space';
-import router from '@/router';
 import SpaceSubscribe from '@/components/space/content/SpaceSubscribeButtonComponent.vue';
+import SpaceAddMaterial from '@/components/space/SpaceAddMaterialComponent.vue';
 
 export default defineComponent({
-    components: { SpaceSubscribe },
+    components: { SpaceSubscribe, SpaceAddMaterial },
     setup() {
         const store = useStore();
         const route = useRoute();
@@ -86,18 +104,34 @@ export default defineComponent({
             }
         });
 
-        const onNewMaterial = () => {
+        const materialType = ref<string>('');
+        const onAddMaterial = (type: string) => {
             const url = '/space/' + space.value.id + '/newMaterial';
             if (authenticated(store)) {
-                router.push(url)
+                materialType.value = type;
             } else {
                 store.commit("startLogin", url);
             }
         }
 
+        const onAddImages = () => {
+            return onAddMaterial("image");
+        }
+
+        const onAddVideos = () => {
+            return onAddMaterial("video");
+        }
+
+        const onAddLinks = () => {
+            return onAddMaterial("link");
+        }
+
         return {
+            materialType,
             space,
-            onNewMaterial,
+            onAddImages,
+            onAddVideos,
+            onAddLinks,
         };
     }
 });
@@ -113,5 +147,6 @@ export default defineComponent({
     margin-bottom: 0px;
     font-size: 13px;
     color: gray;
+    font-weight: bold;
 }
 </style>

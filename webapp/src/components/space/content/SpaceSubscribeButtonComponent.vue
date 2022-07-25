@@ -5,7 +5,7 @@
         </span>
     </a-row>
     <a-button
-        shape="round"
+        shape="square"
         :type="actionType"
         style="font-weight: bold;"
         @mouseover="mouseOver = true"

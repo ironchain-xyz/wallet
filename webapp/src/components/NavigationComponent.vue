@@ -5,7 +5,7 @@
     <a-row class="menu">
         <a-tooltip placement="right" title="Spaces">
             <a href="/">
-                <a-button shape="circle" >
+                <a-button shape="square" >
                     <template #icon>
                         <AppstoreOutlined />
                     </template>
@@ -13,9 +13,18 @@
             </a>
         </a-tooltip>
     </a-row>
+    <a-row class="menu" v-for="space in subscription" v-bind:key="space.id">
+        <a-tooltip placement="right" :title="space.name">
+            <a :href='"/space/" + space.id'>
+                <a-avatar class="avatar" shape="square">
+                    {{ space.name.substring(0, 1).toUpperCase() }}
+                </a-avatar>
+            </a>
+        </a-tooltip>
+    </a-row>
     <a-row class="menu">
         <a-tooltip placement="right" title="New Space">
-            <a-button shape="circle" @click="onClick">
+            <a-button shape="square" @click="onClick">
                 <template #icon>
                     <PlusOutlined />
                 </template>
@@ -40,6 +49,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const auth = computed(() => authenticated(store));
+    const subscription = computed(() => Object.values(store.state.user?.subscription || {}));
 
     const onClick = () => {
         if (auth.value) {
@@ -51,6 +61,7 @@ export default defineComponent({
 
     return {
         onClick,
+        subscription,
         onLogout: () => logout(store),
     };
   },
@@ -60,5 +71,10 @@ export default defineComponent({
 <style lang="less" scoped>
 .menu {
   margin: 10px;
+}
+
+.avatar {
+    font-weight: bold;
+    background-color: #209645;
 }
 </style>

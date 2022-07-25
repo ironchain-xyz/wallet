@@ -3,12 +3,9 @@ import ProfileMaterials from '../views/ProfileMaterialsView.vue'
 import ProfileAbout from '../views/ProfileAboutView.vue'
 import Spaces from '../views/SpacesView.vue'
 import Space from '../views/SpaceView.vue'
-import SpaceNewMaterial from '../views/SpaceNewMaterialView.vue'
 import SpaceAbout from '../views/SpaceAboutView.vue'
 import NewSpace from '../views/NewSpaceView.vue'
 import Material from '../views/MaterialView.vue'
-import { authenticated } from '@/services/auth'
-import { useStore } from '@/store';
 
 const routes = [
   {
@@ -25,11 +22,6 @@ const routes = [
     path: '/space/:id',
     name: 'space',
     component: Space
-  },
-  {
-    path: '/space/:id/newMaterial',
-    name: 'newMaterial',
-    component: SpaceNewMaterial,
   },
   {
     path: '/space/:id/about',

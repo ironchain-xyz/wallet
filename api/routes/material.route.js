@@ -44,7 +44,7 @@ router.post('/new', asyncHandler(async (req, res) => {
         spaceId: req.body.spaceId,
         description: req.body.description,
         type: req.body.type,
-        content: req.body.content,
+        links: req.body.links,
         createdBy: req.user.id,
     }, {
         include: [

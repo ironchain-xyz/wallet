@@ -20,36 +20,17 @@ export interface Material {
 export interface NewMaterial {
     spaceId: string;
     description: string;
-    files: RawFile[];
+    type: "image" | "video" | "link";
+    links: string[];
 }
 
 export interface MaterialQuery {
     startId?: number
 }
 
-export function validateMaterial(material: NewMaterial) {
-    if (!material.description) {
-        throw new Error("description cannot be empty");
-    }
-
-    for (const index in material.files || []) {
-        const e = material.files[index];
-        if (e.status == "error") {
-            throw new Error("Please remove invalid files");
-        }
-        if (e.status == "uploading") {
-            throw new Error("Please remove invalid files");
-        }
-    }
-}
-
 export async function newMaterial(store: Store<State>, material: NewMaterial): Promise<{hash: string}> {
-    validateMaterial(material);
     const url = API_URL + "material/new";
-    const res = await axios.post(url, {
-        description: material.description,
-        files: material.files.map(e => e.response),
-    }, { headers: authHeader(store) });
+    const res = await axios.post(url, material, { headers: authHeader(store) });
     return res.data;
 }
 
